@@ -1,4 +1,4 @@
-# StoneCode.ai
+# stonecode.ai
 
 Personal landing page and brand website for Andrew Stone.
 
@@ -14,6 +14,7 @@ Personal landing page and brand website for Andrew Stone.
 | Framework | React 18 + TypeScript |
 | Build Tool | Vite |
 | Styling | Tailwind CSS |
+| Animations | Framer Motion |
 | Hosting | Cloudflare Pages |
 | DNS/CDN | Cloudflare |
 | Repository | GitHub |
@@ -23,7 +24,8 @@ Personal landing page and brand website for Andrew Stone.
 ```
 stonecode.ai/
 ├── public/
-│   └── favicon.svg          # Custom logo (code brackets)
+│   ├── favicon.svg          # Custom logo (code brackets)
+│   └── stone-texture.jpg    # Stone texture for "stone" text fill
 ├── src/
 │   ├── App.tsx              # Main landing page component
 │   ├── index.css            # Tailwind imports
@@ -81,19 +83,39 @@ git push
 
 ## Features
 
+### Core
 - [x] Responsive design
 - [x] Dark/light mode (auto-detects system preference)
-- [x] Theme toggle button
 - [x] Custom favicon
 - [x] SEO meta tags
 - [x] Open Graph tags for social sharing
 - [x] SSL/HTTPS
 
+### Visual Design
+- [x] Glassmorphism UI elements (frosted glass effect)
+- [x] Animated gradient background with floating orbs
+- [x] Cursor glow effect (follows mouse)
+- [x] Scroll progress bar at top
+
+### Typography
+- [x] "stone" text filled with real stone/concrete texture
+- [x] "code.ai" in light weight font (white in dark mode, black in light mode)
+- [x] Letter-by-letter entrance animation
+
+### Animations (Framer Motion)
+- [x] Staggered entrance animations for all elements
+- [x] Logo icon draws itself on load
+- [x] Tagline glow & grow effect (10% scale, pause, shrink) on load and hover
+- [x] Theme toggle with glow effect and "Light mode" / "Dark mode" label on hover
+- [x] Animated shimmer effects on glassmorphism cards
+- [x] Pulsing status indicator on "Coming Soon" badge
+
 ## TODO
 
-- [ ] **Unhide social links** - Update URLs in `src/App.tsx` (line 77)
+- [ ] **Unhide social links** - Uncomment in `src/App.tsx` and update URLs
   - LinkedIn: Replace `YOUR-PROFILE` with actual username
   - GitHub: Replace `YOUR-PROFILE` with actual username
+- [ ] **Unhide "Get in Touch" button** - Uncomment in `src/App.tsx`
 - [ ] Design custom logo
 - [ ] Add more content sections (About, Projects, Contact)
 - [ ] Set up Cloudflare Analytics
@@ -119,6 +141,21 @@ git push
 
 ## Changelog
 
+### 2026-02-05
+- Added Framer Motion for animations
+- Implemented glassmorphism design system
+- Added animated gradient background with floating orbs
+- Added cursor glow effect
+- Added scroll progress bar
+- Implemented "stone" text with real stone texture fill (stone-texture.jpg)
+- Made "code.ai" light weight font (white/black based on mode)
+- Added tagline glow & grow animation (on load and hover)
+- Enhanced theme toggle with hover glow and mode label
+- Added letter-by-letter entrance animations
+- Added shimmer effects on cards
+- Hidden social links and "Get in Touch" button (ready to enable)
+- Renamed "StoneCode.ai" to "stonecode.ai" (lowercase branding)
+
 ### 2026-02-03
 - Initial project setup
 - Created Vite + React + TypeScript project
@@ -132,4 +169,4 @@ git push
 
 ---
 
-*Last updated: 2026-02-03*
+*Last updated: 2026-02-05*
