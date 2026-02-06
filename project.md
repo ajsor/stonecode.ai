@@ -16,6 +16,7 @@ Personal landing page and brand website for Andrew Stone.
 | Styling | Tailwind CSS |
 | Animations | Framer Motion |
 | Hosting | Cloudflare Pages |
+| CI/CD | GitHub Actions |
 | DNS/CDN | Cloudflare |
 | Repository | GitHub |
 
@@ -23,6 +24,9 @@ Personal landing page and brand website for Andrew Stone.
 
 ```
 stonecode.ai/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml       # GitHub Actions deployment workflow
 ├── public/
 │   ├── favicon.svg          # Custom logo (code brackets)
 │   └── stone-texture.jpg    # Stone texture for "stone" text fill
@@ -31,7 +35,6 @@ stonecode.ai/
 │   ├── index.css            # Tailwind imports
 │   └── main.tsx             # React entry point
 ├── index.html               # HTML template with SEO meta tags
-├── wrangler.toml            # Cloudflare Pages config
 ├── vite.config.ts           # Vite + Tailwind config
 └── project.md               # This file
 ```
@@ -65,7 +68,7 @@ npm run build
 Output goes to `dist/` folder.
 
 ### Deploy
-Push to `main` branch - Cloudflare Pages auto-deploys.
+Push to `main` branch - GitHub Actions builds and deploys to Cloudflare Pages.
 
 ```bash
 git add .
@@ -73,13 +76,19 @@ git commit -m "Your message"
 git push
 ```
 
-## Cloudflare Pages Settings
+## Deployment (GitHub Actions)
 
-| Setting | Value |
-|---------|-------|
-| Build command | `npm run build` |
-| Deploy command | `echo "Deploy complete"` |
-| Build output | `dist` (via wrangler.toml) |
+Deployment is handled by `.github/workflows/deploy.yml`:
+1. Triggered on push to `main` branch
+2. Installs dependencies with `npm ci`
+3. Builds with `npm run build`
+4. Deploys `dist/` to Cloudflare Pages using wrangler
+
+**Required GitHub Secrets:**
+| Secret | Description |
+|--------|-------------|
+| `CLOUDFLARE_API_TOKEN` | API token with Pages edit permissions |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
 
 ## Features
 
@@ -141,6 +150,14 @@ git push
 
 ## Changelog
 
+### 2026-02-06
+- Improved mobile experience with responsive design
+- Added touch device detection (disables cursor effects on mobile)
+- Made background orbs smaller on mobile for better performance
+- Added responsive sizing for logo, title, and icons
+- Switched from Cloudflare CI/CD to GitHub Actions for deployment
+- Removed wrangler.toml (no longer needed)
+
 ### 2026-02-05
 - Added Framer Motion for animations
 - Implemented glassmorphism design system
@@ -169,4 +186,4 @@ git push
 
 ---
 
-*Last updated: 2026-02-05*
+*Last updated: 2026-02-06*
