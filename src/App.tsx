@@ -66,6 +66,7 @@ function App() {
     return true
   })
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [, setCursorVariant] = useState('default')
   const { scrollYProgress } = useScroll()
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
@@ -74,13 +75,25 @@ function App() {
     document.documentElement.classList.toggle('dark', darkMode)
   }, [darkMode])
 
+  // Detect touch device
   useEffect(() => {
+    const checkTouch = () => {
+      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    }
+    checkTouch()
+    window.addEventListener('resize', checkTouch)
+    return () => window.removeEventListener('resize', checkTouch)
+  }, [])
+
+  useEffect(() => {
+    if (isTouchDevice) return // Skip mouse tracking on touch devices
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY })
     }
     window.addEventListener('mousemove', handleMouseMove)
     return () => window.removeEventListener('mousemove', handleMouseMove)
-  }, [])
+  }, [isTouchDevice])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -148,12 +161,12 @@ function App() {
             : 'bg-gradient-to-br from-violet-100/50 via-slate-100 to-blue-100/50'
         }`} />
 
-        {/* Animated orbs */}
+        {/* Animated orbs - smaller on mobile */}
         <motion.div
-          className={`absolute w-[600px] h-[600px] rounded-full blur-[120px] ${
+          className={`absolute w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full blur-[60px] md:blur-[120px] ${
             darkMode ? 'bg-violet-600/20' : 'bg-violet-400/30'
           }`}
-          animate={{
+          animate={isTouchDevice ? {} : {
             x: [0, 100, 0],
             y: [0, -50, 0],
             scale: [1, 1.1, 1],
@@ -163,13 +176,13 @@ function App() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          style={{ top: '10%', left: '10%' }}
+          style={{ top: '10%', left: '5%' }}
         />
         <motion.div
-          className={`absolute w-[500px] h-[500px] rounded-full blur-[100px] ${
+          className={`absolute w-[250px] h-[250px] md:w-[500px] md:h-[500px] rounded-full blur-[50px] md:blur-[100px] ${
             darkMode ? 'bg-blue-600/20' : 'bg-blue-400/30'
           }`}
-          animate={{
+          animate={isTouchDevice ? {} : {
             x: [0, -80, 0],
             y: [0, 60, 0],
             scale: [1, 1.2, 1],
@@ -179,13 +192,13 @@ function App() {
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          style={{ bottom: '20%', right: '10%' }}
+          style={{ bottom: '20%', right: '5%' }}
         />
         <motion.div
-          className={`absolute w-[400px] h-[400px] rounded-full blur-[80px] ${
+          className={`absolute w-[200px] h-[200px] md:w-[400px] md:h-[400px] rounded-full blur-[40px] md:blur-[80px] ${
             darkMode ? 'bg-cyan-600/15' : 'bg-cyan-400/20'
           }`}
-          animate={{
+          animate={isTouchDevice ? {} : {
             x: [0, 60, 0],
             y: [0, 80, 0],
             scale: [1, 0.9, 1],
@@ -199,23 +212,25 @@ function App() {
         />
       </motion.div>
 
-      {/* Cursor glow effect */}
-      <motion.div
-        className={`fixed w-64 h-64 rounded-full pointer-events-none z-50 blur-[80px] ${
-          darkMode ? 'bg-violet-500/20' : 'bg-violet-400/20'
-        }`}
-        animate={{
-          x: mousePosition.x - 128,
-          y: mousePosition.y - 128,
-        }}
-        transition={{
-          type: 'spring',
-          damping: 30,
-          stiffness: 200,
-        }}
-        variants={glowVariants}
-        initial="default"
-      />
+      {/* Cursor glow effect - hidden on touch devices */}
+      {!isTouchDevice && (
+        <motion.div
+          className={`fixed w-64 h-64 rounded-full pointer-events-none z-50 blur-[80px] ${
+            darkMode ? 'bg-violet-500/20' : 'bg-violet-400/20'
+          }`}
+          animate={{
+            x: mousePosition.x - 128,
+            y: mousePosition.y - 128,
+          }}
+          transition={{
+            type: 'spring',
+            damping: 30,
+            stiffness: 200,
+          }}
+          variants={glowVariants}
+          initial="default"
+        />
+      )}
 
       {/* Progress bar */}
       <motion.div
@@ -225,7 +240,7 @@ function App() {
 
       {/* Theme Toggle */}
       <motion.div
-        className="fixed top-6 right-6 z-40 group"
+        className="fixed top-4 right-4 sm:top-6 sm:right-6 z-40 group"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
@@ -315,7 +330,7 @@ function App() {
       </motion.div>
 
       {/* Main Content */}
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
         <motion.div
           className="flex flex-col items-center"
           variants={containerVariants}
@@ -324,14 +339,14 @@ function App() {
         >
           {/* Animated Logo */}
           <motion.div
-            className="mb-10"
+            className="mb-6 sm:mb-10"
             variants={itemVariants}
             whileHover={{ scale: 1.05 }}
             onHoverStart={() => setCursorVariant('hover')}
             onHoverEnd={() => setCursorVariant('default')}
           >
             <motion.div
-              className={`relative w-24 h-24 rounded-3xl flex items-center justify-center overflow-hidden ${
+              className={`relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl sm:rounded-3xl flex items-center justify-center overflow-hidden ${
                 darkMode
                   ? 'bg-gradient-to-br from-violet-500 to-blue-600'
                   : 'bg-gradient-to-br from-violet-600 to-blue-700'
@@ -364,7 +379,7 @@ function App() {
 
               <motion.svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-white relative z-10"
+                className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 text-white relative z-10"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -393,7 +408,7 @@ function App() {
 
           {/* Animated Title */}
           <motion.h1
-            className="text-5xl md:text-7xl tracking-tight mb-6 flex items-baseline"
+            className="text-3xl sm:text-5xl md:text-7xl tracking-tight mb-4 sm:mb-6 flex items-baseline"
             variants={itemVariants}
           >
             {/* "stone" with rock texture fill */}
