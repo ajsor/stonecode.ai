@@ -11,10 +11,13 @@ Personal landing page and brand website for Andrew Stone.
 
 | Layer | Technology |
 |-------|------------|
-| Framework | React 18 + TypeScript |
+| Framework | React 19 + TypeScript |
 | Build Tool | Vite |
 | Styling | Tailwind CSS |
 | Animations | Framer Motion |
+| Routing | React Router v6 |
+| Backend | Supabase (Auth, Database, Edge Functions) |
+| Auth | Supabase Auth + WebAuthn (passkeys) |
 | Hosting | Cloudflare Pages |
 | CI/CD | GitHub Actions |
 | DNS/CDN | Cloudflare |
@@ -26,17 +29,43 @@ Personal landing page and brand website for Andrew Stone.
 stonecode.ai/
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml       # GitHub Actions deployment workflow
+│       └── deploy.yml           # GitHub Actions deployment workflow
 ├── public/
-│   ├── favicon.svg          # Custom logo (code brackets)
-│   └── stone-texture.jpg    # Stone texture for "stone" text fill
+│   ├── favicon.svg              # Custom logo (code brackets)
+│   ├── stone-texture.jpg        # Stone texture for "stone" text fill
+│   └── _headers                 # Cloudflare security headers
 ├── src/
-│   ├── App.tsx              # Main landing page component
-│   ├── index.css            # Tailwind imports
-│   └── main.tsx             # React entry point
-├── index.html               # HTML template with SEO meta tags
-├── vite.config.ts           # Vite + Tailwind config
-└── project.md               # This file
+│   ├── components/
+│   │   ├── auth/                # Auth components
+│   │   ├── features/            # FeatureGate component
+│   │   ├── layout/              # PortalLayout, AdminLayout
+│   │   └── ui/                  # Shared UI components
+│   ├── contexts/
+│   │   ├── AuthContext.tsx      # Auth state provider
+│   │   └── FeatureFlagContext.tsx
+│   ├── hooks/
+│   │   ├── useAuth.ts           # Auth hook
+│   │   └── useFeatureFlags.ts
+│   ├── lib/
+│   │   ├── supabase.ts          # Supabase client
+│   │   └── webauthn.ts          # WebAuthn utilities
+│   ├── pages/
+│   │   ├── landing/LandingPage.tsx
+│   │   ├── auth/                # Login, AcceptInvite
+│   │   └── portal/              # Dashboard, Profile, Admin
+│   ├── types/
+│   │   ├── database.ts          # Supabase types
+│   │   └── index.ts
+│   ├── App.tsx                  # Legacy (kept for reference)
+│   ├── router.tsx               # React Router config
+│   ├── index.css
+│   └── main.tsx
+├── supabase/
+│   ├── migrations/              # Database schema SQL
+│   └── functions/               # Edge Functions
+├── index.html
+├── vite.config.ts
+└── project.md
 ```
 
 ## Accounts & Services
@@ -46,6 +75,7 @@ stonecode.ai/
 | Porkbun | Domain registrar | stonecode.ai registered (2-year) |
 | Cloudflare | DNS, CDN, hosting | Free plan |
 | GitHub | Source control | github.com/ajsor/stonecode.ai |
+| Supabase | Auth, Database, Edge Functions | Free tier (1-50 users) |
 
 ## Development
 
@@ -89,6 +119,8 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 |--------|-------------|
 | `CLOUDFLARE_API_TOKEN` | API token with Pages edit permissions |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
 
 ## Features
 
@@ -99,6 +131,17 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] SEO meta tags
 - [x] Open Graph tags for social sharing
 - [x] SSL/HTTPS
+
+### User Portal (Invitation-Only)
+- [x] Email invitations with private links + QR codes
+- [x] Password authentication
+- [x] Magic link authentication
+- [x] Passkey/biometric authentication (WebAuthn)
+- [x] MFA support (TOTP) - UI ready, needs backend
+- [x] Per-user feature toggles
+- [x] Admin panel for user/invitation/feature management
+- [x] Protected routes with React Router
+- [x] Row Level Security on all database tables
 
 ### Visual Design
 - [x] Glassmorphism UI elements (frosted glass effect)
@@ -121,14 +164,25 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 
 ## TODO
 
-- [ ] **Unhide social links** - Uncomment in `src/App.tsx` and update URLs
+### Landing Page
+- [ ] **Unhide social links** - Uncomment in `src/pages/landing/LandingPage.tsx` and update URLs
   - LinkedIn: Replace `YOUR-PROFILE` with actual username
   - GitHub: Replace `YOUR-PROFILE` with actual username
-- [ ] **Unhide "Get in Touch" button** - Uncomment in `src/App.tsx`
+- [ ] **Unhide "Get in Touch" button** - Uncomment in LandingPage
 - [ ] Design custom logo
 - [ ] Add more content sections (About, Projects, Contact)
 - [ ] Set up Cloudflare Analytics
 - [ ] Consider registering stonecode.com and stonecode.net for brand protection
+
+### User Portal
+- [ ] **Set up Supabase project** - Create project at supabase.com
+- [ ] **Run database migrations** - Execute SQL in `supabase/migrations/`
+- [ ] **Deploy Edge Functions** - Deploy functions in `supabase/functions/`
+- [ ] **Configure environment variables** - Add Supabase keys to GitHub Secrets
+- [ ] **Create first admin user** - Manually set `is_admin=true` in profiles table
+- [ ] Implement TOTP MFA backend
+- [ ] Add email sending for invitations (Resend/SendGrid)
+- [ ] Add user avatar upload
 
 ## Domain Details
 
@@ -148,7 +202,49 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 
 **Total:** ~$72/year (domain only)
 
+## Portal Routes
+
+| Route | Description | Access |
+|-------|-------------|--------|
+| `/` | Landing page | Public |
+| `/login` | Login page | Public |
+| `/accept-invite?token=x` | Invitation acceptance | Public (with valid token) |
+| `/portal` | Portal root (redirects to dashboard) | Authenticated |
+| `/portal/dashboard` | Main dashboard | Authenticated |
+| `/portal/profile` | User profile settings | Authenticated |
+| `/portal/profile/security` | MFA, passkeys, password | Authenticated |
+| `/portal/admin/users` | User management | Admin only |
+| `/portal/admin/invitations` | Create/manage invitations | Admin only |
+| `/portal/admin/features` | Feature flag management | Admin only |
+
+## Database Schema
+
+### Tables (Supabase PostgreSQL)
+- **profiles** - Extended user data (links to auth.users)
+- **invitations** - Invitation tokens with 7-day expiry
+- **feature_flags** - Available features
+- **user_feature_flags** - Per-user feature overrides
+- **passkeys** - WebAuthn credentials
+- **audit_log** - Security event tracking
+- **mfa_factors** - TOTP MFA factors
+- **webauthn_challenges** - Temporary challenge storage
+
+All tables use Row Level Security (RLS).
+
 ## Changelog
+
+### 2026-02-08
+- Added user portal with invitation-only access
+- Implemented auth with password, magic link, and passkey support
+- Added React Router for client-side routing
+- Refactored App.tsx to LandingPage component
+- Created AuthContext and FeatureFlagContext
+- Built portal layout with sidebar navigation
+- Created admin panel for users, invitations, and features
+- Added QR code generation for invitations
+- Created Supabase database schema with RLS
+- Created Supabase Edge Functions for WebAuthn
+- Added security headers via Cloudflare _headers file
 
 ### 2026-02-06
 - Improved mobile experience with responsive design
@@ -186,4 +282,4 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 
 ---
 
-*Last updated: 2026-02-06*
+*Last updated: 2026-02-08*
