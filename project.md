@@ -19,6 +19,7 @@ Personal landing page and brand website for Andrew Stone.
 | Backend | Supabase (Auth, Database, Edge Functions) |
 | Auth | Supabase Auth + WebAuthn (passkeys) |
 | Hosting | Cloudflare Pages |
+| Widget Layout | react-grid-layout |
 | CI/CD | GitHub Actions |
 | DNS/CDN | Cloudflare |
 | Repository | GitHub |
@@ -40,14 +41,21 @@ stonecode.ai/
 │   │   ├── features/            # FeatureGate component
 │   │   ├── layout/              # PortalLayout, AdminLayout
 │   │   └── ui/                  # Shared UI components
+│   ├── components/widgets/      # Widget components (13 types)
 │   ├── contexts/
 │   │   ├── AuthContext.tsx      # Auth state provider
-│   │   └── FeatureFlagContext.tsx
+│   │   ├── FeatureFlagContext.tsx
+│   │   └── WidgetContext.tsx    # Widget state & persistence
 │   ├── hooks/
 │   │   ├── useAuth.ts           # Auth hook
-│   │   └── useFeatureFlags.ts
+│   │   ├── useFeatureFlags.ts
+│   │   ├── useGoogleCalendar.ts # Google Calendar integration
+│   │   ├── useWeather.ts        # Weather data hook
+│   │   └── useWidgets.ts        # Widget context hook
 │   ├── lib/
-│   │   ├── supabase.ts          # Supabase client
+│   │   ├── supabase.ts          # Supabase client + widget helpers
+│   │   ├── googleAuth.ts        # Google OAuth flow
+│   │   ├── weatherApi.ts        # OpenWeatherMap API
 │   │   └── webauthn.ts          # WebAuthn utilities
 │   ├── pages/
 │   │   ├── landing/LandingPage.tsx
@@ -55,6 +63,7 @@ stonecode.ai/
 │   │   └── portal/              # Dashboard, Profile, Admin
 │   ├── types/
 │   │   ├── database.ts          # Supabase types
+│   │   ├── widgets.ts           # Widget type definitions
 │   │   └── index.ts
 │   ├── App.tsx                  # Legacy (kept for reference)
 │   ├── router.tsx               # React Router config
@@ -121,6 +130,8 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth client ID (Calendar widget) |
+| `VITE_OPENWEATHER_API_KEY` | OpenWeatherMap API key (Weather widget) |
 
 ## Features
 
@@ -142,6 +153,18 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] Admin panel for user/invitation/feature management
 - [x] Protected routes with React Router
 - [x] Row Level Security on all database tables
+
+### Dashboard Widget System
+- [x] Drag-and-drop widget grid (react-grid-layout)
+- [x] 13 widget types: Clock, Weather, Calendar, Pomodoro, Notes, Todos, Bookmarks, Habits, Calculator, Countdown, Breathing, Spotify, Gmail
+- [x] Widget settings modal with per-widget configuration
+- [x] Widget state persistence to Supabase
+- [x] Google Calendar OAuth integration
+- [x] Weather API integration with 30-min cache
+- [x] Database migrations for widget data (notes, bookmarks, todos, habits)
+- [ ] Deploy google-oauth-exchange Edge Function
+- [ ] Configure external API keys (Google, OpenWeatherMap)
+- [ ] Test full widget persistence and OAuth flow
 
 ### Visual Design
 - [x] Glassmorphism UI elements (frosted glass effect)
@@ -228,10 +251,28 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - **audit_log** - Security event tracking
 - **mfa_factors** - TOTP MFA factors
 - **webauthn_challenges** - Temporary challenge storage
+- **widget_preferences** - Per-user widget layout and configs
+- **google_oauth_tokens** - Google OAuth tokens with expiry
+- **quick_notes** - Quick notes widget data
+- **bookmarks** - Bookmarks widget data
+- **todos** - Todo list items
+- **habits** - Habit definitions
+- **habit_completions** - Daily habit completion tracking
 
 All tables use Row Level Security (RLS).
 
 ## Changelog
+
+### 2026-02-11
+- Added customizable widget dashboard with 13 widget types
+- Implemented drag-and-drop widget grid using react-grid-layout
+- Built widget components: Clock, Weather, Calendar, Pomodoro, Notes, Todos, Bookmarks, Habits, Calculator, Countdown, Breathing, Spotify, Gmail
+- Added WidgetContext for state management with Supabase persistence
+- Integrated Google Calendar OAuth flow (client + Edge Function)
+- Integrated OpenWeatherMap API with 30-min caching
+- Created database migrations for widget preferences and user data tables
+- Added widget settings modal with per-widget configuration
+- Updated Dashboard to use widget grid layout
 
 ### 2026-02-08
 - Added user portal with invitation-only access
@@ -282,4 +323,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-02-08*
+*Last updated: 2026-02-11*

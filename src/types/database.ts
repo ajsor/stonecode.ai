@@ -201,6 +201,64 @@ export interface Database {
           created_at?: string
         }
       }
+      widget_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          layout: unknown // JSONB - WidgetLayoutItem[]
+          widget_configs: unknown // JSONB - WidgetConfigs
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          layout?: unknown
+          widget_configs?: unknown
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          layout?: unknown
+          widget_configs?: unknown
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      google_oauth_tokens: {
+        Row: {
+          id: string
+          user_id: string
+          access_token: string
+          refresh_token: string
+          expires_at: string
+          scope: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          access_token: string
+          refresh_token: string
+          expires_at: string
+          scope: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          access_token?: string
+          refresh_token?: string
+          expires_at?: string
+          scope?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -216,6 +274,8 @@ export type UserFeatureFlag = Database['public']['Tables']['user_feature_flags']
 export type Passkey = Database['public']['Tables']['passkeys']['Row']
 export type AuditLog = Database['public']['Tables']['audit_log']['Row']
 export type MfaFactor = Database['public']['Tables']['mfa_factors']['Row']
+export type WidgetPreferencesRow = Database['public']['Tables']['widget_preferences']['Row']
+export type GoogleOAuthTokenRow = Database['public']['Tables']['google_oauth_tokens']['Row']
 
 // Extended types with joins
 export interface ProfileWithFeatures extends Profile {

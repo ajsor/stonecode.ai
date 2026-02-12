@@ -12,11 +12,13 @@
   "dependencies": {
     "@simplewebauthn/browser": "^13.2.2",
     "@supabase/supabase-js": "^2.95.3",
+    "@types/react-grid-layout": "^1.3.6",
     "clsx": "^2.1.1",
     "framer-motion": "^12.33.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-grid-layout": "^2.2.2",
     "react-router-dom": "^7.13.0"
   },
   "devDependencies": {

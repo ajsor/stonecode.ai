@@ -1,4 +1,5 @@
 export * from './database'
+export * from './widgets'
 
 // Auth types
 export interface AuthUser {

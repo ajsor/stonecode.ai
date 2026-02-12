@@ -193,3 +193,68 @@ export const updateUserFeatureFlag = async (
       onConflict: 'user_id,feature_id',
     })
 }
+
+// Widget preference helpers
+export const getWidgetPreferences = async (userId: string) => {
+  return supabase
+    .from('widget_preferences')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+}
+
+export const saveWidgetPreferences = async (
+  userId: string,
+  layout: unknown,
+  widgetConfigs: unknown
+) => {
+  return supabase
+    .from('widget_preferences')
+    .upsert({
+      user_id: userId,
+      layout,
+      widget_configs: widgetConfigs,
+    }, {
+      onConflict: 'user_id',
+    })
+    .select()
+    .single()
+}
+
+// Google OAuth token helpers
+export const getGoogleOAuthTokens = async (userId: string) => {
+  return supabase
+    .from('google_oauth_tokens')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+}
+
+export const saveGoogleOAuthTokens = async (
+  userId: string,
+  accessToken: string,
+  refreshToken: string,
+  expiresAt: string,
+  scope: string
+) => {
+  return supabase
+    .from('google_oauth_tokens')
+    .upsert({
+      user_id: userId,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_at: expiresAt,
+      scope,
+    }, {
+      onConflict: 'user_id',
+    })
+    .select()
+    .single()
+}
+
+export const deleteGoogleOAuthTokens = async (userId: string) => {
+  return supabase
+    .from('google_oauth_tokens')
+    .delete()
+    .eq('user_id', userId)
+}
