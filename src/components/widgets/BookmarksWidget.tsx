@@ -8,22 +8,27 @@ export function BookmarksWidget() {
   const { user } = useAuth()
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [newUrl, setNewUrl] = useState('')
   const [newTitle, setNewTitle] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   // Fetch bookmarks
   const fetchBookmarks = useCallback(async () => {
     if (!user) return
 
-    const { data, error } = await supabase
+    setError(null)
+    const { data, error: fetchError } = await supabase
       .from('bookmarks')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20)
 
-    if (!error && data) {
+    if (fetchError) {
+      setError('Failed to load bookmarks')
+    } else if (data) {
       setBookmarks(data)
     }
     setIsLoading(false)
@@ -56,7 +61,7 @@ export function BookmarksWidget() {
     // Use URL as title if not provided
     const title = newTitle.trim() || url
 
-    const { data, error } = await supabase
+    const { data, error: insertError } = await supabase
       .from('bookmarks')
       .insert({
         user_id: user.id,
@@ -67,7 +72,9 @@ export function BookmarksWidget() {
       .select()
       .single()
 
-    if (!error && data) {
+    if (insertError) {
+      setError('Failed to add bookmark')
+    } else if (data) {
       setBookmarks([data, ...bookmarks])
       setNewUrl('')
       setNewTitle('')
@@ -77,14 +84,17 @@ export function BookmarksWidget() {
 
   // Delete bookmark
   const deleteBookmark = async (id: string) => {
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('bookmarks')
       .delete()
       .eq('id', id)
 
-    if (!error) {
+    if (deleteError) {
+      setError('Failed to delete bookmark')
+    } else {
       setBookmarks(bookmarks.filter(b => b.id !== id))
     }
+    setConfirmDeleteId(null)
   }
 
   return (
@@ -97,6 +107,15 @@ export function BookmarksWidget() {
       }
     >
       <div className="h-full flex flex-col">
+        {error && (
+          <div className="mb-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 ml-2">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+
         {/* Add form */}
         {isAdding ? (
           <div className="mb-3 p-3 bg-slate-700/50 rounded-lg border border-slate-600">
@@ -148,7 +167,7 @@ export function BookmarksWidget() {
         )}
 
         {/* Bookmarks list */}
-        <div className="flex-1 overflow-y-auto space-y-1 pr-1">
+        <div className="flex-1 overflow-y-auto space-y-1 pr-1 widget-scrollable">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent" />
@@ -185,14 +204,22 @@ export function BookmarksWidget() {
                 >
                   {bookmark.title}
                 </a>
-                <button
-                  onClick={() => deleteBookmark(bookmark.id)}
-                  className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity flex-shrink-0"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                {confirmDeleteId === bookmark.id ? (
+                  <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 border border-slate-600">
+                    <span className="text-xs text-slate-300">Delete?</span>
+                    <button onClick={() => deleteBookmark(bookmark.id)} className="text-xs text-red-400 hover:text-red-300 px-1">Yes</button>
+                    <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-slate-400 hover:text-white px-1">No</button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setConfirmDeleteId(bookmark.id)}
+                    className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity flex-shrink-0"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
               </div>
             ))
           )}

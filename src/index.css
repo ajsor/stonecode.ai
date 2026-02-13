@@ -72,6 +72,30 @@
   border-bottom-color: rgba(139, 92, 246, 0.6);
 }
 
+/* Widget scrollable areas */
+.widget-scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.widget-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.widget-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.widget-scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox thin scrollbar */
+.widget-scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
 /* Widget Grid specific styles */
 .widget-grid .widget-item {
   overflow: hidden;

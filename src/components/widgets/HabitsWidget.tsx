@@ -40,10 +40,12 @@ export function HabitsWidget() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [completions, setCompletions] = useState<HabitCompletion[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newIcon, setNewIcon] = useState('star')
   const [newColor, setNewColor] = useState('violet')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
   const last7Days = useMemo(() => getLast7Days(), [])
@@ -52,12 +54,20 @@ export function HabitsWidget() {
   const fetchData = useCallback(async () => {
     if (!user) return
 
+    setError(null)
+
     // Fetch habits
-    const { data: habitsData } = await supabase
+    const { data: habitsData, error: habitsError } = await supabase
       .from('habits')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
+
+    if (habitsError) {
+      setError('Failed to load habits')
+      setIsLoading(false)
+      return
+    }
 
     if (habitsData) {
       setHabits(habitsData)
@@ -65,14 +75,16 @@ export function HabitsWidget() {
       // Fetch completions for the last 7 days
       if (habitsData.length > 0) {
         const habitIds = habitsData.map(h => h.id)
-        const { data: completionsData } = await supabase
+        const { data: completionsData, error: completionsError } = await supabase
           .from('habit_completions')
           .select('*')
           .in('habit_id', habitIds)
           .gte('completed_date', last7Days[0])
           .lte('completed_date', last7Days[6])
 
-        if (completionsData) {
+        if (completionsError) {
+          setError('Failed to load habit data')
+        } else if (completionsData) {
           setCompletions(completionsData)
         }
       }
@@ -88,7 +100,7 @@ export function HabitsWidget() {
   const addHabit = async () => {
     if (!user || !newName.trim()) return
 
-    const { data, error } = await supabase
+    const { data, error: insertError } = await supabase
       .from('habits')
       .insert({
         user_id: user.id,
@@ -99,7 +111,9 @@ export function HabitsWidget() {
       .select()
       .single()
 
-    if (!error && data) {
+    if (insertError) {
+      setError('Failed to add habit')
+    } else if (data) {
       setHabits([...habits, data])
       setNewName('')
       setNewIcon('star')
@@ -116,17 +130,19 @@ export function HabitsWidget() {
 
     if (existing) {
       // Remove completion
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('habit_completions')
         .delete()
         .eq('id', existing.id)
 
-      if (!error) {
+      if (deleteError) {
+        setError('Failed to update habit')
+      } else {
         setCompletions(completions.filter(c => c.id !== existing.id))
       }
     } else {
       // Add completion
-      const { data, error } = await supabase
+      const { data, error: insertError } = await supabase
         .from('habit_completions')
         .insert({
           habit_id: habitId,
@@ -135,7 +151,9 @@ export function HabitsWidget() {
         .select()
         .single()
 
-      if (!error && data) {
+      if (insertError) {
+        setError('Failed to update habit')
+      } else if (data) {
         setCompletions([...completions, data])
       }
     }
@@ -143,15 +161,18 @@ export function HabitsWidget() {
 
   // Delete habit
   const deleteHabit = async (id: string) => {
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('habits')
       .delete()
       .eq('id', id)
 
-    if (!error) {
+    if (deleteError) {
+      setError('Failed to delete habit')
+    } else {
       setHabits(habits.filter(h => h.id !== id))
       setCompletions(completions.filter(c => c.habit_id !== id))
     }
+    setConfirmDeleteId(null)
   }
 
   // Check if habit is completed on a given date
@@ -183,8 +204,24 @@ export function HabitsWidget() {
   }
 
   return (
-    <WidgetContainer title="Habit Tracker" icon="habits">
+    <WidgetContainer
+      title="Habit Tracker"
+      icon={
+        <svg className="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      }
+    >
       <div className="h-full flex flex-col">
+        {error && (
+          <div className="mb-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 ml-2">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+
         {/* Add form */}
         {isAdding ? (
           <div className="mb-3 p-3 bg-slate-700/50 rounded-lg border border-slate-600">
@@ -252,7 +289,7 @@ export function HabitsWidget() {
         )}
 
         {/* Habits list */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+        <div className="flex-1 overflow-y-auto space-y-2 pr-1 widget-scrollable">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent" />
@@ -265,7 +302,6 @@ export function HabitsWidget() {
             habits.map((habit) => {
               const colors = getColorClass(habit.color)
               const streak = getStreak(habit.id)
-
 
               return (
                 <div
@@ -282,14 +318,22 @@ export function HabitsWidget() {
                         </span>
                       )}
                     </div>
-                    <button
-                      onClick={() => deleteHabit(habit.id)}
-                      className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
+                    {confirmDeleteId === habit.id ? (
+                      <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 border border-slate-600">
+                        <span className="text-xs text-slate-300">Delete?</span>
+                        <button onClick={() => deleteHabit(habit.id)} className="text-xs text-red-400 hover:text-red-300 px-1">Yes</button>
+                        <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-slate-400 hover:text-white px-1">No</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(habit.id)}
+                        className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                   <div className="flex gap-1">
                     {last7Days.map((date) => {

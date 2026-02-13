@@ -20,7 +20,7 @@ export function WidgetContainer({
 }: WidgetContainerProps) {
   return (
     <motion.div
-      className="h-full flex flex-col rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl overflow-hidden"
+      className="h-full flex flex-col rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 backdrop-blur-xl overflow-hidden transition-colors"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
@@ -35,7 +35,7 @@ export function WidgetContainer({
         </div>
         <div className="flex items-center gap-2">
           {headerAction}
-          <div className="text-slate-500">
+          <div className="text-slate-500 hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
             </svg>

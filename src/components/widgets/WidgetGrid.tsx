@@ -10,6 +10,11 @@ import { PomodoroWidget } from './PomodoroWidget'
 import { CountdownWidget } from './CountdownWidget'
 import { CalculatorWidget } from './CalculatorWidget'
 import { BreathingWidget } from './BreathingWidget'
+import { NotesWidget } from './NotesWidget'
+import { BookmarksWidget } from './BookmarksWidget'
+import { TodosWidget } from './TodosWidget'
+import { HabitsWidget } from './HabitsWidget'
+import { WidgetErrorBoundary } from './WidgetErrorBoundary'
 import type { WidgetLayoutItem, WidgetType } from '../../types/widgets'
 
 import 'react-grid-layout/css/styles.css'
@@ -40,6 +45,21 @@ interface GridLayoutItem {
 const COLS = 4
 const ROW_HEIGHT = 100
 const MARGIN: [number, number] = [16, 16]
+
+const WIDGET_NAMES: Record<WidgetType, string> = {
+  weather: 'Weather',
+  spotify: 'Spotify',
+  calendar: 'Calendar',
+  clock: 'Clock',
+  pomodoro: 'Pomodoro',
+  countdown: 'Countdown',
+  calculator: 'Calculator',
+  breathing: 'Breathing',
+  notes: 'Notes',
+  bookmarks: 'Bookmarks',
+  todos: 'Todos',
+  habits: 'Habits',
+}
 
 export function WidgetGrid({ className }: WidgetGridProps) {
   const { layout, configs, updateLayout, isLoading } = useWidgets()
@@ -99,33 +119,54 @@ export function WidgetGrid({ className }: WidgetGridProps) {
 
   // Render widget by type
   const renderWidget = (type: WidgetType) => {
+    let widget: React.ReactNode = null
+
     switch (type) {
       case 'weather':
-        return <WeatherWidget />
+        widget = <WeatherWidget />
+        break
       case 'spotify':
-        return <SpotifyWidget />
+        widget = <SpotifyWidget />
+        break
       case 'calendar':
-        return <CalendarWidget />
+        widget = <CalendarWidget />
+        break
       case 'clock':
-        return <ClockWidget />
+        widget = <ClockWidget />
+        break
       case 'pomodoro':
-        return <PomodoroWidget />
+        widget = <PomodoroWidget />
+        break
       case 'countdown':
-        return <CountdownWidget />
+        widget = <CountdownWidget />
+        break
       case 'calculator':
-        return <CalculatorWidget />
+        widget = <CalculatorWidget />
+        break
       case 'breathing':
-        return <BreathingWidget />
-      case 'gmail':
-        // Future placeholder
-        return (
-          <div className="h-full flex items-center justify-center text-slate-500">
-            Gmail widget coming soon
-          </div>
-        )
+        widget = <BreathingWidget />
+        break
+      case 'notes':
+        widget = <NotesWidget />
+        break
+      case 'bookmarks':
+        widget = <BookmarksWidget />
+        break
+      case 'todos':
+        widget = <TodosWidget />
+        break
+      case 'habits':
+        widget = <HabitsWidget />
+        break
       default:
         return null
     }
+
+    return (
+      <WidgetErrorBoundary widgetName={WIDGET_NAMES[type]}>
+        {widget}
+      </WidgetErrorBoundary>
+    )
   }
 
   if (isLoading) {

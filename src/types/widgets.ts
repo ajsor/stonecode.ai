@@ -4,7 +4,6 @@ export type WidgetType =
   | 'weather'
   | 'spotify'
   | 'calendar'
-  | 'gmail'
   | 'clock'
   | 'pomodoro'
   | 'countdown'
@@ -53,11 +52,6 @@ export interface SpotifyConfig {
 export interface CalendarConfig {
   enabled: boolean
   maxEvents: number
-}
-
-// Gmail Widget Config (future)
-export interface GmailConfig {
-  enabled: boolean
 }
 
 // Clock Widget Config
@@ -168,7 +162,6 @@ export interface WidgetConfigs {
   weather: WeatherConfig
   spotify: SpotifyConfig
   calendar: CalendarConfig
-  gmail: GmailConfig
   clock: ClockConfig
   pomodoro: PomodoroConfig
   countdown: CountdownConfig
@@ -223,7 +216,6 @@ export const DEFAULT_CONFIGS: WidgetConfigs = {
   weather: { enabled: false, location: 'Vancouver, WA 98682', units: 'imperial' },
   spotify: { enabled: false, playlists: [] },
   calendar: { enabled: false, maxEvents: 7 },
-  gmail: { enabled: false },
   clock: { enabled: true, showSeconds: true, timezones: ['local'] },
   pomodoro: { enabled: true, focusMinutes: 25, breakMinutes: 5, longBreakMinutes: 15 },
   countdown: { enabled: true, eventName: '', targetDate: '' },

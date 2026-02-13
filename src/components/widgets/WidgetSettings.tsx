@@ -31,6 +31,7 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void 
 export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
   const { configs, updateConfig, toggleWidget, resetToDefaults, isSaving } = useWidgets()
   const [activeTab, setActiveTab] = useState<WidgetType>('clock')
+  const [confirmReset, setConfirmReset] = useState(false)
 
   // Local state for form fields
   const [weatherLocation, setWeatherLocation] = useState(configs.weather.location)
@@ -125,6 +126,10 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
     { id: 'weather', label: 'Weather', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg> },
     { id: 'spotify', label: 'Spotify', icon: <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> },
     { id: 'calendar', label: 'Calendar', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> },
+    { id: 'notes', label: 'Notes', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg> },
+    { id: 'bookmarks', label: 'Bookmarks', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg> },
+    { id: 'todos', label: 'Todos', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg> },
+    { id: 'habits', label: 'Habits', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
   ]
 
   return (
@@ -172,16 +177,37 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     </button>
                   ))}
                   <hr className="border-white/10 my-4" />
-                  <button
-                    onClick={resetToDefaults}
-                    disabled={isSaving}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Reset All
-                  </button>
+                  {confirmReset ? (
+                    <div className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
+                      <p className="text-xs text-red-400 mb-2">Reset all widgets to defaults?</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => { resetToDefaults(); setConfirmReset(false) }}
+                          disabled={isSaving}
+                          className="text-xs text-red-400 hover:text-red-300 font-medium disabled:opacity-50"
+                        >
+                          Yes, reset
+                        </button>
+                        <button
+                          onClick={() => setConfirmReset(false)}
+                          className="text-xs text-slate-400 hover:text-white"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmReset(true)}
+                      disabled={isSaving}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Reset All
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex-1 p-6 overflow-y-auto">
@@ -414,6 +440,62 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                       <button onClick={handleSaveCalendar} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Calendar Settings'}
                       </button>
+                    </div>
+                  )}
+
+                  {/* Notes Tab */}
+                  {activeTab === 'notes' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-medium">Enable Notes Widget</h3>
+                          <p className="text-sm text-slate-400">Quick notes stored in your account</p>
+                        </div>
+                        <Toggle enabled={configs.notes?.enabled ?? true} onChange={() => toggleWidget('notes', !(configs.notes?.enabled ?? true))} />
+                      </div>
+                      <p className="text-sm text-slate-500">No additional settings for notes.</p>
+                    </div>
+                  )}
+
+                  {/* Bookmarks Tab */}
+                  {activeTab === 'bookmarks' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-medium">Enable Bookmarks Widget</h3>
+                          <p className="text-sm text-slate-400">Save your favorite links</p>
+                        </div>
+                        <Toggle enabled={configs.bookmarks?.enabled ?? true} onChange={() => toggleWidget('bookmarks', !(configs.bookmarks?.enabled ?? true))} />
+                      </div>
+                      <p className="text-sm text-slate-500">No additional settings for bookmarks.</p>
+                    </div>
+                  )}
+
+                  {/* Todos Tab */}
+                  {activeTab === 'todos' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-medium">Enable Todo List Widget</h3>
+                          <p className="text-sm text-slate-400">Track your tasks and to-dos</p>
+                        </div>
+                        <Toggle enabled={configs.todos?.enabled ?? true} onChange={() => toggleWidget('todos', !(configs.todos?.enabled ?? true))} />
+                      </div>
+                      <p className="text-sm text-slate-500">No additional settings for todos.</p>
+                    </div>
+                  )}
+
+                  {/* Habits Tab */}
+                  {activeTab === 'habits' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-medium">Enable Habit Tracker Widget</h3>
+                          <p className="text-sm text-slate-400">Track daily habits with streaks</p>
+                        </div>
+                        <Toggle enabled={configs.habits?.enabled ?? true} onChange={() => toggleWidget('habits', !(configs.habits?.enabled ?? true))} />
+                      </div>
+                      <p className="text-sm text-slate-500">No additional settings for habits.</p>
                     </div>
                   )}
                 </div>

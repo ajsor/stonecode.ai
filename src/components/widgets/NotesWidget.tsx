@@ -17,21 +17,26 @@ export function NotesWidget() {
   const { user } = useAuth()
   const [notes, setNotes] = useState<QuickNote[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   // Fetch notes
   const fetchNotes = useCallback(async () => {
     if (!user) return
 
-    const { data, error } = await supabase
+    setError(null)
+    const { data, error: fetchError } = await supabase
       .from('quick_notes')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10)
 
-    if (!error && data) {
+    if (fetchError) {
+      setError('Failed to load notes')
+    } else if (data) {
       setNotes(data)
     }
     setIsLoading(false)
@@ -45,7 +50,7 @@ export function NotesWidget() {
   const addNote = async () => {
     if (!user) return
 
-    const { data, error } = await supabase
+    const { data, error: insertError } = await supabase
       .from('quick_notes')
       .insert({
         user_id: user.id,
@@ -55,7 +60,9 @@ export function NotesWidget() {
       .select()
       .single()
 
-    if (!error && data) {
+    if (insertError) {
+      setError('Failed to create note')
+    } else if (data) {
       setNotes([data, ...notes])
       setEditingId(data.id)
       setEditContent('')
@@ -64,12 +71,14 @@ export function NotesWidget() {
 
   // Update note
   const updateNote = async (id: string, content: string) => {
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from('quick_notes')
       .update({ content })
       .eq('id', id)
 
-    if (!error) {
+    if (updateError) {
+      setError('Failed to save note')
+    } else {
       setNotes(notes.map(n => n.id === id ? { ...n, content } : n))
     }
     setEditingId(null)
@@ -77,26 +86,31 @@ export function NotesWidget() {
 
   // Update note color
   const updateNoteColor = async (id: string, color: string) => {
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from('quick_notes')
       .update({ color })
       .eq('id', id)
 
-    if (!error) {
+    if (updateError) {
+      setError('Failed to update note color')
+    } else {
       setNotes(notes.map(n => n.id === id ? { ...n, color } : n))
     }
   }
 
   // Delete note
   const deleteNote = async (id: string) => {
-    const { error } = await supabase
+    const { error: deleteError } = await supabase
       .from('quick_notes')
       .delete()
       .eq('id', id)
 
-    if (!error) {
+    if (deleteError) {
+      setError('Failed to delete note')
+    } else {
       setNotes(notes.filter(n => n.id !== id))
     }
+    setConfirmDeleteId(null)
   }
 
   const getColorClasses = (colorId: string) => {
@@ -113,6 +127,15 @@ export function NotesWidget() {
       }
     >
       <div className="h-full flex flex-col">
+        {error && (
+          <div className="mb-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center justify-between">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 ml-2">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
+
         {/* Add button */}
         <button
           onClick={addNote}
@@ -125,7 +148,7 @@ export function NotesWidget() {
         </button>
 
         {/* Notes list */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+        <div className="flex-1 overflow-y-auto space-y-2 pr-1 widget-scrollable">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent" />
@@ -188,14 +211,22 @@ export function NotesWidget() {
                       >
                         {note.content || <span className="text-slate-500 italic">Empty note</span>}
                       </p>
-                      <button
-                        onClick={() => deleteNote(note.id)}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
+                      {confirmDeleteId === note.id ? (
+                        <div className="absolute top-2 right-2 flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 border border-slate-600">
+                          <span className="text-xs text-slate-300">Delete?</span>
+                          <button onClick={() => deleteNote(note.id)} className="text-xs text-red-400 hover:text-red-300 px-1">Yes</button>
+                          <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-slate-400 hover:text-white px-1">No</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteId(note.id)}
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
