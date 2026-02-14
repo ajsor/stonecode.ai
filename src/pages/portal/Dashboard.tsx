@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import { WidgetGrid, WidgetSettings } from '../../components/widgets'
-import { DashboardToolbar } from '../../components/dashboard/DashboardToolbar'
 import { NewsTicker } from '../../components/dashboard/NewsTicker'
 
 export default function Dashboard() {
@@ -41,9 +40,6 @@ export default function Dashboard() {
             Customize
           </button>
         </div>
-
-        {/* Toolbar */}
-        <DashboardToolbar />
 
         {/* Widget Grid */}
         <div className="mb-8">
