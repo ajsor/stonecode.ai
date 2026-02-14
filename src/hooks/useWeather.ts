@@ -3,7 +3,7 @@ import { fetchWeather } from '../lib/weatherApi'
 import type { WeatherData } from '../types/widgets'
 
 const REFRESH_INTERVAL = 30 * 60 * 1000 // 30 minutes
-const CACHE_KEY = 'weather_cache'
+const CACHE_KEY = 'weather_cache_v2'
 
 interface CachedWeather {
   data: WeatherData

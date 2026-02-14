@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useEffect, useState } from 'react'
+import { useMemo, useCallback, useRef, useEffect, useState, createContext } from 'react'
 import type { ComponentType } from 'react'
 import GridLayoutBase from 'react-grid-layout'
 import { useWidgets } from '../../hooks/useWidgets'
@@ -22,6 +22,11 @@ import 'react-grid-layout/css/styles.css'
 // Cast to any to work around type definition issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GridLayout = GridLayoutBase as ComponentType<any>
+
+// Collapse context provided per-widget so WidgetContainer can report collapse
+export const WidgetCollapseContext = createContext<{
+  reportCollapse: (collapsed: boolean) => void
+} | null>(null)
 
 interface WidgetGridProps {
   className?: string
@@ -65,6 +70,10 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   const { layout, configs, updateLayout, isLoading } = useWidgets()
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
+  const [collapsedWidgets, setCollapsedWidgets] = useState<Set<string>>(new Set())
+
+  // Track original heights so we can restore them
+  const originalHeights = useRef<Map<string, number>>(new Map())
 
   // Measure container width
   useEffect(() => {
@@ -89,13 +98,40 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     }
   }, [])
 
-  // Filter layout to only show enabled widgets
+  const handleCollapseChange = useCallback((widgetId: string, collapsed: boolean) => {
+    setCollapsedWidgets(prev => {
+      const next = new Set(prev)
+      if (collapsed) {
+        next.add(widgetId)
+      } else {
+        next.delete(widgetId)
+      }
+      return next
+    })
+  }, [])
+
+  // Filter layout to only show enabled widgets, adjust heights for collapsed
   const visibleLayout = useMemo(() => {
-    return layout.filter((item) => {
+    const filtered = layout.filter((item) => {
       const config = configs[item.i as WidgetType]
       return config?.enabled
     })
-  }, [layout, configs])
+
+    return filtered.map((item) => {
+      // Store original height
+      if (!originalHeights.current.has(item.i)) {
+        originalHeights.current.set(item.i, item.h)
+      }
+
+      if (collapsedWidgets.has(item.i)) {
+        return { ...item, h: 1, minH: 1 }
+      }
+
+      // Restore original height when expanded
+      const origH = originalHeights.current.get(item.i) ?? item.h
+      return { ...item, h: origH }
+    })
+  }, [layout, configs, collapsedWidgets])
 
   // Handle layout change from drag/resize
   const handleLayoutChange = useCallback((newLayout: GridLayoutItem[]) => {
@@ -103,19 +139,23 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     const updatedLayout: WidgetLayoutItem[] = layout.map((item) => {
       const updated = newLayout.find((l) => l.i === item.i)
       if (updated) {
+        // If collapsed, don't persist the h=1
+        const h = collapsedWidgets.has(item.i)
+          ? (originalHeights.current.get(item.i) ?? item.h)
+          : updated.h
         return {
           ...item,
           x: updated.x,
           y: updated.y,
           w: updated.w,
-          h: updated.h,
+          h,
         }
       }
       return item
     })
 
     updateLayout(updatedLayout)
-  }, [layout, updateLayout])
+  }, [layout, updateLayout, collapsedWidgets])
 
   // Render widget by type
   const renderWidget = (type: WidgetType) => {
@@ -163,9 +203,15 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     }
 
     return (
-      <WidgetErrorBoundary widgetName={WIDGET_NAMES[type]}>
-        {widget}
-      </WidgetErrorBoundary>
+      <WidgetCollapseContext.Provider
+        value={{
+          reportCollapse: (collapsed) => handleCollapseChange(type, collapsed),
+        }}
+      >
+        <WidgetErrorBoundary widgetName={WIDGET_NAMES[type]}>
+          {widget}
+        </WidgetErrorBoundary>
+      </WidgetCollapseContext.Provider>
     )
   }
 

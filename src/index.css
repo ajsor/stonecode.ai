@@ -96,6 +96,20 @@
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
+/* News Ticker animation */
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  animation: ticker 60s linear infinite;
+}
+
 /* Widget Grid specific styles */
 .widget-grid .widget-item {
   overflow: hidden;

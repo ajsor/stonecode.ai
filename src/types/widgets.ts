@@ -149,6 +149,13 @@ export interface Habit {
   created_at: string
 }
 
+// News Ticker Config (dashboard-level, not a widget)
+export interface NewsConfig {
+  enabled: boolean
+  categories: string[]
+  keywords: string[]
+}
+
 // Habit Completion (stored in DB)
 export interface HabitCompletion {
   id: string
@@ -171,6 +178,7 @@ export interface WidgetConfigs {
   bookmarks: BookmarksConfig
   todos: TodosConfig
   habits: HabitsConfig
+  news: NewsConfig
 }
 
 // Widget Preferences (stored in DB)
@@ -213,7 +221,7 @@ export const DEFAULT_LAYOUT: WidgetLayoutItem[] = [
 
 // Default Configs
 export const DEFAULT_CONFIGS: WidgetConfigs = {
-  weather: { enabled: false, location: 'Vancouver, WA 98682', units: 'imperial' },
+  weather: { enabled: false, location: '98682,US', units: 'imperial' },
   spotify: { enabled: false, playlists: [] },
   calendar: { enabled: false, maxEvents: 7 },
   clock: { enabled: true, showSeconds: true, timezones: ['local'] },
@@ -225,6 +233,7 @@ export const DEFAULT_CONFIGS: WidgetConfigs = {
   bookmarks: { enabled: true },
   todos: { enabled: true },
   habits: { enabled: true },
+  news: { enabled: false, categories: ['technology'], keywords: [] },
 }
 
 // Weather API Types
@@ -269,11 +278,11 @@ export interface WidgetState {
 // Widget Context Actions
 export interface WidgetActions {
   updateLayout: (layout: WidgetLayoutItem[]) => Promise<void>
-  updateConfig: <K extends WidgetType>(
+  updateConfig: <K extends keyof WidgetConfigs>(
     widget: K,
     config: Partial<WidgetConfigs[K]>
   ) => Promise<void>
-  toggleWidget: (widget: WidgetType, enabled: boolean) => Promise<void>
+  toggleWidget: (widget: keyof WidgetConfigs, enabled: boolean) => Promise<void>
   resetToDefaults: () => Promise<void>
 }
 

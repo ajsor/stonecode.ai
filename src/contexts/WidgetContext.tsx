@@ -6,7 +6,6 @@ import {
   type WidgetContextType,
   type WidgetLayoutItem,
   type WidgetConfigs,
-  type WidgetType,
   DEFAULT_LAYOUT,
   DEFAULT_CONFIGS,
 } from '../types/widgets'
@@ -15,6 +14,37 @@ export const WidgetContext = createContext<WidgetContextType | null>(null)
 
 interface WidgetProviderProps {
   children: ReactNode
+}
+
+// Valid config keys from DEFAULT_CONFIGS
+const VALID_CONFIG_KEYS = new Set(Object.keys(DEFAULT_CONFIGS))
+
+// Merge saved layout with defaults: keep saved positions for known widgets,
+// add any new widgets from defaults, remove any that no longer exist
+function mergeLayout(saved: WidgetLayoutItem[]): WidgetLayoutItem[] {
+  const savedMap = new Map(saved.map(item => [item.i, item]))
+  const merged: WidgetLayoutItem[] = []
+
+  for (const defaultItem of DEFAULT_LAYOUT) {
+    const savedItem = savedMap.get(defaultItem.i)
+    merged.push(savedItem ?? defaultItem)
+  }
+
+  return merged
+}
+
+// Merge saved configs with defaults: keep saved values for known config keys,
+// add defaults for new keys, remove configs for deleted keys
+function mergeConfigs(saved: Record<string, unknown>): WidgetConfigs {
+  const merged = { ...DEFAULT_CONFIGS } as Record<string, unknown>
+
+  for (const key of Object.keys(DEFAULT_CONFIGS)) {
+    if (key in saved && VALID_CONFIG_KEYS.has(key)) {
+      merged[key] = { ...(merged[key] as object), ...(saved[key] as object) }
+    }
+  }
+
+  return merged as unknown as WidgetConfigs
 }
 
 export function WidgetProvider({ children }: WidgetProviderProps) {
@@ -48,8 +78,10 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
           setLayout(DEFAULT_LAYOUT)
           setConfigs(DEFAULT_CONFIGS)
         } else if (data) {
-          setLayout(data.layout as WidgetLayoutItem[] || DEFAULT_LAYOUT)
-          setConfigs(data.widget_configs as WidgetConfigs || DEFAULT_CONFIGS)
+          const savedLayout = data.layout as WidgetLayoutItem[] | undefined
+          const savedConfigs = data.widget_configs as Record<string, unknown> | undefined
+          setLayout(savedLayout ? mergeLayout(savedLayout) : DEFAULT_LAYOUT)
+          setConfigs(savedConfigs ? mergeConfigs(savedConfigs) : DEFAULT_CONFIGS)
         }
       } catch (err) {
         console.error('Widget preferences fetch failed:', err)
@@ -97,7 +129,7 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
   }, [configs, persistPreferences])
 
   // Update a specific widget's config
-  const updateConfig = useCallback(async <K extends WidgetType>(
+  const updateConfig = useCallback(async <K extends keyof WidgetConfigs>(
     widget: K,
     config: Partial<WidgetConfigs[K]>
   ) => {
@@ -110,7 +142,7 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
   }, [configs, layout, persistPreferences])
 
   // Toggle widget enabled state
-  const toggleWidget = useCallback(async (widget: WidgetType, enabled: boolean) => {
+  const toggleWidget = useCallback(async (widget: keyof WidgetConfigs, enabled: boolean) => {
     await updateConfig(widget, { enabled } as Partial<WidgetConfigs[typeof widget]>)
   }, [updateConfig])
 

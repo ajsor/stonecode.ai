@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import { WidgetGrid, WidgetSettings } from '../../components/widgets'
+import { DashboardToolbar } from '../../components/dashboard/DashboardToolbar'
+import { NewsTicker } from '../../components/dashboard/NewsTicker'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -12,7 +14,7 @@ export default function Dashboard() {
   const enabledFeatures = Object.entries(flags).filter(([, enabled]) => enabled)
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto pb-14">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -39,6 +41,9 @@ export default function Dashboard() {
             Customize
           </button>
         </div>
+
+        {/* Toolbar */}
+        <DashboardToolbar />
 
         {/* Widget Grid */}
         <div className="mb-8">
@@ -147,6 +152,9 @@ export default function Dashboard() {
 
       {/* Widget Settings Modal */}
       <WidgetSettings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      {/* News Ticker */}
+      <NewsTicker />
     </div>
   )
 }

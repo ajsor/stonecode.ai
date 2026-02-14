@@ -31,7 +31,13 @@ export async function fetchWeather(
   }
 
   const url = new URL(`${BASE_URL}/weather`)
-  url.searchParams.set('q', location)
+  // Detect zip code format (e.g. "98682,US") vs city name
+  const isZip = /^\d{5}(,\w{2})?$/.test(location.trim())
+  if (isZip) {
+    url.searchParams.set('zip', location.trim())
+  } else {
+    url.searchParams.set('q', location)
+  }
   url.searchParams.set('appid', API_KEY)
   url.searchParams.set('units', units)
 

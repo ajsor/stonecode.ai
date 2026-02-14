@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWidgets } from '../../hooks/useWidgets'
 import type { WidgetType, SpotifyPlaylist } from '../../types/widgets'
+import { NEWS_CATEGORIES } from '../../lib/newsApi'
 import { TIMEZONES } from './ClockWidget'
 import { PATTERNS } from './BreathingWidget'
+
+type SettingsTab = WidgetType | 'news'
 
 interface WidgetSettingsProps {
   isOpen: boolean
@@ -30,10 +33,13 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void 
 
 export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
   const { configs, updateConfig, toggleWidget, resetToDefaults, isSaving } = useWidgets()
-  const [activeTab, setActiveTab] = useState<WidgetType>('clock')
+  const [activeTab, setActiveTab] = useState<SettingsTab>('clock')
   const [confirmReset, setConfirmReset] = useState(false)
 
   // Local state for form fields
+  const [newsCategories, setNewsCategories] = useState<string[]>(configs.news?.categories ?? ['technology'])
+  const [newsKeywords, setNewsKeywords] = useState<string[]>(configs.news?.keywords ?? [])
+  const [newKeyword, setNewKeyword] = useState('')
   const [weatherLocation, setWeatherLocation] = useState(configs.weather.location)
   const [weatherUnits, setWeatherUnits] = useState(configs.weather.units)
   const [newPlaylistUrl, setNewPlaylistUrl] = useState('')
@@ -50,6 +56,8 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
 
   // Sync local state when configs change
   useEffect(() => {
+    setNewsCategories(configs.news?.categories ?? ['technology'])
+    setNewsKeywords(configs.news?.keywords ?? [])
     setWeatherLocation(configs.weather.location)
     setWeatherUnits(configs.weather.units)
     setCalendarMaxEvents(configs.calendar.maxEvents)
@@ -107,6 +115,28 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
     await updateConfig('breathing', { pattern: breathingPattern as 'relaxing' | 'box' | 'calm' | 'energizing' })
   }
 
+  const handleSaveNews = async () => {
+    await updateConfig('news', { categories: newsCategories, keywords: newsKeywords })
+  }
+
+  const toggleNewsCategory = (cat: string) => {
+    setNewsCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    )
+  }
+
+  const addKeyword = () => {
+    const kw = newKeyword.trim()
+    if (kw && !newsKeywords.includes(kw)) {
+      setNewsKeywords([...newsKeywords, kw])
+      setNewKeyword('')
+    }
+  }
+
+  const removeKeyword = (kw: string) => {
+    setNewsKeywords(newsKeywords.filter(k => k !== kw))
+  }
+
   const toggleTimezone = (tz: string) => {
     if (clockTimezones.includes(tz)) {
       if (clockTimezones.length > 1) {
@@ -117,7 +147,8 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
     }
   }
 
-  const tabs: { id: WidgetType; label: string; icon: React.ReactNode }[] = [
+  const tabs: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'news', label: 'News Ticker', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg> },
     { id: 'clock', label: 'Clock', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
     { id: 'pomodoro', label: 'Pomodoro', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> },
     { id: 'countdown', label: 'Countdown', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> },
@@ -496,6 +527,75 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                         <Toggle enabled={configs.habits?.enabled ?? true} onChange={() => toggleWidget('habits', !(configs.habits?.enabled ?? true))} />
                       </div>
                       <p className="text-sm text-slate-500">No additional settings for habits.</p>
+                    </div>
+                  )}
+
+                  {/* News Ticker Tab */}
+                  {activeTab === 'news' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-white font-medium">Enable News Ticker</h3>
+                          <p className="text-sm text-slate-400">Scrolling headlines at the bottom of dashboard</p>
+                        </div>
+                        <Toggle enabled={configs.news?.enabled ?? false} onChange={() => toggleWidget('news', !(configs.news?.enabled ?? false))} />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-3">Categories</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {NEWS_CATEGORIES.map((cat) => (
+                            <label key={cat.id} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/5">
+                              <input
+                                type="checkbox"
+                                checked={newsCategories.includes(cat.id)}
+                                onChange={() => toggleNewsCategory(cat.id)}
+                                className="rounded text-violet-500"
+                              />
+                              <span className="text-sm text-white">{cat.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">Keywords</label>
+                        <div className="flex gap-2 mb-3">
+                          <input
+                            type="text"
+                            value={newKeyword}
+                            onChange={(e) => setNewKeyword(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
+                            placeholder="Add a keyword..."
+                            className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500"
+                          />
+                          <button
+                            onClick={addKeyword}
+                            disabled={!newKeyword.trim()}
+                            className="px-4 py-2 rounded-lg bg-violet-500/20 text-violet-400 font-medium hover:bg-violet-500/30 disabled:opacity-50 transition-colors"
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {newsKeywords.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {newsKeywords.map((kw) => (
+                              <span key={kw} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-sm text-white">
+                                {kw}
+                                <button onClick={() => removeKeyword(kw)} className="text-slate-400 hover:text-red-400">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button onClick={handleSaveNews} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                        {isSaving ? 'Saving...' : 'Save News Settings'}
+                      </button>
                     </div>
                   )}
                 </div>
