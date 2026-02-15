@@ -37,7 +37,7 @@ export function WidgetContainer({
       transition={{ duration: 0.2 }}
     >
       {/* Header with drag handle */}
-      <div className={`widget-drag-handle flex items-center justify-between px-4 py-3 cursor-move select-none ${isCollapsed ? '' : 'border-b border-white/10'}`}>
+      <div className={`widget-drag-handle flex items-center justify-between px-4 py-2 cursor-move select-none ${isCollapsed ? '' : 'border-b border-white/10'}`}>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
             {icon}

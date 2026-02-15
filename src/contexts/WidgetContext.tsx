@@ -8,6 +8,7 @@ import {
   type WidgetConfigs,
   DEFAULT_LAYOUT,
   DEFAULT_CONFIGS,
+  LAYOUT_VERSION,
 } from '../types/widgets'
 
 export const WidgetContext = createContext<WidgetContextType | null>(null)
@@ -19,10 +20,31 @@ interface WidgetProviderProps {
 // Valid config keys from DEFAULT_CONFIGS
 const VALID_CONFIG_KEYS = new Set(Object.keys(DEFAULT_CONFIGS))
 
+// Detect if a saved layout uses the old ROW_HEIGHT=100 scale (v1)
+// by checking if the max h value is small (old max was h:4)
+function isOldLayoutScale(saved: WidgetLayoutItem[]): boolean {
+  const maxH = Math.max(...saved.map(item => item.h))
+  return maxH <= 5
+}
+
 // Merge saved layout with defaults: keep saved positions for known widgets,
 // add any new widgets from defaults, remove any that no longer exist
-function mergeLayout(saved: WidgetLayoutItem[]): WidgetLayoutItem[] {
-  const savedMap = new Map(saved.map(item => [item.i, item]))
+function mergeLayout(saved: WidgetLayoutItem[], savedVersion?: number): WidgetLayoutItem[] {
+  const needsScale = (savedVersion ?? 1) < LAYOUT_VERSION && isOldLayoutScale(saved)
+
+  const savedMap = new Map(saved.map(item => {
+    if (needsScale) {
+      // Scale h, minH, y values from old ROW_HEIGHT=100 to new ROW_HEIGHT=50
+      return [item.i, {
+        ...item,
+        h: item.h * 2,
+        y: item.y * 2,
+        minH: item.minH ? item.minH * 2 : undefined,
+      }]
+    }
+    return [item.i, item]
+  }))
+
   const merged: WidgetLayoutItem[] = []
 
   for (const defaultItem of DEFAULT_LAYOUT) {
@@ -80,7 +102,8 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
         } else if (data) {
           const savedLayout = data.layout as WidgetLayoutItem[] | undefined
           const savedConfigs = data.widget_configs as Record<string, unknown> | undefined
-          setLayout(savedLayout ? mergeLayout(savedLayout) : DEFAULT_LAYOUT)
+          const savedVersion = (data as Record<string, unknown>).layout_version as number | undefined
+          setLayout(savedLayout ? mergeLayout(savedLayout, savedVersion) : DEFAULT_LAYOUT)
           setConfigs(savedConfigs ? mergeConfigs(savedConfigs) : DEFAULT_CONFIGS)
         }
       } catch (err) {

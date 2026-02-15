@@ -203,20 +203,23 @@ export interface GoogleOAuthToken {
   updated_at: string
 }
 
-// Default Layout
+// Layout version — bump when ROW_HEIGHT or layout scale changes
+export const LAYOUT_VERSION = 2
+
+// Default Layout (ROW_HEIGHT=50 scale: h values are 2× the old ROW_HEIGHT=100 scale)
 export const DEFAULT_LAYOUT: WidgetLayoutItem[] = [
-  { i: 'clock', x: 0, y: 0, w: 2, h: 2, minW: 2, minH: 2 },
-  { i: 'weather', x: 2, y: 0, w: 2, h: 2, minW: 2, minH: 2 },
-  { i: 'pomodoro', x: 0, y: 2, w: 2, h: 3, minW: 2, minH: 3 },
-  { i: 'calculator', x: 2, y: 2, w: 2, h: 3, minW: 2, minH: 3 },
-  { i: 'countdown', x: 0, y: 5, w: 2, h: 2, minW: 2, minH: 2 },
-  { i: 'breathing', x: 2, y: 5, w: 2, h: 3, minW: 2, minH: 3 },
-  { i: 'notes', x: 0, y: 8, w: 2, h: 3, minW: 2, minH: 2 },
-  { i: 'todos', x: 2, y: 8, w: 2, h: 3, minW: 2, minH: 2 },
-  { i: 'bookmarks', x: 0, y: 11, w: 2, h: 3, minW: 2, minH: 2 },
-  { i: 'habits', x: 2, y: 11, w: 2, h: 3, minW: 2, minH: 2 },
-  { i: 'spotify', x: 0, y: 14, w: 2, h: 3, minW: 2, minH: 2 },
-  { i: 'calendar', x: 2, y: 14, w: 2, h: 4, minW: 2, minH: 3 },
+  { i: 'clock', x: 0, y: 0, w: 2, h: 4, minW: 2, minH: 4 },
+  { i: 'weather', x: 2, y: 0, w: 2, h: 4, minW: 2, minH: 4 },
+  { i: 'pomodoro', x: 0, y: 4, w: 2, h: 6, minW: 2, minH: 6 },
+  { i: 'calculator', x: 2, y: 4, w: 2, h: 6, minW: 2, minH: 6 },
+  { i: 'countdown', x: 0, y: 10, w: 2, h: 4, minW: 2, minH: 4 },
+  { i: 'breathing', x: 2, y: 10, w: 2, h: 6, minW: 2, minH: 6 },
+  { i: 'notes', x: 0, y: 16, w: 2, h: 6, minW: 2, minH: 4 },
+  { i: 'todos', x: 2, y: 16, w: 2, h: 6, minW: 2, minH: 4 },
+  { i: 'bookmarks', x: 0, y: 22, w: 2, h: 6, minW: 2, minH: 4 },
+  { i: 'habits', x: 2, y: 22, w: 2, h: 6, minW: 2, minH: 4 },
+  { i: 'spotify', x: 0, y: 28, w: 2, h: 6, minW: 2, minH: 4 },
+  { i: 'calendar', x: 2, y: 28, w: 2, h: 8, minW: 2, minH: 6 },
 ]
 
 // Default Configs

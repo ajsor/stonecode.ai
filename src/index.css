@@ -110,11 +110,7 @@
   animation: ticker 60s linear infinite;
 }
 
-/* Collapsed widget: override RGL inline height to fit header only */
-.react-grid-item:has(.widget-collapsed) {
-  height: fit-content !important;
-}
-
+/* Hide resize handle on collapsed widgets */
 .react-grid-item:has(.widget-collapsed) > .react-resizable-handle {
   display: none;
 }

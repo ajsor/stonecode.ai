@@ -48,7 +48,7 @@ interface GridLayoutItem {
 
 // Column breakpoints
 const COLS = 4
-const ROW_HEIGHT = 100
+const ROW_HEIGHT = 50
 const MARGIN: [number, number] = [16, 16]
 
 const WIDGET_NAMES: Record<WidgetType, string> = {
