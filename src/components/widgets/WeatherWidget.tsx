@@ -44,7 +44,7 @@ export function WeatherWidget() {
       }
     >
       {weather && (
-        <div className="h-full flex flex-col justify-between">
+        <div className="flex flex-col gap-3">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-baseline gap-1">

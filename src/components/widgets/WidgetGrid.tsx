@@ -23,33 +23,32 @@ import 'react-grid-layout/css/styles.css'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const GridLayout = GridLayoutBase as ComponentType<any>
 
-// Collapse context provided per-widget so WidgetContainer can report collapse
+// Context provided per-widget so WidgetContainer can report collapse and content height
 export const WidgetCollapseContext = createContext<{
   reportCollapse: (collapsed: boolean) => void
+  reportContentHeight: (height: number) => void
 } | null>(null)
 
 interface WidgetGridProps {
   className?: string
 }
 
-// GridLayout item interface matching react-grid-layout
-interface GridLayoutItem {
-  i: string
-  x: number
-  y: number
-  w: number
-  h: number
-  minW?: number
-  minH?: number
-  maxW?: number
-  maxH?: number
-  static?: boolean
-}
-
-// Column breakpoints
+// Grid constants
 const COLS = 4
-const ROW_HEIGHT = 50
-const MARGIN: [number, number] = [16, 16]
+const ROW_HEIGHT = 1  // 1px rows for pixel-precise widget heights (max 4px waste)
+const MARGIN: [number, number] = [16, 4]
+const COLLAPSED_H = 12 // 5*12-4 = 56px, fits 52px collapsed header
+
+// Total non-content overhead: header(50) + border-bottom(1) + card border(2) + content padding py-1(8)
+const HEADER_OVERHEAD = 61
+
+// Convert pixel height to grid h units (round up to nearest unit that fits)
+function pixelsToH(pixels: number): number {
+  // pixels = h * ROW_HEIGHT + (h - 1) * MARGIN[1]
+  // pixels = h * (ROW_HEIGHT + MARGIN[1]) - MARGIN[1]
+  // h = (pixels + MARGIN[1]) / (ROW_HEIGHT + MARGIN[1])
+  return Math.ceil((pixels + MARGIN[1]) / (ROW_HEIGHT + MARGIN[1]))
+}
 
 const WIDGET_NAMES: Record<WidgetType, string> = {
   weather: 'Weather',
@@ -72,31 +71,59 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   const [containerWidth, setContainerWidth] = useState(0)
   const [collapsedWidgets, setCollapsedWidgets] = useState<Set<string>>(new Set())
 
-  // Track original heights so we can restore them
-  const originalHeights = useRef<Map<string, number>>(new Map())
+  // Track measured content heights for auto-sizing
+  const measuredHeights = useRef<Map<string, number>>(new Map())
+  const autoSizeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Measure container width
+  // Stable refs for auto-sizing callback (avoids recreating on every layout change)
+  const layoutRef = useRef(layout)
+  layoutRef.current = layout
+  const collapsedRef = useRef(collapsedWidgets)
+  collapsedRef.current = collapsedWidgets
+
+  // Measure container width via ResizeObserver
   useEffect(() => {
-    const updateWidth = () => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth)
+    if (!containerRef.current) return
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width)
       }
-    }
+    })
+    observer.observe(containerRef.current)
 
-    updateWidth()
-    window.addEventListener('resize', updateWidth)
-
-    // Use ResizeObserver for more accurate updates
-    const observer = new ResizeObserver(updateWidth)
-    if (containerRef.current) {
-      observer.observe(containerRef.current)
-    }
-
-    return () => {
-      window.removeEventListener('resize', updateWidth)
-      observer.disconnect()
-    }
+    return () => observer.disconnect()
   }, [])
+
+  // When content measurements arrive, directly update layout state with auto-sized h values.
+  // Uses refs for stable access so the callback doesn't recreate on every layout change.
+  const handleContentHeight = useCallback((widgetId: string, height: number) => {
+    const prev = measuredHeights.current.get(widgetId)
+    if (prev === height) return
+
+    measuredHeights.current.set(widgetId, height)
+
+    // Debounce: wait for all widgets to report before updating layout
+    if (autoSizeTimer.current) clearTimeout(autoSizeTimer.current)
+    autoSizeTimer.current = setTimeout(() => {
+      const currentLayout = layoutRef.current
+      const currentCollapsed = collapsedRef.current
+      const autoSized = currentLayout.map(item => {
+        if (currentCollapsed.has(item.i)) return item
+        const measured = measuredHeights.current.get(item.i)
+        if (measured !== undefined) {
+          const neededH = Math.max(pixelsToH(measured + HEADER_OVERHEAD), item.minH || 1)
+          if (neededH !== item.h) {
+            return { ...item, h: neededH }
+          }
+        }
+        return item
+      })
+      if (autoSized.some((item, i) => item !== currentLayout[i])) {
+        updateLayout(autoSized)
+      }
+    }, 100)
+  }, [updateLayout])
 
   const handleCollapseChange = useCallback((widgetId: string, collapsed: boolean) => {
     setCollapsedWidgets(prev => {
@@ -118,31 +145,20 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     })
 
     return filtered.map((item) => {
-      // Store original height
-      if (!originalHeights.current.has(item.i)) {
-        originalHeights.current.set(item.i, item.h)
-      }
-
       if (collapsedWidgets.has(item.i)) {
-        return { ...item, h: 1, minH: 1 }
+        return { ...item, h: COLLAPSED_H, minH: COLLAPSED_H }
       }
-
-      // Restore original height when expanded
-      const origH = originalHeights.current.get(item.i) ?? item.h
-      return { ...item, h: origH }
+      return item
     })
   }, [layout, configs, collapsedWidgets])
 
   // Handle layout change from drag/resize
-  const handleLayoutChange = useCallback((newLayout: GridLayoutItem[]) => {
-    // Map back to our format, preserving min/max constraints
+  const handleLayoutChange = useCallback((newLayout: WidgetLayoutItem[]) => {
     const updatedLayout: WidgetLayoutItem[] = layout.map((item) => {
       const updated = newLayout.find((l) => l.i === item.i)
       if (updated) {
-        // If collapsed, don't persist the h=1
-        const h = collapsedWidgets.has(item.i)
-          ? (originalHeights.current.get(item.i) ?? item.h)
-          : updated.h
+        // If collapsed, keep the original h instead of the collapsed height
+        const h = collapsedWidgets.has(item.i) ? item.h : updated.h
         return {
           ...item,
           x: updated.x,
@@ -206,6 +222,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
       <WidgetCollapseContext.Provider
         value={{
           reportCollapse: (collapsed) => handleCollapseChange(type, collapsed),
+          reportContentHeight: (height) => handleContentHeight(type, height),
         }}
       >
         <WidgetErrorBoundary widgetName={WIDGET_NAMES[type]}>
@@ -243,17 +260,21 @@ export function WidgetGrid({ className }: WidgetGridProps) {
         <GridLayout
           className="widget-grid"
           layout={visibleLayout}
-          cols={COLS}
-          rowHeight={ROW_HEIGHT}
           width={containerWidth}
-          margin={MARGIN}
+          gridConfig={{
+            cols: COLS,
+            rowHeight: ROW_HEIGHT,
+            margin: MARGIN,
+          }}
+          dragConfig={{
+            enabled: true,
+            handle: '.widget-drag-handle',
+          }}
+          resizeConfig={{
+            enabled: true,
+          }}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onLayoutChange={handleLayoutChange as any}
-          draggableHandle=".widget-drag-handle"
-          isResizable={true}
-          isDraggable={true}
-          useCSSTransforms={true}
-          compactType="vertical"
         >
           {visibleLayout.map((item) => (
             <div key={item.i} className="widget-item">

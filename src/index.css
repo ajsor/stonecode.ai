@@ -110,7 +110,6 @@
   animation: ticker 60s linear infinite;
 }
 
-/* Hide resize handle on collapsed widgets */
 .react-grid-item:has(.widget-collapsed) > .react-resizable-handle {
   display: none;
 }

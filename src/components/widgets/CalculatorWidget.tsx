@@ -122,7 +122,7 @@ export function CalculatorWidget() {
         </svg>
       }
     >
-      <div className="h-full flex flex-col">
+      <div className="flex flex-col">
         {/* Display */}
         <div className="bg-white/5 rounded-xl p-3 mb-3">
           <div className="text-right text-2xl font-mono text-white truncate">
@@ -131,7 +131,7 @@ export function CalculatorWidget() {
         </div>
 
         {/* Buttons */}
-        <div className="grid grid-cols-4 gap-1.5 flex-1">
+        <div className="grid grid-cols-4 gap-1.5">
           <Button onClick={clear} className="bg-slate-600 text-white hover:bg-slate-500">
             AC
           </Button>

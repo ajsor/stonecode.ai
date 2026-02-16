@@ -67,7 +67,7 @@ export function CountdownWidget() {
         </svg>
       }
     >
-      <div className="h-full flex flex-col justify-center">
+      <div className="flex flex-col">
         {!hasTarget ? (
           <div className="text-center">
             <svg className="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

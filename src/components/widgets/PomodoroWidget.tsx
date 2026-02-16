@@ -114,7 +114,7 @@ export function PomodoroWidget() {
         </svg>
       }
     >
-      <div className="h-full flex flex-col">
+      <div className="flex flex-col">
         {/* Mode selector */}
         <div className="flex gap-1 mb-4">
           {(['focus', 'break', 'longBreak'] as TimerMode[]).map((m) => (

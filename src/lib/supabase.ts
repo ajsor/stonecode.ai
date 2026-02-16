@@ -206,14 +206,19 @@ export const getWidgetPreferences = async (userId: string) => {
 export const saveWidgetPreferences = async (
   userId: string,
   layout: unknown,
-  widgetConfigs: unknown
+  widgetConfigs: unknown,
+  layoutVersion?: number
 ) => {
+  // Store layout_version inside widget_configs to avoid DB migration
+  const configs = layoutVersion !== undefined
+    ? { ...(widgetConfigs as object), _layoutVersion: layoutVersion }
+    : widgetConfigs
   return supabase
     .from('widget_preferences')
     .upsert({
       user_id: userId,
       layout,
-      widget_configs: widgetConfigs,
+      widget_configs: configs,
     }, {
       onConflict: 'user_id',
     })

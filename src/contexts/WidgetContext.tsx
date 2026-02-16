@@ -20,39 +20,16 @@ interface WidgetProviderProps {
 // Valid config keys from DEFAULT_CONFIGS
 const VALID_CONFIG_KEYS = new Set(Object.keys(DEFAULT_CONFIGS))
 
-// Detect if a saved layout uses the old ROW_HEIGHT=100 scale (v1)
-// by checking if the max h value is small (old max was h:4)
-function isOldLayoutScale(saved: WidgetLayoutItem[]): boolean {
-  const maxH = Math.max(...saved.map(item => item.h))
-  return maxH <= 5
-}
-
 // Merge saved layout with defaults: keep saved positions for known widgets,
-// add any new widgets from defaults, remove any that no longer exist
+// add any new widgets from defaults, remove any that no longer exist.
+// If layout is from an older version, reset to defaults (scaling is lossy).
 function mergeLayout(saved: WidgetLayoutItem[], savedVersion?: number): WidgetLayoutItem[] {
-  const needsScale = (savedVersion ?? 1) < LAYOUT_VERSION && isOldLayoutScale(saved)
-
-  const savedMap = new Map(saved.map(item => {
-    if (needsScale) {
-      // Scale h, minH, y values from old ROW_HEIGHT=100 to new ROW_HEIGHT=50
-      return [item.i, {
-        ...item,
-        h: item.h * 2,
-        y: item.y * 2,
-        minH: item.minH ? item.minH * 2 : undefined,
-      }]
-    }
-    return [item.i, item]
-  }))
-
-  const merged: WidgetLayoutItem[] = []
-
-  for (const defaultItem of DEFAULT_LAYOUT) {
-    const savedItem = savedMap.get(defaultItem.i)
-    merged.push(savedItem ?? defaultItem)
+  if (savedVersion !== undefined && savedVersion < LAYOUT_VERSION) {
+    return DEFAULT_LAYOUT
   }
 
-  return merged
+  const savedMap = new Map(saved.map(item => [item.i, item]))
+  return DEFAULT_LAYOUT.map(defaultItem => savedMap.get(defaultItem.i) ?? defaultItem)
 }
 
 // Merge saved configs with defaults: keep saved values for known config keys,
@@ -102,7 +79,8 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
         } else if (data) {
           const savedLayout = data.layout as WidgetLayoutItem[] | undefined
           const savedConfigs = data.widget_configs as Record<string, unknown> | undefined
-          const savedVersion = (data as Record<string, unknown>).layout_version as number | undefined
+          // layout_version stored inside widget_configs as _layoutVersion
+          const savedVersion = savedConfigs?._layoutVersion as number | undefined
           setLayout(savedLayout ? mergeLayout(savedLayout, savedVersion) : DEFAULT_LAYOUT)
           setConfigs(savedConfigs ? mergeConfigs(savedConfigs) : DEFAULT_CONFIGS)
         }
@@ -130,7 +108,8 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
       const { error: saveError } = await saveWidgetPreferences(
         user.id,
         newLayout,
-        newConfigs
+        newConfigs,
+        LAYOUT_VERSION
       )
 
       if (saveError) {

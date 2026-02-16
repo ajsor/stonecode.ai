@@ -71,7 +71,7 @@ export function CalendarWidget() {
       }
     >
       {!isConfigured ? (
-        <div className="h-full flex flex-col items-center justify-center text-center">
+        <div className="flex flex-col items-center text-center">
           <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -81,7 +81,7 @@ export function CalendarWidget() {
           </p>
         </div>
       ) : !isConnected ? (
-        <div className="h-full flex flex-col items-center justify-center text-center">
+        <div className="flex flex-col items-center text-center">
           <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
@@ -100,7 +100,7 @@ export function CalendarWidget() {
           </button>
         </div>
       ) : events.length === 0 ? (
-        <div className="h-full flex flex-col items-center justify-center text-center">
+        <div className="flex flex-col items-center text-center">
           <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -114,7 +114,7 @@ export function CalendarWidget() {
           </button>
         </div>
       ) : (
-        <div className="space-y-1 h-full overflow-y-auto">
+        <div className="space-y-1 overflow-y-auto">
           {events.map((event) => (
             <a
               key={event.id}

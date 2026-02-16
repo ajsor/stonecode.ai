@@ -58,7 +58,7 @@ export function ClockWidget() {
         </svg>
       }
     >
-      <div className="h-full flex flex-col justify-center">
+      <div className="flex flex-col">
         {/* Primary time display */}
         <div className="text-center mb-4">
           <div className="text-4xl font-bold text-white tracking-tight">

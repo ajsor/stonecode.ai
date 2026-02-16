@@ -204,22 +204,24 @@ export interface GoogleOAuthToken {
 }
 
 // Layout version — bump when ROW_HEIGHT or layout scale changes
-export const LAYOUT_VERSION = 2
+export const LAYOUT_VERSION = 3
 
-// Default Layout (ROW_HEIGHT=50 scale: h values are 2× the old ROW_HEIGHT=100 scale)
+// Default Layout (ROW_HEIGHT=1, vertical margin=4)
+// Widget pixel height = h + (h-1)*4 = 5h - 4. Overhead = 61px (header+borders+padding).
+// h = ceil((contentHeight + 61 + 4) / 5) — pixel-precise, max 4px waste.
 export const DEFAULT_LAYOUT: WidgetLayoutItem[] = [
-  { i: 'clock', x: 0, y: 0, w: 2, h: 4, minW: 2, minH: 4 },
-  { i: 'weather', x: 2, y: 0, w: 2, h: 4, minW: 2, minH: 4 },
-  { i: 'pomodoro', x: 0, y: 4, w: 2, h: 6, minW: 2, minH: 6 },
-  { i: 'calculator', x: 2, y: 4, w: 2, h: 6, minW: 2, minH: 6 },
-  { i: 'countdown', x: 0, y: 10, w: 2, h: 4, minW: 2, minH: 4 },
-  { i: 'breathing', x: 2, y: 10, w: 2, h: 6, minW: 2, minH: 6 },
-  { i: 'notes', x: 0, y: 16, w: 2, h: 6, minW: 2, minH: 4 },
-  { i: 'todos', x: 2, y: 16, w: 2, h: 6, minW: 2, minH: 4 },
-  { i: 'bookmarks', x: 0, y: 22, w: 2, h: 6, minW: 2, minH: 4 },
-  { i: 'habits', x: 2, y: 22, w: 2, h: 6, minW: 2, minH: 4 },
-  { i: 'spotify', x: 0, y: 28, w: 2, h: 6, minW: 2, minH: 4 },
-  { i: 'calendar', x: 2, y: 28, w: 2, h: 8, minW: 2, minH: 6 },
+  { i: 'clock', x: 0, y: 0, w: 2, h: 37, minW: 2, minH: 22 },
+  { i: 'weather', x: 2, y: 0, w: 2, h: 42, minW: 2, minH: 33 },
+  { i: 'pomodoro', x: 0, y: 37, w: 2, h: 56, minW: 2, minH: 44 },
+  { i: 'calculator', x: 2, y: 42, w: 2, h: 72, minW: 2, minH: 54 },
+  { i: 'countdown', x: 0, y: 93, w: 2, h: 37, minW: 2, minH: 22 },
+  { i: 'breathing', x: 2, y: 114, w: 2, h: 61, minW: 2, minH: 44 },
+  { i: 'notes', x: 0, y: 130, w: 2, h: 46, minW: 2, minH: 22 },
+  { i: 'todos', x: 2, y: 175, w: 2, h: 53, minW: 2, minH: 22 },
+  { i: 'bookmarks', x: 0, y: 176, w: 2, h: 49, minW: 2, minH: 22 },
+  { i: 'habits', x: 2, y: 228, w: 2, h: 50, minW: 2, minH: 22 },
+  { i: 'spotify', x: 0, y: 225, w: 2, h: 49, minW: 2, minH: 22 },
+  { i: 'calendar', x: 2, y: 278, w: 2, h: 53, minW: 2, minH: 33 },
 ]
 
 // Default Configs

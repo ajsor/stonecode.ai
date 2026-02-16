@@ -162,6 +162,9 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] Google Calendar OAuth integration
 - [x] Weather API integration with 30-min cache
 - [x] Database migrations for widget data (notes, bookmarks, todos, habits)
+- [x] Widget collapse/expand with animated transitions
+- [x] Pixel-precise auto-sizing (ROW_HEIGHT=1, max 4px waste)
+- [x] Layout version migration (resets to defaults on version change)
 - [ ] Deploy google-oauth-exchange Edge Function
 - [ ] Configure external API keys (Google, OpenWeatherMap)
 - [ ] Test full widget persistence and OAuth flow
@@ -263,6 +266,14 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-02-13
+- Fixed widget vertical sizing: migrated to react-grid-layout v2 nested config API
+- Pixel-precise widget heights with ROW_HEIGHT=1 (max 4px waste vs previous 50px)
+- Added widget collapse/expand with chevron toggle and animated transitions
+- Auto-sizing system measures content and adjusts grid height dynamically
+- Code review cleanup: fixed render-every-frame useEffect, stabilized callbacks with refs, removed dead code, simplified layout version migration
+- Removed h-full constraints from widget content for proper auto-sizing
+
 ### 2026-02-11
 - Added customizable widget dashboard with 13 widget types
 - Implemented drag-and-drop widget grid using react-grid-layout
@@ -323,4 +334,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-02-11*
+*Last updated: 2026-02-13*
