@@ -124,70 +124,70 @@ export function CalculatorWidget() {
     >
       <div className="flex flex-col">
         {/* Display */}
-        <div className="bg-white/5 rounded-xl p-3 mb-3">
-          <div className="text-right text-2xl font-mono text-white truncate">
+        <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-3 mb-3">
+          <div className="text-right text-2xl font-mono text-slate-900 dark:text-white truncate">
             {formatDisplay(display)}
           </div>
         </div>
 
         {/* Buttons */}
         <div className="grid grid-cols-4 gap-1.5">
-          <Button onClick={clear} className="bg-slate-600 text-white hover:bg-slate-500">
+          <Button onClick={clear} className="bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white hover:bg-slate-400 dark:hover:bg-slate-500">
             AC
           </Button>
-          <Button onClick={toggleSign} className="bg-slate-600 text-white hover:bg-slate-500">
+          <Button onClick={toggleSign} className="bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white hover:bg-slate-400 dark:hover:bg-slate-500">
             +/-
           </Button>
-          <Button onClick={inputPercent} className="bg-slate-600 text-white hover:bg-slate-500">
+          <Button onClick={inputPercent} className="bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white hover:bg-slate-400 dark:hover:bg-slate-500">
             %
           </Button>
           <Button onClick={() => performOperation('/')} className="bg-orange-500 text-white hover:bg-orange-400">
             /
           </Button>
 
-          <Button onClick={() => inputDigit('7')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('7')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             7
           </Button>
-          <Button onClick={() => inputDigit('8')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('8')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             8
           </Button>
-          <Button onClick={() => inputDigit('9')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('9')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             9
           </Button>
           <Button onClick={() => performOperation('*')} className="bg-orange-500 text-white hover:bg-orange-400">
             *
           </Button>
 
-          <Button onClick={() => inputDigit('4')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('4')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             4
           </Button>
-          <Button onClick={() => inputDigit('5')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('5')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             5
           </Button>
-          <Button onClick={() => inputDigit('6')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('6')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             6
           </Button>
           <Button onClick={() => performOperation('-')} className="bg-orange-500 text-white hover:bg-orange-400">
             -
           </Button>
 
-          <Button onClick={() => inputDigit('1')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('1')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             1
           </Button>
-          <Button onClick={() => inputDigit('2')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('2')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             2
           </Button>
-          <Button onClick={() => inputDigit('3')} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={() => inputDigit('3')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             3
           </Button>
           <Button onClick={() => performOperation('+')} className="bg-orange-500 text-white hover:bg-orange-400">
             +
           </Button>
 
-          <Button onClick={() => inputDigit('0')} className="bg-white/10 text-white hover:bg-white/20" wide>
+          <Button onClick={() => inputDigit('0')} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20" wide>
             0
           </Button>
-          <Button onClick={inputDecimal} className="bg-white/10 text-white hover:bg-white/20">
+          <Button onClick={inputDecimal} className="bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-300 dark:hover:bg-white/20">
             .
           </Button>
           <Button onClick={equals} className="bg-orange-500 text-white hover:bg-orange-400">

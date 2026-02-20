@@ -35,8 +35,8 @@ export default function UsersPage() {
       >
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white mb-2">Users</h1>
-            <p className="text-slate-400">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Users</h1>
+            <p className="text-slate-500 dark:text-slate-400">
               {users.length} {users.length === 1 ? 'user' : 'users'} total
             </p>
           </div>
@@ -63,7 +63,7 @@ export default function UsersPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search users..."
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:border-violet-500 outline-none transition-colors"
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 outline-none transition-colors"
             />
           </div>
         </div>
@@ -71,11 +71,11 @@ export default function UsersPage() {
         {/* Users List */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
               <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
@@ -89,7 +89,7 @@ export default function UsersPage() {
             {filteredUsers.map((user, index) => (
               <motion.div
                 key={user.id}
-                className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl"
+                className="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
@@ -98,18 +98,18 @@ export default function UsersPage() {
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold ${
                       user.is_admin
-                        ? 'bg-violet-500/20 text-violet-400'
-                        : 'bg-slate-800 text-slate-400'
+                        ? 'bg-orange-500/20 text-orange-400'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                     }`}>
                       {user.full_name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="text-white font-medium">
+                        <p className="text-slate-900 dark:text-white font-medium">
                           {user.full_name || 'Unnamed User'}
                         </p>
                         {user.is_admin && (
-                          <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-400 text-xs font-medium">
+                          <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-xs font-medium">
                             Admin
                           </span>
                         )}

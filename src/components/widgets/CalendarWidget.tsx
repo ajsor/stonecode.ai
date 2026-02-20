@@ -60,7 +60,7 @@ export function CalendarWidget() {
         isConnected ? (
           <button
             onClick={refresh}
-            className="p-1 text-slate-400 hover:text-white transition-colors"
+            className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             title="Refresh events"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +108,7 @@ export function CalendarWidget() {
           <p className="text-xs text-slate-500">Your calendar is clear!</p>
           <button
             onClick={disconnect}
-            className="mt-4 text-xs text-red-400 hover:text-red-300 transition-colors"
+            className="mt-4 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
           >
             Disconnect Google Calendar
           </button>
@@ -121,11 +121,11 @@ export function CalendarWidget() {
               href={event.htmlLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="block p-3 rounded-lg hover:bg-white/5 transition-colors group"
+              className="block p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate group-hover:text-blue-400 transition-colors">
+                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
                     {event.summary}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
@@ -144,10 +144,10 @@ export function CalendarWidget() {
             </a>
           ))}
 
-          <div className="pt-3 mt-3 border-t border-white/10">
+          <div className="pt-3 mt-3 border-t border-slate-200 dark:border-white/10">
             <button
               onClick={disconnect}
-              className="w-full text-xs text-slate-500 hover:text-red-400 transition-colors text-center py-2"
+              className="w-full text-xs text-slate-500 hover:text-red-500 dark:hover:text-red-400 transition-colors text-center py-2"
             >
               Disconnect Google Calendar
             </button>

@@ -25,7 +25,7 @@ export function WeatherWidget() {
     <WidgetContainer
       title="Weather"
       icon={
-        <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       }
@@ -34,7 +34,7 @@ export function WeatherWidget() {
       headerAction={
         <button
           onClick={refresh}
-          className="p-1 text-slate-400 hover:text-white transition-colors"
+          className="p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           title="Refresh weather"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,10 +48,10 @@ export function WeatherWidget() {
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">{weather.temp}</span>
+                <span className="text-4xl font-bold text-slate-900 dark:text-white">{weather.temp}</span>
                 <span className="text-xl text-slate-400">&deg;{tempUnit}</span>
               </div>
-              <p className="text-sm text-slate-400 capitalize mt-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 capitalize mt-1">
                 {weather.description}
               </p>
             </div>
@@ -64,16 +64,16 @@ export function WeatherWidget() {
 
           <div className="space-y-2 mt-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Feels like</span>
-              <span className="text-white">{weather.feelsLike}&deg;{tempUnit}</span>
+              <span className="text-slate-500 dark:text-slate-400">Feels like</span>
+              <span className="text-slate-900 dark:text-white">{weather.feelsLike}&deg;{tempUnit}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Humidity</span>
-              <span className="text-white">{weather.humidity}%</span>
+              <span className="text-slate-500 dark:text-slate-400">Humidity</span>
+              <span className="text-slate-900 dark:text-white">{weather.humidity}%</span>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-white/10">
+          <div className="mt-4 pt-3 border-t border-slate-200 dark:border-white/10">
             {editing ? (
               <div className="flex items-center gap-2">
                 <input
@@ -86,11 +86,11 @@ export function WeatherWidget() {
                   }}
                   autoFocus
                   placeholder="City or ZIP,Country"
-                  className="flex-1 px-2 py-1 text-xs rounded bg-white/10 border border-white/20 text-white placeholder-slate-500 outline-none focus:border-violet-500"
+                  className="flex-1 px-2 py-1 text-xs rounded bg-slate-50 dark:bg-white/10 border border-slate-300 dark:border-white/20 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-orange-500"
                 />
                 <button
                   onClick={handleSaveLocation}
-                  className="text-xs text-violet-400 hover:text-violet-300 font-medium"
+                  className="text-xs text-orange-400 hover:text-orange-300 font-medium"
                 >
                   Save
                 </button>
@@ -98,7 +98,7 @@ export function WeatherWidget() {
             ) : (
               <button
                 onClick={() => { setEditLocation(location); setEditing(true) }}
-                className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors group w-full"
+                className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors group w-full"
                 title="Click to change location"
               >
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

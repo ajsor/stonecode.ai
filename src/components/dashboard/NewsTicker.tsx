@@ -21,11 +21,11 @@ export function NewsTicker() {
   if (headlines.length === 0) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 border-t border-white/10 backdrop-blur-xl">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 dark:bg-slate-900/95 border-t border-slate-200 dark:border-white/10 backdrop-blur-xl">
       <div className="flex items-center h-10">
         {/* Label */}
-        <div className="flex-shrink-0 px-4 bg-violet-500/20 h-full flex items-center border-r border-white/10">
-          <span className="text-xs font-bold text-violet-400 tracking-wider">NEWS</span>
+        <div className="flex-shrink-0 px-4 bg-orange-100 dark:bg-orange-500/20 h-full flex items-center border-r border-slate-200 dark:border-white/10">
+          <span className="text-xs font-bold text-orange-400 tracking-wider">NEWS</span>
         </div>
 
         {/* Scrolling area */}
@@ -40,7 +40,7 @@ export function NewsTicker() {
                     href={article.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-6 text-sm text-slate-300 hover:text-white transition-colors"
+                    className="inline-flex items-center px-6 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
                     <span className="text-slate-600 mr-3">{article.source.name}</span>
                     {article.title}

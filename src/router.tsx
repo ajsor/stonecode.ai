@@ -9,6 +9,7 @@ const PortalLayout = lazy(() => import('./components/layout/PortalLayout'))
 const Dashboard = lazy(() => import('./pages/portal/Dashboard'))
 const ProfilePage = lazy(() => import('./pages/portal/ProfilePage'))
 const SecurityPage = lazy(() => import('./pages/portal/SecurityPage'))
+const ColorSettingsPage = lazy(() => import('./pages/portal/ColorSettingsPage'))
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'))
 const UsersPage = lazy(() => import('./pages/portal/admin/UsersPage'))
 const InvitationsPage = lazy(() => import('./pages/portal/admin/InvitationsPage'))
@@ -19,7 +20,7 @@ function PageLoader(): ReactNode {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
         <p className="text-slate-400 text-sm">Loading...</p>
       </div>
     </div>
@@ -67,6 +68,10 @@ export const router = createBrowserRouter([
       {
         path: 'profile/security',
         element: withSuspense(SecurityPage),
+      },
+      {
+        path: 'profile/color-settings',
+        element: withSuspense(ColorSettingsPage),
       },
       {
         path: 'admin',

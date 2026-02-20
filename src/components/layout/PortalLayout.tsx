@@ -87,7 +87,7 @@ export default function PortalLayout() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-400 text-sm">Loading...</p>
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function PortalLayout() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode ? 'bg-slate-950' : 'bg-slate-100'
+      darkMode ? 'bg-slate-950' : 'bg-slate-50'
     }`}>
       {/* Mobile sidebar backdrop */}
       <AnimatePresence>
@@ -124,8 +124,8 @@ export default function PortalLayout() {
           <Link to="/" className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               darkMode
-                ? 'bg-gradient-to-br from-violet-500 to-blue-600'
-                : 'bg-gradient-to-br from-violet-600 to-blue-700'
+                ? 'bg-gradient-to-br from-orange-400 to-orange-600'
+                : 'bg-gradient-to-br from-orange-500 to-orange-700'
             }`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -159,8 +159,8 @@ export default function PortalLayout() {
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                   isActive
                     ? darkMode
-                      ? 'bg-violet-500/20 text-violet-400'
-                      : 'bg-violet-500/10 text-violet-600'
+                      ? 'bg-orange-500/20 text-orange-400'
+                      : 'bg-orange-500/10 text-orange-600'
                     : darkMode
                       ? 'text-slate-400 hover:bg-white/5 hover:text-white'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -188,8 +188,8 @@ export default function PortalLayout() {
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                       isActive
                         ? darkMode
-                          ? 'bg-violet-500/20 text-violet-400'
-                          : 'bg-violet-500/10 text-violet-600'
+                          ? 'bg-orange-500/20 text-orange-400'
+                          : 'bg-orange-500/10 text-orange-600'
                         : darkMode
                           ? 'text-slate-400 hover:bg-white/5 hover:text-white'
                           : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -210,7 +210,7 @@ export default function PortalLayout() {
         }`}>
           <div className="flex items-center gap-3 mb-4">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              darkMode ? 'bg-violet-500/20 text-violet-400' : 'bg-violet-500/10 text-violet-600'
+              darkMode ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-500/10 text-orange-600'
             }`}>
               {profile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || '?'}
             </div>
@@ -243,7 +243,7 @@ export default function PortalLayout() {
       <div className="lg:pl-64">
         {/* Header */}
         <header className={`sticky top-0 z-30 px-4 sm:px-6 py-3 backdrop-blur-xl ${
-          darkMode ? 'bg-slate-950/80 border-b border-white/5' : 'bg-slate-100/80 border-b border-slate-200'
+          darkMode ? 'bg-slate-950/80 border-b border-white/5' : 'bg-white/95 border-b border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
             {/* Left: hamburger (mobile) + dashboard toolbar content */}
@@ -261,7 +261,7 @@ export default function PortalLayout() {
                 </svg>
               </button>
 
-              {isDashboard && <DashboardToolbar darkMode={darkMode} />}
+              {isDashboard && <DashboardToolbar />}
             </div>
 
             {/* Right: dark mode toggle */}

@@ -108,9 +108,9 @@ export function BookmarksWidget() {
     >
       <div className="flex flex-col">
         {error && (
-          <div className="mb-2 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs flex items-center justify-between">
+          <div className="mb-2 px-3 py-2 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-red-700 dark:text-red-400 text-xs flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 ml-2">
+            <button onClick={() => setError(null)} className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 ml-2">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -118,13 +118,13 @@ export function BookmarksWidget() {
 
         {/* Add form */}
         {isAdding ? (
-          <div className="mb-3 p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+          <div className="mb-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
             <input
               type="text"
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="URL (e.g., github.com)"
-              className="w-full bg-slate-800 text-white text-sm px-3 py-2 rounded-lg border border-slate-600 focus:border-violet-500 focus:outline-none mb-2"
+              className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 focus:border-orange-500 focus:outline-none mb-2"
               autoFocus
             />
             <input
@@ -132,7 +132,7 @@ export function BookmarksWidget() {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Title (optional)"
-              className="w-full bg-slate-800 text-white text-sm px-3 py-2 rounded-lg border border-slate-600 focus:border-violet-500 focus:outline-none mb-2"
+              className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 focus:border-orange-500 focus:outline-none mb-2"
             />
             <div className="flex gap-2 justify-end">
               <button
@@ -141,14 +141,14 @@ export function BookmarksWidget() {
                   setNewUrl('')
                   setNewTitle('')
                 }}
-                className="text-xs text-slate-400 hover:text-white px-3 py-1"
+                className="text-xs text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1"
               >
                 Cancel
               </button>
               <button
                 onClick={addBookmark}
                 disabled={!newUrl.trim()}
-                className="text-xs bg-violet-600 hover:bg-violet-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-3 py-1 rounded"
+                className="text-xs bg-orange-600 hover:bg-orange-500 disabled:bg-slate-200 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-3 py-1 rounded"
               >
                 Add
               </button>
@@ -157,7 +157,7 @@ export function BookmarksWidget() {
         ) : (
           <button
             onClick={() => setIsAdding(true)}
-            className="w-full py-2 px-3 mb-3 border border-dashed border-slate-600 rounded-lg text-slate-400 hover:text-white hover:border-violet-500 transition-colors text-sm flex items-center justify-center gap-2"
+            className="w-full py-2 px-3 mb-3 border border-dashed border-slate-300 dark:border-slate-600 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-orange-500 transition-colors text-sm flex items-center justify-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -170,7 +170,7 @@ export function BookmarksWidget() {
         <div className="flex-1 overflow-y-auto space-y-1 pr-1 widget-scrollable">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent" />
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-orange-500 border-t-transparent" />
             </div>
           ) : bookmarks.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-4">
@@ -180,7 +180,7 @@ export function BookmarksWidget() {
             bookmarks.map((bookmark) => (
               <div
                 key={bookmark.id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/50 group"
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 group"
               >
                 {bookmark.favicon ? (
                   <img
@@ -200,20 +200,20 @@ export function BookmarksWidget() {
                   href={bookmark.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 text-sm text-white hover:text-violet-400 truncate"
+                  className="flex-1 text-sm text-slate-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 truncate"
                 >
                   {bookmark.title}
                 </a>
                 {confirmDeleteId === bookmark.id ? (
-                  <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1 border border-slate-600">
-                    <span className="text-xs text-slate-300">Delete?</span>
-                    <button onClick={() => deleteBookmark(bookmark.id)} className="text-xs text-red-400 hover:text-red-300 px-1">Yes</button>
-                    <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-slate-400 hover:text-white px-1">No</button>
+                  <div className="flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg px-2 py-1 border border-slate-200 dark:border-slate-600 shadow-sm dark:shadow-none">
+                    <span className="text-xs text-slate-600 dark:text-slate-300">Delete?</span>
+                    <button onClick={() => deleteBookmark(bookmark.id)} className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-1">Yes</button>
+                    <button onClick={() => setConfirmDeleteId(null)} className="text-xs text-slate-400 hover:text-slate-900 dark:hover:text-white px-1">No</button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setConfirmDeleteId(bookmark.id)}
-                    className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-opacity flex-shrink-0"
+                    className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-opacity flex-shrink-0"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

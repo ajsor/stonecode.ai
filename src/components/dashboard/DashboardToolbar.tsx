@@ -3,18 +3,10 @@ import { useWidgets } from '../../hooks/useWidgets'
 import { useWeather } from '../../hooks/useWeather'
 import { getWeatherIconUrl } from '../../lib/weatherApi'
 
-interface DashboardToolbarProps {
-  darkMode: boolean
-}
-
-export function DashboardToolbar({ darkMode }: DashboardToolbarProps) {
+export function DashboardToolbar() {
   const [now, setNow] = useState(new Date())
   const { configs } = useWidgets()
-  const weatherEnabled = configs.weather.enabled
-  const { weather } = useWeather(
-    weatherEnabled ? configs.weather.location : '',
-    configs.weather.units
-  )
+  const { weather } = useWeather(configs.weather.location, configs.weather.units)
 
   const tempUnit = configs.weather.units === 'imperial' ? 'F' : 'C'
 
@@ -37,34 +29,31 @@ export function DashboardToolbar({ darkMode }: DashboardToolbarProps) {
     day: 'numeric',
   })
 
-  const textPrimary = darkMode ? 'text-white' : 'text-slate-900'
-  const textSecondary = darkMode ? 'text-slate-400' : 'text-slate-500'
-
   return (
     <div className="flex items-center gap-6">
       {/* Time */}
-      <span className={`text-lg font-mono font-semibold tabular-nums ${textPrimary}`}>
+      <span className="text-lg font-mono font-semibold tabular-nums text-slate-900 dark:text-white">
         {timeStr}
       </span>
 
       {/* Date */}
-      <span className={`text-sm hidden sm:block ${textSecondary}`}>
+      <span className="text-sm hidden sm:block text-slate-500 dark:text-slate-400">
         {dateStr}
       </span>
 
       {/* Weather summary */}
-      {weatherEnabled && weather && (
+      {weather && (
         <div className="flex items-center gap-2 hidden md:flex">
-          <div className={`w-px h-5 ${darkMode ? 'bg-white/10' : 'bg-slate-300'}`} />
+          <div className="w-px h-5 bg-slate-300 dark:bg-white/10" />
           <img
             src={getWeatherIconUrl(weather.icon)}
             alt={weather.description}
             className="w-7 h-7"
           />
-          <span className={`text-sm font-medium ${textPrimary}`}>
+          <span className="text-sm font-medium text-slate-900 dark:text-white">
             {weather.temp}&deg;{tempUnit}
           </span>
-          <span className={`text-xs capitalize hidden lg:block ${textSecondary}`}>
+          <span className="text-xs capitalize hidden lg:block text-slate-500 dark:text-slate-400">
             {weather.description}
           </span>
         </div>

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Use class-based dark mode (.dark on <html>) instead of OS prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -36,8 +39,8 @@
 }
 
 .react-grid-item.react-grid-placeholder {
-  background: rgb(139 92 246 / 0.2);
-  border: 2px dashed rgb(139 92 246 / 0.5);
+  background: rgb(249 115 22 / 0.2);
+  border: 2px dashed rgb(249 115 22 / 0.5);
   border-radius: 1rem;
   opacity: 0.5;
   transition-duration: 100ms;
@@ -62,14 +65,19 @@
   bottom: 6px;
   width: 8px;
   height: 8px;
-  border-right: 2px solid rgba(255, 255, 255, 0.3);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  border-right: 2px solid rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: 0 0 2px 0;
 }
 
+.dark .react-grid-item > .react-resizable-handle::after {
+  border-right-color: rgba(255, 255, 255, 0.3);
+  border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
 .react-grid-item:hover > .react-resizable-handle::after {
-  border-right-color: rgba(139, 92, 246, 0.6);
-  border-bottom-color: rgba(139, 92, 246, 0.6);
+  border-right-color: rgba(249, 115, 22, 0.6);
+  border-bottom-color: rgba(249, 115, 22, 0.6);
 }
 
 /* Widget scrollable areas */
@@ -82,17 +90,29 @@
 }
 
 .widget-scrollable::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 2px;
 }
 
 .widget-scrollable::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark .widget-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .widget-scrollable::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
 /* Firefox thin scrollbar */
 .widget-scrollable {
   scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.dark .widget-scrollable {
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 

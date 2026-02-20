@@ -235,7 +235,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-2 border-violet-500 border-t-transparent" />
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-orange-500 border-t-transparent" />
       </div>
     )
   }
@@ -246,7 +246,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
         <svg className="w-16 h-16 text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
         </svg>
-        <h3 className="text-lg font-medium text-white mb-2">No widgets enabled</h3>
+        <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">No widgets enabled</h3>
         <p className="text-slate-400 text-sm">
           Click "Customize" to enable widgets and personalize your dashboard.
         </p>

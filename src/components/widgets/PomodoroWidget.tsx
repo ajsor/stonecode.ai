@@ -11,9 +11,9 @@ const MODE_LABELS: Record<TimerMode, string> = {
 }
 
 const MODE_COLORS: Record<TimerMode, string> = {
-  focus: 'text-red-400',
-  break: 'text-green-400',
-  longBreak: 'text-blue-400',
+  focus: 'text-red-500 dark:text-red-400',
+  break: 'text-green-600 dark:text-green-400',
+  longBreak: 'text-blue-600 dark:text-blue-400',
 }
 
 export function PomodoroWidget() {
@@ -109,7 +109,7 @@ export function PomodoroWidget() {
     <WidgetContainer
       title="Pomodoro"
       icon={
-        <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       }
@@ -123,8 +123,8 @@ export function PomodoroWidget() {
               onClick={() => switchMode(m)}
               className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 mode === m
-                  ? 'bg-white/10 text-white'
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white'
+                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
               }`}
             >
               {MODE_LABELS[m]}
@@ -142,7 +142,7 @@ export function PomodoroWidget() {
           </div>
 
           {/* Progress bar */}
-          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-4">
+          <div className="w-full h-1.5 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden mb-4">
             <div
               className={`h-full transition-all duration-1000 ${
                 mode === 'focus' ? 'bg-red-400' : mode === 'break' ? 'bg-green-400' : 'bg-blue-400'
@@ -157,15 +157,15 @@ export function PomodoroWidget() {
               onClick={toggleTimer}
               className={`px-6 py-2 rounded-xl font-medium transition-colors ${
                 isRunning
-                  ? 'bg-white/10 text-white hover:bg-white/20'
-                  : 'bg-violet-500 text-white hover:bg-violet-600'
+                  ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20'
+                  : 'bg-orange-500 text-white hover:bg-orange-600'
               }`}
             >
               {isRunning ? 'Pause' : 'Start'}
             </button>
             <button
               onClick={resetTimer}
-              className="px-4 py-2 rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

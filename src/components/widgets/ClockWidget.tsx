@@ -61,26 +61,26 @@ export function ClockWidget() {
       <div className="flex flex-col">
         {/* Primary time display */}
         <div className="text-center mb-4">
-          <div className="text-4xl font-bold text-white tracking-tight">
+          <div className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
             {formatTime(time, primaryZone.zone, showSeconds)}
           </div>
-          <div className="text-sm text-slate-400 mt-1">
+          <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {formatDate(time, primaryZone.zone)}
           </div>
           {primaryZone.id !== 'local' && (
-            <div className="text-xs text-slate-500 mt-1">{primaryZone.label}</div>
+            <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">{primaryZone.label}</div>
           )}
         </div>
 
         {/* Secondary timezones */}
         {secondaryZones.length > 0 && (
-          <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
+          <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-200 dark:border-white/10">
             {secondaryZones.map((tz) => (
               <div key={tz.id} className="text-center">
-                <div className="text-lg font-medium text-white">
+                <div className="text-lg font-medium text-slate-900 dark:text-white">
                   {formatTime(time, tz.zone, false)}
                 </div>
-                <div className="text-xs text-slate-500">{tz.label}</div>
+                <div className="text-xs text-slate-400 dark:text-slate-500">{tz.label}</div>
               </div>
             ))}
           </div>

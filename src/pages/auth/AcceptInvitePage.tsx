@@ -131,7 +131,7 @@ export default function AcceptInvitePage() {
       case 'validating':
         return (
           <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-4 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-12 h-12 mx-auto mb-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
             <p className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
               Validating invitation...
             </p>
@@ -243,8 +243,8 @@ export default function AcceptInvitePage() {
                     required
                     className={`w-full px-4 py-3 rounded-xl border transition-colors ${
                       darkMode
-                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-violet-500'
-                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-violet-500'
+                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-orange-500'
+                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-orange-500'
                     } outline-none`}
                     placeholder="John Doe"
                   />
@@ -264,8 +264,8 @@ export default function AcceptInvitePage() {
                     minLength={8}
                     className={`w-full px-4 py-3 rounded-xl border transition-colors ${
                       darkMode
-                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-violet-500'
-                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-violet-500'
+                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-orange-500'
+                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-orange-500'
                     } outline-none`}
                     placeholder="At least 8 characters"
                   />
@@ -284,8 +284,8 @@ export default function AcceptInvitePage() {
                     required
                     className={`w-full px-4 py-3 rounded-xl border transition-colors ${
                       darkMode
-                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-violet-500'
-                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-violet-500'
+                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-orange-500'
+                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-orange-500'
                     } outline-none`}
                     placeholder="Confirm your password"
                   />
@@ -296,8 +296,8 @@ export default function AcceptInvitePage() {
                   disabled={isLoading}
                   className={`w-full py-3 px-4 rounded-xl font-medium text-white transition-all ${
                     isLoading
-                      ? 'bg-violet-500/50 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500'
+                      ? 'bg-orange-500/50 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400'
                   }`}
                   whileHover={!isLoading ? { scale: 1.02 } : {}}
                   whileTap={!isLoading ? { scale: 0.98 } : {}}
@@ -328,8 +328,8 @@ export default function AcceptInvitePage() {
       {/* Background gradient */}
       <div className={`fixed inset-0 ${
         darkMode
-          ? 'bg-gradient-to-br from-violet-950/50 via-slate-950 to-blue-950/50'
-          : 'bg-gradient-to-br from-violet-100/50 via-slate-100 to-blue-100/50'
+          ? 'bg-gradient-to-br from-orange-950/30 via-slate-950 to-amber-950/30'
+          : 'bg-gradient-to-br from-orange-100/50 via-slate-100 to-amber-100/50'
       }`} />
 
       {/* Theme toggle */}
@@ -371,8 +371,8 @@ export default function AcceptInvitePage() {
           <Link to="/" className="flex items-center justify-center mb-8">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
               darkMode
-                ? 'bg-gradient-to-br from-violet-500 to-blue-600'
-                : 'bg-gradient-to-br from-violet-600 to-blue-700'
+                ? 'bg-gradient-to-br from-orange-400 to-orange-600'
+                : 'bg-gradient-to-br from-orange-500 to-orange-700'
             }`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

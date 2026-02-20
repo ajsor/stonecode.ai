@@ -137,7 +137,7 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 
 ### Core
 - [x] Responsive design
-- [x] Dark/light mode (auto-detects system preference)
+- [x] Dark/light mode (JS-toggled via `.dark` class on `<html>`, class-based with `@custom-variant dark` in Tailwind v4)
 - [x] Custom favicon
 - [x] SEO meta tags
 - [x] Open Graph tags for social sharing
@@ -239,6 +239,7 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 | `/portal/dashboard` | Main dashboard | Authenticated |
 | `/portal/profile` | User profile settings | Authenticated |
 | `/portal/profile/security` | MFA, passkeys, password | Authenticated |
+| `/portal/profile/color-settings` | Light mode color palette explorer | Authenticated |
 | `/portal/admin/users` | User management | Admin only |
 | `/portal/admin/invitations` | Create/manage invitations | Admin only |
 | `/portal/admin/features` | Feature flag management | Admin only |
@@ -265,6 +266,15 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 All tables use Row Level Security (RLS).
 
 ## Changelog
+
+### 2026-02-19
+- Fixed portal dark mode for Tailwind v4: added `@custom-variant dark (&:where(.dark, .dark *))` to `index.css` so `dark:` variants respond to the JS-toggled `.dark` class instead of OS `prefers-color-scheme`
+- Refactored portal accent color from violet/blue → orange/amber throughout all portal and auth components
+- Fixed all light mode contrast issues: transparent `bg-white/5` and `border-white/10` dark-only backgrounds replaced with proper `bg-white dark:bg-white/5` dual-mode classes; `text-white` without fallbacks replaced with `text-slate-900 dark:text-white`
+- Added `ColorSettingsPage` at `/portal/profile/color-settings` — live widget preview and color picker for all light mode UI tokens
+- Added news ticker to dashboard with configurable categories/keywords
+- Added dashboard toolbar (widget settings button in header)
+- Added widget collapse/expand chevron toggle in widget header
 
 ### 2026-02-13
 - Fixed widget vertical sizing: migrated to react-grid-layout v2 nested config API
@@ -334,4 +344,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-02-13*
+*Last updated: 2026-02-19*

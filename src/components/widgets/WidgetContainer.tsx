@@ -38,24 +38,24 @@ export function WidgetContainer({
 
   return (
     <motion.div
-      className={`flex flex-col rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 backdrop-blur-xl overflow-hidden transition-colors ${isCollapsed ? 'widget-collapsed' : 'h-full'}`}
+      className={`flex flex-col rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-sm dark:shadow-none backdrop-blur-xl overflow-hidden transition-colors ${isCollapsed ? 'widget-collapsed' : 'h-full'}`}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
     >
       {/* Header with drag handle */}
-      <div className={`widget-drag-handle flex items-center justify-between px-4 py-[9px] cursor-move select-none ${isCollapsed ? '' : 'border-b border-white/10'}`}>
+      <div className={`widget-drag-handle flex items-center justify-between px-4 py-[9px] cursor-move select-none ${isCollapsed ? '' : 'border-b border-slate-200 dark:border-white/10'}`}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-white/10 flex items-center justify-center">
             {icon}
           </div>
-          <h3 className="text-sm font-medium text-white">{title}</h3>
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white">{title}</h3>
         </div>
         <div className="flex items-center gap-2">
           {headerAction}
           <button
             onClick={handleToggleCollapse}
-            className="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors"
+            className="p-1 rounded text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
             title={isCollapsed ? 'Expand' : 'Collapse'}
           >
             <svg
@@ -67,7 +67,7 @@ export function WidgetContainer({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          <div className="text-slate-500 hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors">
+          <div className="text-slate-400 dark:text-slate-500 hover:text-slate-500 dark:hover:text-slate-400 cursor-grab active:cursor-grabbing transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
             </svg>
@@ -87,14 +87,14 @@ export function WidgetContainer({
           >
             {isLoading ? (
               <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-violet-500 border-t-transparent" />
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-orange-500 border-t-transparent" />
               </div>
             ) : error ? (
               <div className="text-center py-4">
-                <svg className="w-8 h-8 text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 text-red-500 dark:text-red-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
               </div>
             ) : (
               <div ref={contentRef}>

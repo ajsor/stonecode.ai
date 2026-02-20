@@ -19,7 +19,7 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void 
     <button
       onClick={onChange}
       className={`relative w-12 h-6 rounded-full transition-colors ${
-        enabled ? 'bg-violet-500' : 'bg-slate-600'
+        enabled ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-600'
       }`}
     >
       <span
@@ -181,12 +181,12 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
             exit={{ opacity: 0, scale: 0.95 }}
           >
             <div
-              className="w-full max-w-2xl max-h-[80vh] bg-slate-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+              className="w-full max-w-2xl max-h-[80vh] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-                <h2 className="text-lg font-semibold text-white">Widget Settings</h2>
-                <button onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-white/10">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Widget Settings</h2>
+                <button onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -194,34 +194,34 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
               </div>
 
               <div className="flex h-[60vh]">
-                <div className="w-48 border-r border-white/10 p-4 space-y-1 overflow-y-auto">
+                <div className="w-48 border-r border-slate-200 dark:border-white/10 p-4 space-y-1 overflow-y-auto">
                   {tabs.map((tab) => (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                        activeTab === tab.id ? 'bg-violet-500/20 text-violet-400' : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        activeTab === tab.id ? 'bg-orange-500/20 text-orange-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'
                       }`}
                     >
                       {tab.icon}
                       {tab.label}
                     </button>
                   ))}
-                  <hr className="border-white/10 my-4" />
+                  <hr className="border-slate-200 dark:border-white/10 my-4" />
                   {confirmReset ? (
-                    <div className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20">
-                      <p className="text-xs text-red-400 mb-2">Reset all widgets to defaults?</p>
+                    <div className="px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                      <p className="text-xs text-red-600 dark:text-red-400 mb-2">Reset all widgets to defaults?</p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => { resetToDefaults(); setConfirmReset(false) }}
                           disabled={isSaving}
-                          className="text-xs text-red-400 hover:text-red-300 font-medium disabled:opacity-50"
+                          className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium disabled:opacity-50"
                         >
                           Yes, reset
                         </button>
                         <button
                           onClick={() => setConfirmReset(false)}
-                          className="text-xs text-slate-400 hover:text-white"
+                          className="text-xs text-slate-400 hover:text-slate-900 dark:hover:text-white"
                         >
                           Cancel
                         </button>
@@ -231,7 +231,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <button
                       onClick={() => setConfirmReset(true)}
                       disabled={isSaving}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-50"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -247,32 +247,32 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Clock Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Clock Widget</h3>
                           <p className="text-sm text-slate-400">Display current time</p>
                         </div>
                         <Toggle enabled={configs.clock?.enabled ?? true} onChange={() => toggleWidget('clock', !(configs.clock?.enabled ?? true))} />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-300">Show Seconds</span>
+                        <span className="text-sm text-slate-600 dark:text-slate-300">Show Seconds</span>
                         <Toggle enabled={clockShowSeconds} onChange={() => setClockShowSeconds(!clockShowSeconds)} />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-3">Timezones</label>
+                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-3">Timezones</label>
                         <div className="grid grid-cols-2 gap-2">
                           {TIMEZONES.map((tz) => (
-                            <label key={tz.id} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/5">
+                            <label key={tz.id} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5">
                               <input
                                 type="checkbox"
                                 checked={clockTimezones.includes(tz.id)}
                                 onChange={() => toggleTimezone(tz.id)}
-                                className="rounded text-violet-500"
+                                className="rounded text-orange-500"
                               />
-                              <span className="text-sm text-white">{tz.label}</span>
+                              <span className="text-sm text-slate-900 dark:text-white">{tz.label}</span>
                             </label>
                           ))}
                         </div>
                       </div>
-                      <button onClick={handleSaveClock} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSaveClock} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Clock Settings'}
                       </button>
                     </div>
@@ -283,26 +283,26 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Pomodoro Timer</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Pomodoro Timer</h3>
                           <p className="text-sm text-slate-400">Focus and break timer</p>
                         </div>
                         <Toggle enabled={configs.pomodoro?.enabled ?? true} onChange={() => toggleWidget('pomodoro', !(configs.pomodoro?.enabled ?? true))} />
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm text-slate-300 mb-2">Focus (min)</label>
-                          <input type="number" min={1} max={60} value={pomodoroFocus} onChange={(e) => setPomodoroFocus(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white" />
+                          <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Focus (min)</label>
+                          <input type="number" min={1} max={60} value={pomodoroFocus} onChange={(e) => setPomodoroFocus(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white" />
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-300 mb-2">Break (min)</label>
-                          <input type="number" min={1} max={30} value={pomodoroBreak} onChange={(e) => setPomodoroBreak(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white" />
+                          <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Break (min)</label>
+                          <input type="number" min={1} max={30} value={pomodoroBreak} onChange={(e) => setPomodoroBreak(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white" />
                         </div>
                         <div>
-                          <label className="block text-sm text-slate-300 mb-2">Long Break (min)</label>
-                          <input type="number" min={1} max={60} value={pomodoroLongBreak} onChange={(e) => setPomodoroLongBreak(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white" />
+                          <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Long Break (min)</label>
+                          <input type="number" min={1} max={60} value={pomodoroLongBreak} onChange={(e) => setPomodoroLongBreak(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white" />
                         </div>
                       </div>
-                      <button onClick={handleSavePomodoro} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSavePomodoro} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Pomodoro Settings'}
                       </button>
                     </div>
@@ -313,20 +313,20 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Countdown Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Countdown Widget</h3>
                           <p className="text-sm text-slate-400">Count down to a special event</p>
                         </div>
                         <Toggle enabled={configs.countdown?.enabled ?? true} onChange={() => toggleWidget('countdown', !(configs.countdown?.enabled ?? true))} />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-300 mb-2">Event Name</label>
-                        <input type="text" value={countdownName} onChange={(e) => setCountdownName(e.target.value)} placeholder="e.g., Vacation, Birthday, Launch" className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500" />
+                        <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Event Name</label>
+                        <input type="text" value={countdownName} onChange={(e) => setCountdownName(e.target.value)} placeholder="e.g., Vacation, Birthday, Launch" className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-300 mb-2">Target Date</label>
-                        <input type="datetime-local" value={countdownDate} onChange={(e) => setCountdownDate(e.target.value)} className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white" />
+                        <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Target Date</label>
+                        <input type="datetime-local" value={countdownDate} onChange={(e) => setCountdownDate(e.target.value)} className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white" />
                       </div>
-                      <button onClick={handleSaveCountdown} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSaveCountdown} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Countdown Settings'}
                       </button>
                     </div>
@@ -337,7 +337,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Calculator Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Calculator Widget</h3>
                           <p className="text-sm text-slate-400">Quick calculations</p>
                         </div>
                         <Toggle enabled={configs.calculator?.enabled ?? true} onChange={() => toggleWidget('calculator', !(configs.calculator?.enabled ?? true))} />
@@ -351,26 +351,26 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Breathing Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Breathing Widget</h3>
                           <p className="text-sm text-slate-400">Guided breathing exercises</p>
                         </div>
                         <Toggle enabled={configs.breathing?.enabled ?? true} onChange={() => toggleWidget('breathing', !(configs.breathing?.enabled ?? true))} />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-300 mb-3">Breathing Pattern</label>
+                        <label className="block text-sm text-slate-600 dark:text-slate-300 mb-3">Breathing Pattern</label>
                         <div className="space-y-2">
                           {PATTERNS.map((pattern) => (
-                            <label key={pattern.id} className="flex items-center gap-3 p-3 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10">
+                            <label key={pattern.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-white/5 cursor-pointer hover:bg-slate-100 dark:hover:bg-white/10">
                               <input
                                 type="radio"
                                 name="breathing-pattern"
                                 value={pattern.id}
                                 checked={breathingPattern === pattern.id}
                                 onChange={() => setBreathingPattern(pattern.id)}
-                                className="text-violet-500"
+                                className="text-orange-500"
                               />
                               <div>
-                                <div className="text-sm text-white font-medium">{pattern.name}</div>
+                                <div className="text-sm text-slate-900 dark:text-white font-medium">{pattern.name}</div>
                                 <div className="text-xs text-slate-500">
                                   {pattern.inhale}s in / {pattern.hold > 0 ? `${pattern.hold}s hold / ` : ''}{pattern.exhale}s out
                                   {pattern.rest > 0 ? ` / ${pattern.rest}s rest` : ''}
@@ -380,7 +380,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                           ))}
                         </div>
                       </div>
-                      <button onClick={handleSaveBreathing} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSaveBreathing} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Breathing Settings'}
                       </button>
                     </div>
@@ -391,29 +391,29 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Weather Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Weather Widget</h3>
                           <p className="text-sm text-slate-400">Show current weather (requires API key)</p>
                         </div>
                         <Toggle enabled={configs.weather.enabled} onChange={() => toggleWidget('weather', !configs.weather.enabled)} />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-300 mb-2">Location</label>
-                        <input type="text" value={weatherLocation} onChange={(e) => setWeatherLocation(e.target.value)} placeholder="City, State ZIP" className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500" />
+                        <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Location</label>
+                        <input type="text" value={weatherLocation} onChange={(e) => setWeatherLocation(e.target.value)} placeholder="City, State ZIP" className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-300 mb-2">Units</label>
+                        <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Units</label>
                         <div className="flex gap-4">
                           <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" checked={weatherUnits === 'imperial'} onChange={() => setWeatherUnits('imperial')} className="text-violet-500" />
-                            <span className="text-white">Fahrenheit</span>
+                            <input type="radio" checked={weatherUnits === 'imperial'} onChange={() => setWeatherUnits('imperial')} className="text-orange-500" />
+                            <span className="text-slate-900 dark:text-white">Fahrenheit</span>
                           </label>
                           <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" checked={weatherUnits === 'metric'} onChange={() => setWeatherUnits('metric')} className="text-violet-500" />
-                            <span className="text-white">Celsius</span>
+                            <input type="radio" checked={weatherUnits === 'metric'} onChange={() => setWeatherUnits('metric')} className="text-orange-500" />
+                            <span className="text-slate-900 dark:text-white">Celsius</span>
                           </label>
                         </div>
                       </div>
-                      <button onClick={handleSaveWeather} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSaveWeather} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Weather Settings'}
                       </button>
                     </div>
@@ -424,25 +424,25 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Spotify Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Spotify Widget</h3>
                           <p className="text-sm text-slate-400">Quick links to playlists</p>
                         </div>
                         <Toggle enabled={configs.spotify.enabled} onChange={() => toggleWidget('spotify', !configs.spotify.enabled)} />
                       </div>
                       <div className="space-y-3">
-                        <label className="block text-sm text-slate-300">Add Playlist</label>
-                        <input type="text" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} placeholder="Playlist name" className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500" />
+                        <label className="block text-sm text-slate-600 dark:text-slate-300">Add Playlist</label>
+                        <input type="text" value={newPlaylistName} onChange={(e) => setNewPlaylistName(e.target.value)} placeholder="Playlist name" className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" />
                         <div className="flex gap-2">
-                          <input type="text" value={newPlaylistUrl} onChange={(e) => setNewPlaylistUrl(e.target.value)} placeholder="Spotify URL" className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500" />
+                          <input type="text" value={newPlaylistUrl} onChange={(e) => setNewPlaylistUrl(e.target.value)} placeholder="Spotify URL" className="flex-1 px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500" />
                           <button onClick={handleAddPlaylist} disabled={!newPlaylistUrl.trim()} className="px-4 py-2 rounded-lg bg-green-500 text-white font-medium hover:bg-green-600 disabled:opacity-50">Add</button>
                         </div>
                       </div>
                       {configs.spotify.playlists.length > 0 && (
                         <div className="space-y-2">
                           {configs.spotify.playlists.map((playlist, i) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5">
-                              <span className="text-white text-sm truncate">{playlist.name}</span>
-                              <button onClick={() => handleRemovePlaylist(i)} className="text-slate-400 hover:text-red-400">
+                            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/5">
+                              <span className="text-slate-900 dark:text-white text-sm truncate">{playlist.name}</span>
+                              <button onClick={() => handleRemovePlaylist(i)} className="text-slate-400 hover:text-red-500 dark:hover:text-red-400">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
@@ -459,16 +459,16 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Calendar Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Calendar Widget</h3>
                           <p className="text-sm text-slate-400">Google Calendar events (requires setup)</p>
                         </div>
                         <Toggle enabled={configs.calendar.enabled} onChange={() => toggleWidget('calendar', !configs.calendar.enabled)} />
                       </div>
                       <div>
-                        <label className="block text-sm text-slate-300 mb-2">Max Events</label>
-                        <input type="number" min={1} max={20} value={calendarMaxEvents} onChange={(e) => setCalendarMaxEvents(Number(e.target.value))} className="w-24 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white" />
+                        <label className="block text-sm text-slate-600 dark:text-slate-300 mb-2">Max Events</label>
+                        <input type="number" min={1} max={20} value={calendarMaxEvents} onChange={(e) => setCalendarMaxEvents(Number(e.target.value))} className="w-24 px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white" />
                       </div>
-                      <button onClick={handleSaveCalendar} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSaveCalendar} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save Calendar Settings'}
                       </button>
                     </div>
@@ -479,7 +479,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Notes Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Notes Widget</h3>
                           <p className="text-sm text-slate-400">Quick notes stored in your account</p>
                         </div>
                         <Toggle enabled={configs.notes?.enabled ?? true} onChange={() => toggleWidget('notes', !(configs.notes?.enabled ?? true))} />
@@ -493,7 +493,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Bookmarks Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Bookmarks Widget</h3>
                           <p className="text-sm text-slate-400">Save your favorite links</p>
                         </div>
                         <Toggle enabled={configs.bookmarks?.enabled ?? true} onChange={() => toggleWidget('bookmarks', !(configs.bookmarks?.enabled ?? true))} />
@@ -507,7 +507,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Todo List Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Todo List Widget</h3>
                           <p className="text-sm text-slate-400">Track your tasks and to-dos</p>
                         </div>
                         <Toggle enabled={configs.todos?.enabled ?? true} onChange={() => toggleWidget('todos', !(configs.todos?.enabled ?? true))} />
@@ -521,7 +521,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable Habit Tracker Widget</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable Habit Tracker Widget</h3>
                           <p className="text-sm text-slate-400">Track daily habits with streaks</p>
                         </div>
                         <Toggle enabled={configs.habits?.enabled ?? true} onChange={() => toggleWidget('habits', !(configs.habits?.enabled ?? true))} />
@@ -535,31 +535,31 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                     <div className="space-y-6">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-white font-medium">Enable News Ticker</h3>
+                          <h3 className="text-slate-900 dark:text-white font-medium">Enable News Ticker</h3>
                           <p className="text-sm text-slate-400">Scrolling headlines at the bottom of dashboard</p>
                         </div>
                         <Toggle enabled={configs.news?.enabled ?? false} onChange={() => toggleWidget('news', !(configs.news?.enabled ?? false))} />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-3">Categories</label>
+                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-3">Categories</label>
                         <div className="grid grid-cols-2 gap-2">
                           {NEWS_CATEGORIES.map((cat) => (
-                            <label key={cat.id} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-white/5">
+                            <label key={cat.id} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5">
                               <input
                                 type="checkbox"
                                 checked={newsCategories.includes(cat.id)}
                                 onChange={() => toggleNewsCategory(cat.id)}
-                                className="rounded text-violet-500"
+                                className="rounded text-orange-500"
                               />
-                              <span className="text-sm text-white">{cat.label}</span>
+                              <span className="text-sm text-slate-900 dark:text-white">{cat.label}</span>
                             </label>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Keywords</label>
+                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Keywords</label>
                         <div className="flex gap-2 mb-3">
                           <input
                             type="text"
@@ -567,12 +567,12 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                             onChange={(e) => setNewKeyword(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
                             placeholder="Add a keyword..."
-                            className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500"
+                            className="flex-1 px-4 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
                           />
                           <button
                             onClick={addKeyword}
                             disabled={!newKeyword.trim()}
-                            className="px-4 py-2 rounded-lg bg-violet-500/20 text-violet-400 font-medium hover:bg-violet-500/30 disabled:opacity-50 transition-colors"
+                            className="px-4 py-2 rounded-lg bg-orange-500/20 text-orange-400 font-medium hover:bg-orange-500/30 disabled:opacity-50 transition-colors"
                           >
                             Add
                           </button>
@@ -580,9 +580,9 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                         {newsKeywords.length > 0 && (
                           <div className="flex flex-wrap gap-2">
                             {newsKeywords.map((kw) => (
-                              <span key={kw} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-sm text-white">
+                              <span key={kw} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-white/10 text-sm text-slate-900 dark:text-white">
                                 {kw}
-                                <button onClick={() => removeKeyword(kw)} className="text-slate-400 hover:text-red-400">
+                                <button onClick={() => removeKeyword(kw)} className="text-slate-400 hover:text-red-500 dark:hover:text-red-400">
                                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                   </svg>
@@ -593,7 +593,7 @@ export function WidgetSettings({ isOpen, onClose }: WidgetSettingsProps) {
                         )}
                       </div>
 
-                      <button onClick={handleSaveNews} disabled={isSaving} className="px-4 py-2 rounded-lg bg-violet-500 text-white font-medium hover:bg-violet-600 transition-colors disabled:opacity-50">
+                      <button onClick={handleSaveNews} disabled={isSaving} className="px-4 py-2 rounded-lg bg-orange-500 text-white font-medium hover:bg-orange-600 transition-colors disabled:opacity-50">
                         {isSaving ? 'Saving...' : 'Save News Settings'}
                       </button>
                     </div>

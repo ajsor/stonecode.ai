@@ -82,8 +82,8 @@ export default function LoginPage() {
             Supabase environment variables are not configured. Please set:
           </p>
           <ul className={`list-disc list-inside mb-6 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-            <li><code className="text-violet-400">VITE_SUPABASE_URL</code></li>
-            <li><code className="text-violet-400">VITE_SUPABASE_ANON_KEY</code></li>
+            <li><code className="text-orange-400">VITE_SUPABASE_URL</code></li>
+            <li><code className="text-orange-400">VITE_SUPABASE_ANON_KEY</code></li>
           </ul>
           <Link
             to="/"
@@ -107,8 +107,8 @@ export default function LoginPage() {
       {/* Background gradient */}
       <div className={`fixed inset-0 ${
         darkMode
-          ? 'bg-gradient-to-br from-violet-950/50 via-slate-950 to-blue-950/50'
-          : 'bg-gradient-to-br from-violet-100/50 via-slate-100 to-blue-100/50'
+          ? 'bg-gradient-to-br from-orange-950/30 via-slate-950 to-amber-950/30'
+          : 'bg-gradient-to-br from-orange-100/50 via-slate-100 to-amber-100/50'
       }`} />
 
       {/* Theme toggle */}
@@ -150,8 +150,8 @@ export default function LoginPage() {
           <Link to="/" className="flex items-center justify-center mb-8">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
               darkMode
-                ? 'bg-gradient-to-br from-violet-500 to-blue-600'
-                : 'bg-gradient-to-br from-violet-600 to-blue-700'
+                ? 'bg-gradient-to-br from-orange-400 to-orange-600'
+                : 'bg-gradient-to-br from-orange-500 to-orange-700'
             }`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +238,7 @@ export default function LoginPage() {
               </p>
               <button
                 onClick={() => setMagicLinkSent(false)}
-                className={`text-sm ${darkMode ? 'text-violet-400 hover:text-violet-300' : 'text-violet-600 hover:text-violet-700'}`}
+                className={`text-sm ${darkMode ? 'text-orange-400 hover:text-orange-300' : 'text-orange-600 hover:text-orange-700'}`}
               >
                 Try a different email
               </button>
@@ -259,8 +259,8 @@ export default function LoginPage() {
                     required
                     className={`w-full px-4 py-3 rounded-xl border transition-colors ${
                       darkMode
-                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-violet-500'
-                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-violet-500'
+                        ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-orange-500'
+                        : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-orange-500'
                     } outline-none`}
                     placeholder="you@example.com"
                   />
@@ -280,8 +280,8 @@ export default function LoginPage() {
                       required
                       className={`w-full px-4 py-3 rounded-xl border transition-colors ${
                         darkMode
-                          ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-violet-500'
-                          : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-violet-500'
+                          ? 'bg-white/5 border-white/10 text-white placeholder-slate-500 focus:border-orange-500'
+                          : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-orange-500'
                       } outline-none`}
                       placeholder="Enter your password"
                     />
@@ -293,8 +293,8 @@ export default function LoginPage() {
                   disabled={isLoading}
                   className={`w-full py-3 px-4 rounded-xl font-medium text-white transition-all ${
                     isLoading
-                      ? 'bg-violet-500/50 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500'
+                      ? 'bg-orange-500/50 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400'
                   }`}
                   whileHover={!isLoading ? { scale: 1.02 } : {}}
                   whileTap={!isLoading ? { scale: 0.98 } : {}}
@@ -323,7 +323,7 @@ export default function LoginPage() {
             This portal is invitation-only.
             <br />
             <Link to="/" className={`${
-              darkMode ? 'text-violet-400 hover:text-violet-300' : 'text-violet-600 hover:text-violet-700'
+              darkMode ? 'text-orange-400 hover:text-orange-300' : 'text-orange-600 hover:text-orange-700'
             }`}>
               Back to home
             </Link>
