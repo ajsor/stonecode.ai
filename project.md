@@ -234,6 +234,7 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 |-------|-------------|--------|
 | `/` | Landing page | Public |
 | `/login` | Login page | Public |
+| `/login?redirect=<url>` | Login with post-auth redirect (for external tools) | Public |
 | `/accept-invite?token=x` | Invitation acceptance | Public (with valid token) |
 | `/portal` | Portal root (redirects to dashboard) | Authenticated |
 | `/portal/dashboard` | Main dashboard | Authenticated |
@@ -243,6 +244,22 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 | `/portal/admin/users` | User management | Admin only |
 | `/portal/admin/invitations` | Create/manage invitations | Admin only |
 | `/portal/admin/features` | Feature flag management | Admin only |
+
+## External Tools
+
+### MB Payroll Dashboard (`mb-dashboard.stonecode.ai`)
+- Repo: `C:\Users\ajs_o\Projects\mb-payroll-dashboard` (GitHub: ajsor/mb-payroll-dashboard)
+- Gated behind `mb_dashboard` feature flag — only users with this flag see it in the sidebar
+- Auth: stonecode.ai passes Supabase `access_token`+`refresh_token` in URL hash on open
+- Cloudflare Pages project name: `mb-dashboard`
+- DNS: CNAME `mb-dashboard` → `mb-dashboard.pages.dev` in Cloudflare
+
+**To enable for a user:** Go to Admin → Users → toggle `mb_dashboard` feature flag on
+**To deploy:** Push to `master` branch (GitHub Actions → Cloudflare Pages)
+**Required GitHub Secrets (same repo secrets as stonecode.ai):**
+- `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- `VITE_STONECODE_URL` = `https://stonecode.ai`
 
 ## Database Schema
 
@@ -266,6 +283,13 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 All tables use Row Level Security (RLS).
 
 ## Changelog
+
+### 2026-02-20
+- Integrated mb-payroll-dashboard as external tool at `mb-dashboard.stonecode.ai`
+- Auth gate added to mb-payroll-dashboard: reads Supabase tokens from URL hash, checks `mb_dashboard` feature flag
+- Deep-link generation in stonecode.ai portal sidebar (passes session tokens to mb-dashboard)
+- Login page updated to support `?redirect=<url>` param for external tool post-login redirect
+- GitHub Actions deploy workflow added to mb-payroll-dashboard repo
 
 ### 2026-02-19
 - Fixed portal dark mode for Tailwind v4: added `@custom-variant dark (&:where(.dark, .dark *))` to `index.css` so `dark:` variants respond to the JS-toggled `.dark` class instead of OS `prefers-color-scheme`
@@ -344,4 +368,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-02-19*
+*Last updated: 2026-02-20*

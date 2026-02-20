@@ -2,13 +2,29 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
-import { isSupabaseConfigured } from '../../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../../lib/supabase'
 
 type AuthMode = 'password' | 'magic-link' | 'passkey'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const { signIn, signInWithMagicLink, isAuthenticated, isLoading: authLoading } = useAuth()
+
+  // Support ?redirect=<url> for external tools like mb-dashboard
+  const redirectParam = new URLSearchParams(window.location.search).get('redirect')
+
+  const handlePostLoginRedirect = async () => {
+    if (redirectParam) {
+      // Pass session tokens so the external app can auth without re-login
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        const url = `${redirectParam}#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
+        window.location.href = url
+        return
+      }
+    }
+    navigate('/portal/dashboard')
+  }
 
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -30,9 +46,10 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      navigate('/portal/dashboard')
+      handlePostLoginRedirect()
     }
-  }, [isAuthenticated, authLoading, navigate])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, authLoading])
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +62,7 @@ export default function LoginPage() {
       setError(error.message)
       setIsLoading(false)
     } else {
-      navigate('/portal/dashboard')
+      await handlePostLoginRedirect()
     }
   }
 
