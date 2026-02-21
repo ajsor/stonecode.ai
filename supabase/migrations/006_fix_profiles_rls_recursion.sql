@@ -1,15 +1,20 @@
--- Fix infinite recursion in profiles RLS policy
+-- Fix infinite recursion in profiles RLS
 --
--- The "Admins can view all profiles" policy used:
---   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+-- Migration 005 merged the admin+user SELECT policy into one, but kept a
+-- self-referential subquery:
 --
--- PostgreSQL evaluates ALL policies for a table on every access, so this
--- sub-query back into `profiles` re-triggered the same policies → infinite loop.
+--   CREATE POLICY "Users can view own profile" ON profiles FOR SELECT
+--   USING (
+--     (select auth.uid()) = id
+--     OR EXISTS (
+--       SELECT 1 FROM profiles p WHERE p.id = (select auth.uid()) AND p.is_admin = true
+--     )  ← queries profiles from inside a profiles policy = infinite recursion
+--   );
 --
--- Fix: create a SECURITY DEFINER function that reads `profiles` while bypassing
--- RLS (runs as the table owner), breaking the recursion chain.
+-- Fix: SECURITY DEFINER function that reads profiles while bypassing RLS,
+-- breaking the recursion chain.
 
--- 1. Security definer function to check admin status without triggering RLS
+-- 1. Create security definer helper (runs as table owner, bypasses RLS)
 CREATE OR REPLACE FUNCTION auth_is_admin()
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -23,9 +28,14 @@ AS $$
   );
 $$;
 
--- 2. Replace the recursive policy on profiles
+-- 2. Drop both the recursive policy (from 005) and any leftover from 001
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
 
-CREATE POLICY "Admins can view all profiles"
+-- 3. Recreate with auth_is_admin() - no self-reference, no recursion
+CREATE POLICY "Users can view own profile"
     ON profiles FOR SELECT
-    USING (auth_is_admin());
+    USING (
+        (select auth.uid()) = id
+        OR auth_is_admin()
+    );
