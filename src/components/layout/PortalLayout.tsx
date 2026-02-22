@@ -7,6 +7,7 @@ import { DashboardToolbar } from '../dashboard/DashboardToolbar'
 import { supabase } from '../../lib/supabase'
 
 const MB_DASHBOARD_URL = 'https://mb-dashboard.stonecode.ai'
+const RELAITE_URL = 'https://relaite.stonecode.ai'
 
 const navItems = [
   {
@@ -90,6 +91,13 @@ export default function PortalLayout() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     const url = `${MB_DASHBOARD_URL}/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  const openRelaite = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    const url = `${RELAITE_URL}/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
@@ -183,28 +191,46 @@ export default function PortalLayout() {
           })}
 
           {/* Tools section */}
+          {(hasFeature('mb_dashboard') || hasFeature('relaite')) && (
+            <div className={`px-4 py-3 mt-6 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+              <span className="text-xs font-semibold uppercase tracking-wider">Tools</span>
+            </div>
+          )}
           {hasFeature('mb_dashboard') && (
-            <>
-              <div className={`px-4 py-3 mt-6 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                <span className="text-xs font-semibold uppercase tracking-wider">Tools</span>
-              </div>
-              <button
-                onClick={() => { setSidebarOpen(false); openMbDashboard() }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  darkMode
-                    ? 'text-slate-400 hover:bg-white/5 hover:text-white'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span className="font-medium">MB Dashboard</span>
-                <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </button>
-            </>
+            <button
+              onClick={() => { setSidebarOpen(false); openMbDashboard() }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                darkMode
+                  ? 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span className="font-medium">MB Dashboard</span>
+              <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
+          )}
+          {hasFeature('relaite') && (
+            <button
+              onClick={() => { setSidebarOpen(false); openRelaite() }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                darkMode
+                  ? 'text-slate-400 hover:bg-white/5 hover:text-white'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span className="font-medium">RELAiTE</span>
+              <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </button>
           )}
 
           {/* Admin section */}

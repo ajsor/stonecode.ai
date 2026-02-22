@@ -133,6 +133,20 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth client ID (Calendar widget) |
 | `VITE_OPENWEATHER_API_KEY` | OpenWeatherMap API key (Weather widget) |
 
+## Secrets
+
+> Full secret values are stored locally at `C:\Users\ajs_o\Projects\secrets.md` (outside all git repos — never commit).
+
+| Secret | Where set | Description |
+|--------|-----------|-------------|
+| `VITE_SUPABASE_URL` | GitHub Actions + `.env.local` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | GitHub Actions + `.env.local` | Supabase anon key |
+| `CLOUDFLARE_API_KEY` | GitHub Actions | Cloudflare Global API Key |
+| `CLOUDFLARE_EMAIL` | GitHub Actions | Cloudflare account email |
+| `CLOUDFLARE_ACCOUNT_ID` | GitHub Actions | Cloudflare account ID |
+
+*(Retrieve values from `C:\Users\ajs_o\Projects\secrets.md`)*
+
 ## Features
 
 ### Core
@@ -284,6 +298,12 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-02-22
+- Integrated RELAiTE relationship intelligence app as external tool at `relaite.stonecode.ai`
+- Added `relaite` feature flag (migration 007) and RELAiTE sidebar button in portal (gated by flag)
+- Deep-link auth from portal passes session tokens to relaite via URL hash (same pattern as mb-dashboard)
+- Added Secrets section to project.md; full secret values stored at `C:\Users\ajs_o\Projects\secrets.md`
+
 ### 2026-02-20
 - Integrated mb-payroll-dashboard as external tool at `mb-dashboard.stonecode.ai`
 - Auth gate added to mb-payroll-dashboard: reads Supabase tokens from URL hash, checks `mb_dashboard` feature flag
@@ -368,4 +388,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-02-20*
+*Last updated: 2026-02-22*
