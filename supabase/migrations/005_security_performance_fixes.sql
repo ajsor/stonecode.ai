@@ -30,6 +30,7 @@ $$ LANGUAGE plpgsql SET search_path = '';
 -- Drop existing policies
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
 DROP POLICY IF EXISTS "Service role can insert profiles" ON profiles;
 DROP POLICY IF EXISTS "Allow profile creation" ON profiles;
@@ -62,6 +63,9 @@ CREATE POLICY "Users can insert own profile"
 
 DROP POLICY IF EXISTS "Admins can manage invitations" ON invitations;
 DROP POLICY IF EXISTS "Anyone can view invitations by token" ON invitations;
+DROP POLICY IF EXISTS "Admins can insert invitations" ON invitations;
+DROP POLICY IF EXISTS "Admins can update invitations" ON invitations;
+DROP POLICY IF EXISTS "Admins can delete invitations" ON invitations;
 
 -- Public can read invitations (needed for token validation during signup)
 CREATE POLICY "Anyone can view invitations by token"
@@ -100,6 +104,9 @@ CREATE POLICY "Admins can delete invitations"
 
 DROP POLICY IF EXISTS "Authenticated users can view feature flags" ON feature_flags;
 DROP POLICY IF EXISTS "Admins can manage feature flags" ON feature_flags;
+DROP POLICY IF EXISTS "Admins can insert feature flags" ON feature_flags;
+DROP POLICY IF EXISTS "Admins can update feature flags" ON feature_flags;
+DROP POLICY IF EXISTS "Admins can delete feature flags" ON feature_flags;
 
 -- Authenticated users can read
 CREATE POLICY "Authenticated users can view feature flags"
@@ -139,6 +146,9 @@ CREATE POLICY "Admins can delete feature flags"
 
 DROP POLICY IF EXISTS "Users can view own feature flags" ON user_feature_flags;
 DROP POLICY IF EXISTS "Admins can manage user feature flags" ON user_feature_flags;
+DROP POLICY IF EXISTS "Admins can insert user feature flags" ON user_feature_flags;
+DROP POLICY IF EXISTS "Admins can update user feature flags" ON user_feature_flags;
+DROP POLICY IF EXISTS "Admins can delete user feature flags" ON user_feature_flags;
 
 -- Merged SELECT: own flags OR admin sees all
 CREATE POLICY "Users can view own feature flags"
@@ -193,6 +203,7 @@ CREATE POLICY "Users can manage own passkeys"
 DROP POLICY IF EXISTS "Users can view own audit logs" ON audit_log;
 DROP POLICY IF EXISTS "Admins can view all audit logs" ON audit_log;
 DROP POLICY IF EXISTS "Service can insert audit logs" ON audit_log;
+DROP POLICY IF EXISTS "Users can view audit logs" ON audit_log;
 
 -- Merged SELECT: own logs OR admin sees all
 CREATE POLICY "Users can view audit logs"
@@ -236,6 +247,7 @@ CREATE POLICY "Service role can manage challenges"
 -- 10. FIX WIDGET_PREFERENCES RLS (performance)
 -- ============================================
 
+-- (drop both old and new names to ensure idempotency)
 DROP POLICY IF EXISTS "Users can view own widget preferences" ON widget_preferences;
 DROP POLICY IF EXISTS "Users can insert own widget preferences" ON widget_preferences;
 DROP POLICY IF EXISTS "Users can update own widget preferences" ON widget_preferences;
@@ -265,6 +277,7 @@ DROP POLICY IF EXISTS "Users can view own OAuth tokens" ON google_oauth_tokens;
 DROP POLICY IF EXISTS "Users can insert own OAuth tokens" ON google_oauth_tokens;
 DROP POLICY IF EXISTS "Users can update own OAuth tokens" ON google_oauth_tokens;
 DROP POLICY IF EXISTS "Users can delete own OAuth tokens" ON google_oauth_tokens;
+DROP POLICY IF EXISTS "Users can manage own OAuth tokens" ON google_oauth_tokens;
 
 CREATE POLICY "Users can view own OAuth tokens"
     ON google_oauth_tokens FOR SELECT
