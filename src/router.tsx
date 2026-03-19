@@ -12,7 +12,6 @@ const SecurityPage = lazy(() => import('./pages/portal/SecurityPage'))
 const ColorSettingsPage = lazy(() => import('./pages/portal/ColorSettingsPage'))
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'))
 const UsersPage = lazy(() => import('./pages/portal/admin/UsersPage'))
-const InvitationsPage = lazy(() => import('./pages/portal/admin/InvitationsPage'))
 const FeaturesPage = lazy(() => import('./pages/portal/admin/FeaturesPage'))
 
 // Loading component
@@ -87,7 +86,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'invitations',
-            element: withSuspense(InvitationsPage),
+            element: <Navigate to="/portal/admin/users" replace />,
           },
           {
             path: 'features',
