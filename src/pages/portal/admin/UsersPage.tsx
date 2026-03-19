@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
-import { getAllUsers, getInvitations, supabase } from '../../../lib/supabase'
+import { getAllUsers, getInvitations, getAllFeatureFlags, supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../hooks/useAuth'
-import type { AdminUser, Invitation } from '../../../types'
-
-interface FeatureFlag {
-  id: string
-  name: string
-  description: string
-  enabled_default: boolean
-}
+import type { AdminUser, Invitation, FeatureFlag } from '../../../types'
 
 interface UserFlagOverride {
   id: string
@@ -46,7 +39,7 @@ function getInvitationStatus(invitation: Invitation) {
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth()
-  const [activeTab, setActiveTab] = useState<'users' | 'invitations'>('users')
+  const [activeTab, setActiveTab] = useState<'users' | 'invitations' | 'features'>('users')
 
   // Users state
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -58,6 +51,14 @@ export default function UsersPage() {
   const [flagsLoading, setFlagsLoading] = useState(false)
   const [togglingFlagId, setTogglingFlagId] = useState<string | null>(null)
   const [revokingUserId, setRevokingUserId] = useState<string | null>(null)
+
+  // Features state
+  const [features, setFeatures] = useState<FeatureFlag[]>([])
+  const [featuresLoading, setFeaturesLoading] = useState(true)
+  const [showCreateFeatureForm, setShowCreateFeatureForm] = useState(false)
+  const [newFeatureName, setNewFeatureName] = useState('')
+  const [newFeatureDescription, setNewFeatureDescription] = useState('')
+  const [isCreatingFeature, setIsCreatingFeature] = useState(false)
 
   // Invitations state
   const [invitations, setInvitations] = useState<InvitationWithInviter[]>([])
@@ -72,9 +73,7 @@ export default function UsersPage() {
   useEffect(() => {
     loadUsers()
     loadInvitations()
-    supabase.from('feature_flags').select('*').order('name').then(({ data }) => {
-      if (data) setAllFlags(data)
-    })
+    loadFeatures()
   }, [])
 
   // Clear message after 4 seconds
@@ -89,6 +88,16 @@ export default function UsersPage() {
     const { data, error } = await getAllUsers()
     if (!error && data) setUsers(data as AdminUser[])
     setUsersLoading(false)
+  }
+
+  const loadFeatures = async () => {
+    setFeaturesLoading(true)
+    const { data, error } = await getAllFeatureFlags()
+    if (!error && data) {
+      setFeatures(data)
+      setAllFlags(data)
+    }
+    setFeaturesLoading(false)
   }
 
   const loadInvitations = async () => {
@@ -215,6 +224,50 @@ export default function UsersPage() {
     setMessage({ type: 'success', text: 'Copied to clipboard!' })
   }
 
+  // --- Features logic ---
+
+  const handleToggleDefault = async (featureId: string, enabled: boolean) => {
+    const { error } = await supabase.from('feature_flags').update({ enabled_default: enabled }).eq('id', featureId)
+    if (error) {
+      setMessage({ type: 'error', text: error.message })
+    } else {
+      setFeatures(prev => prev.map(f => f.id === featureId ? { ...f, enabled_default: enabled } : f))
+      setAllFlags(prev => prev.map(f => f.id === featureId ? { ...f, enabled_default: enabled } : f))
+    }
+  }
+
+  const handleCreateFeature = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsCreatingFeature(true)
+    setMessage(null)
+    const { error } = await supabase.from('feature_flags').insert({
+      name: newFeatureName.toLowerCase().replace(/\s+/g, '_'),
+      description: newFeatureDescription,
+      enabled_default: false,
+    })
+    if (error) {
+      setMessage({ type: 'error', text: error.message })
+    } else {
+      setMessage({ type: 'success', text: 'Feature flag created' })
+      setNewFeatureName('')
+      setNewFeatureDescription('')
+      setShowCreateFeatureForm(false)
+      await loadFeatures()
+    }
+    setIsCreatingFeature(false)
+  }
+
+  const handleDeleteFeature = async (featureId: string) => {
+    if (!confirm('Delete this feature flag? This will also remove all user overrides.')) return
+    const { error } = await supabase.from('feature_flags').delete().eq('id', featureId)
+    if (error) {
+      setMessage({ type: 'error', text: error.message })
+    } else {
+      setMessage({ type: 'success', text: 'Feature flag deleted' })
+      await loadFeatures()
+    }
+  }
+
   const filteredUsers = users.filter(
     u => u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
          u.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -243,11 +296,19 @@ export default function UsersPage() {
               Invite User
             </button>
           )}
+          {activeTab === 'features' && (
+            <button
+              onClick={() => setShowCreateFeatureForm(v => !v)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all text-sm"
+            >
+              {showCreateFeatureForm ? 'Cancel' : 'New Feature'}
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 rounded-xl bg-slate-100 dark:bg-white/5 mb-6 w-fit">
-          {(['users', 'invitations'] as const).map(tab => (
+          {(['users', 'invitations', 'features'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -521,6 +582,134 @@ export default function UsersPage() {
             )}
           </>
         )}
+        {/* === FEATURES TAB === */}
+        {activeTab === 'features' && (
+          <>
+            {/* Create form */}
+            <AnimatePresence>
+              {showCreateFeatureForm && (
+                <motion.div
+                  className="p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">New Feature Flag</h2>
+                  <form onSubmit={handleCreateFeature}>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Name</label>
+                        <input
+                          type="text"
+                          value={newFeatureName}
+                          onChange={(e) => setNewFeatureName(e.target.value)}
+                          required
+                          placeholder="e.g., beta_features"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 outline-none transition-colors"
+                        />
+                        <p className="mt-1 text-xs text-slate-500">
+                          Stored as: {newFeatureName.toLowerCase().replace(/\s+/g, '_') || 'feature_name'}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Description</label>
+                        <input
+                          type="text"
+                          value={newFeatureDescription}
+                          onChange={(e) => setNewFeatureDescription(e.target.value)}
+                          placeholder="What this feature enables"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 outline-none transition-colors"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isCreatingFeature}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all disabled:opacity-50"
+                      >
+                        {isCreatingFeature ? 'Creating...' : 'Create Feature Flag'}
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {featuresLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : features.length === 0 ? (
+              <div className="text-center py-12 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                <p className="text-slate-400 mb-4">No feature flags yet</p>
+                <button
+                  onClick={() => setShowCreateFeatureForm(true)}
+                  className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium"
+                >
+                  Create your first feature flag
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {features.map((feature, index) => (
+                  <motion.div
+                    key={feature.id}
+                    className="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          feature.enabled_default ? 'bg-emerald-100 dark:bg-emerald-500/20' : 'bg-slate-100 dark:bg-slate-800'
+                        }`}>
+                          <svg className={`w-5 h-5 ${feature.enabled_default ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-slate-900 dark:text-white font-medium font-mono">{feature.name}</p>
+                          <p className="text-slate-500 text-sm">{feature.description || 'No description'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-slate-400 text-xs">Default</p>
+                          <p className={`text-sm font-medium ${feature.enabled_default ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`}>
+                            {feature.enabled_default ? 'On' : 'Off'}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleToggleDefault(feature.id, !feature.enabled_default)}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${
+                            feature.enabled_default ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'
+                          }`}
+                        >
+                          <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                            feature.enabled_default ? 'left-7' : 'left-1'
+                          }`} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFeature(feature.id)}
+                          className="p-2 rounded-lg text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            <p className="mt-6 text-xs text-slate-500 dark:text-slate-600">
+              The default toggle affects all users. Per-user overrides can be set from the Users tab.
+            </p>
+          </>
+        )}
+
       </motion.div>
 
       {/* Create Invitation Modal */}

@@ -12,7 +12,6 @@ const SecurityPage = lazy(() => import('./pages/portal/SecurityPage'))
 const ColorSettingsPage = lazy(() => import('./pages/portal/ColorSettingsPage'))
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'))
 const UsersPage = lazy(() => import('./pages/portal/admin/UsersPage'))
-const FeaturesPage = lazy(() => import('./pages/portal/admin/FeaturesPage'))
 
 // Loading component
 function PageLoader(): ReactNode {
@@ -90,7 +89,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'features',
-            element: withSuspense(FeaturesPage),
+            element: <Navigate to="/portal/admin/users" replace />,
           },
         ],
       },
