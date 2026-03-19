@@ -180,7 +180,8 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] Pixel-precise auto-sizing (ROW_HEIGHT=1, max 4px waste)
 - [x] Layout version migration (resets to defaults on version change)
 - [ ] Deploy google-oauth-exchange Edge Function
-- [ ] Configure external API keys (Google, OpenWeatherMap)
+- [x] Configure OpenWeatherMap API key (set in GitHub Secrets)
+- [ ] Configure Google API keys (Calendar widget)
 - [ ] Test full widget persistence and OAuth flow
 
 ### Visual Design
@@ -255,11 +256,26 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 | `/portal/profile` | User profile settings | Authenticated |
 | `/portal/profile/security` | MFA, passkeys, password | Authenticated |
 | `/portal/profile/color-settings` | Light mode color palette explorer | Authenticated |
-| `/portal/admin/users` | User management | Admin only |
-| `/portal/admin/invitations` | Create/manage invitations | Admin only |
-| `/portal/admin/features` | Feature flag management | Admin only |
+| `/portal/admin/users` | Users, Invitations, and Features (tabbed) | Admin only |
+| `/portal/admin/invitations` | Redirects to `/portal/admin/users` | Admin only |
+| `/portal/admin/features` | Redirects to `/portal/admin/users` | Admin only |
 
 ## External Tools
+
+### Aether Dream Journal (`aether.stonecode.ai`)
+- Repo: `C:\Users\ajs_o\Projects\aether` (GitHub: ajsor/aether)
+- Gated behind `aether` feature flag — only users with this flag see it in the sidebar
+- Auth: stonecode.ai passes Supabase `access_token`+`refresh_token` in URL hash on open
+- Cloudflare Pages project name: `aether`
+- DNS: CNAME `aether` → `aether.pages.dev` in Cloudflare
+- DB tables: `aether_dreams`, `aether_chat_messages` (shared Supabase project)
+- Storage: `aether-images` bucket (private)
+- Edge Functions: transcribe-dream (Gemini), interpret-dream (Claude), generate-image (Imagen 4), chat-dream (Claude)
+- AI services: Gemini API (transcription + Imagen 4 images), Anthropic Claude (interpretation + chat)
+
+**To enable for a user:** Go to Admin → Users → toggle `aether` feature flag on
+**To deploy:** Push to `main` branch (GitHub Actions → Cloudflare Pages)
+**Required setup:** See `C:\Users\ajs_o\Projects\secrets.md` → aether section for all manual steps
 
 ### MB Payroll Dashboard (`mb-dashboard.stonecode.ai`)
 - Repo: `C:\Users\ajs_o\Projects\mb-payroll-dashboard` (GitHub: ajsor/mb-payroll-dashboard)
@@ -296,7 +312,38 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 
 All tables use Row Level Security (RLS).
 
+### Functions (Supabase PostgreSQL)
+- **get_admin_users()** - Security definer RPC; joins profiles with auth.users to expose last_sign_in_at to admins
+
+### Edge Functions (Supabase)
+- **admin-revoke-user** - Deletes a user from auth using service role (admin-only)
+
 ## Changelog
+
+### 2026-03-18 (3)
+- Merged Features page into Users admin page — now a three-tab page: Users | Invitations | Features
+- Features tab: create/delete feature flags, toggle global defaults
+- Per-user feature overrides remain in the Users tab expanded panel
+- Removed Features sidebar nav item; `/portal/admin/features` redirects to `/portal/admin/users`
+
+### 2026-03-18 (2)
+- Merged Invitations into Users admin page — single tabbed page with Users and Invitations tabs
+- Removed separate Invitations sidebar nav item; `/portal/admin/invitations` redirects to `/portal/admin/users`
+- Pending invite count shown as badge on Invitations tab
+
+### 2026-03-18
+- Fixed Supabase Auth Site URL (was pointing to localhost; now `https://stonecode.ai`) and added redirect allowlist for all subdomains
+- Admin Users page: added last login time display, Revoke Access button, and `AdminUser` type
+- New `get_admin_users()` SQL function (security definer) joins profiles with auth.users for last_sign_in_at
+- New `admin-revoke-user` edge function permanently deletes a user via service role
+- Fixed feature flag toggle bug in Users admin page (wrong column name `feature_flag_id` → `feature_id`)
+
+### 2026-03-05
+- Built Aether dream journal app at `aether.stonecode.ai`
+- Added `aether` feature flag (migration 008) and Aether sidebar button in portal (gated by flag)
+- Deep-link auth from portal passes session tokens to aether via URL hash (same pattern as RELAiTE)
+- Aether uses Gemini API for audio transcription + Imagen 4 image generation, Claude Sonnet 4.6 for Jungian interpretation + symbol chat
+- New repo at `C:\Users\ajs_o\Projects\aether` with full React/Vite/TypeScript app, 4 edge functions, 2 DB migrations
 
 ### 2026-02-22
 - Integrated RELAiTE relationship intelligence app as external tool at `relaite.stonecode.ai`
@@ -388,4 +435,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-02-22*
+*Last updated: 2026-03-05*

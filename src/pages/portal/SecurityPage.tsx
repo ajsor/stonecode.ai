@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
+import { supabase } from '../../lib/supabase'
 import {
   isWebAuthnSupported,
   isPlatformAuthenticatorAvailable,
@@ -19,6 +20,12 @@ export default function SecurityPage() {
   const [webauthnSupported, setWebauthnSupported] = useState(false)
   const [platformAvailable, setPlatformAvailable] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  // Password change state
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   useEffect(() => {
     const checkSupport = async () => {
@@ -69,6 +76,30 @@ export default function SecurityPage() {
       setMessage({ type: 'success', text: 'Passkey removed' })
     } else {
       setMessage({ type: 'error', text: result.error || 'Failed to remove passkey' })
+    }
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (newPassword !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Passwords do not match' })
+      return
+    }
+    if (newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'Password must be at least 8 characters' })
+      return
+    }
+    setIsChangingPassword(true)
+    setMessage(null)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setIsChangingPassword(false)
+    if (error) {
+      setMessage({ type: 'error', text: error.message })
+    } else {
+      setMessage({ type: 'success', text: 'Password updated successfully' })
+      setShowPasswordForm(false)
+      setNewPassword('')
+      setConfirmPassword('')
     }
   }
 
@@ -214,15 +245,77 @@ export default function SecurityPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Password</h2>
-              <p className="text-slate-500 text-sm">Change your password</p>
+              <p className="text-slate-500 text-sm">Set or change your password</p>
             </div>
           </div>
 
-          <button
-            className="w-full py-3 px-4 rounded-xl font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors"
-          >
-            Change Password
-          </button>
+          <AnimatePresence>
+            {showPasswordForm && (
+              <motion.form
+                onSubmit={handleChangePassword}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden mb-4"
+              >
+                <div className="space-y-3 pb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={8}
+                      placeholder="Min. 8 characters"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="Re-enter new password"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-colors"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      type="submit"
+                      disabled={isChangingPassword}
+                      className="flex-1 py-2.5 px-4 rounded-xl font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isChangingPassword ? 'Saving...' : 'Save Password'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowPasswordForm(false); setNewPassword(''); setConfirmPassword('') }}
+                      className="px-4 py-2.5 rounded-xl font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+
+          {!showPasswordForm && (
+            <button
+              onClick={() => setShowPasswordForm(true)}
+              className="w-full py-3 px-4 rounded-xl font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors"
+            >
+              Change Password
+            </button>
+          )}
         </div>
 
         {/* MFA Section */}
