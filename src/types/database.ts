@@ -277,6 +277,16 @@ export type MfaFactor = Database['public']['Tables']['mfa_factors']['Row']
 export type WidgetPreferencesRow = Database['public']['Tables']['widget_preferences']['Row']
 export type GoogleOAuthTokenRow = Database['public']['Tables']['google_oauth_tokens']['Row']
 
+// Admin view type (includes last_sign_in_at from auth.users via get_admin_users RPC)
+export interface AdminUser {
+  id: string
+  email: string
+  full_name: string | null
+  is_admin: boolean
+  created_at: string
+  last_sign_in_at: string | null
+}
+
 // Extended types with joins
 export interface ProfileWithFeatures extends Profile {
   user_feature_flags: (UserFeatureFlag & { feature_flags: FeatureFlag })[]

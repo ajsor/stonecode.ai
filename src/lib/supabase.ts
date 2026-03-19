@@ -165,10 +165,7 @@ export const logAuditEvent = async (
 
 // Admin helpers
 export const getAllUsers = async () => {
-  return supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false })
+  return supabase.rpc('get_admin_users')
 }
 
 export const getAllFeatureFlags = async () => {
