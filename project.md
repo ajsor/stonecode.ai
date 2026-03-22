@@ -5,7 +5,6 @@ Personal landing page and brand website for Andrew Stone.
 ## Live Site
 
 - **Production:** https://stonecode.ai
-- **Preview:** https://a17d88d0-stonecode.ajs-or.workers.dev
 
 ## Tech Stack
 
@@ -180,7 +179,9 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] Pixel-precise auto-sizing (ROW_HEIGHT=1, max 4px waste)
 - [x] Layout version migration (resets to defaults on version change)
 - [ ] Deploy google-oauth-exchange Edge Function
-- [x] Configure OpenWeatherMap API key (set in GitHub Secrets)
+- [x] Configure OpenWeatherMap API key (in GitHub Actions deploy.yml build env)
+- [ ] Widgets disabled by default for new users (currently all widgets on by default)
+- [ ] Add ? help icon to dashboard header explaining widget functionality
 - [ ] Configure Google API keys (Calendar widget)
 - [ ] Test full widget persistence and OAuth flow
 
@@ -320,6 +321,13 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-03-19
+- Fixed weather widget: root cause was GitHub Actions build step was missing `VITE_OPENWEATHER_API_KEY` env var — key was never baked into the JS bundle; added to `deploy.yml` build step; widget now works in production
+- Fixed Change Password button on Security Settings (was a stub with no handler): implemented inline expand/collapse form using `supabase.auth.updateUser({ password })`; works for magic-link users setting a password for the first time
+- Aether: created Cloudflare Pages project, added DNS CNAME (`aether.stonecode.ai → aether-5wv.pages.dev`), deployed app, configured GitHub Actions CI/CD (see `aether/project.md`)
+- Changed ajs_or@yahoo.com from admin to member; 1stonecode.ai@gmail.com is sole admin
+- Deploy pipeline fix: `VITE_*` env vars must be in the GitHub Actions `build` step env block — Cloudflare Pages env vars alone are not enough when deploying via wrangler from CI
+
 ### 2026-03-18 (3)
 - Merged Features page into Users admin page — now a three-tab page: Users | Invitations | Features
 - Features tab: create/delete feature flags, toggle global defaults
@@ -435,4 +443,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-03-05*
+*Last updated: 2026-03-19 (session 2)*
