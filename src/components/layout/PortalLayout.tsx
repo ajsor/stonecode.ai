@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import { DashboardToolbar } from '../dashboard/DashboardToolbar'
+import { QuantumField } from '../QuantumField'
 import { supabase } from '../../lib/supabase'
 
 const MB_DASHBOARD_URL = 'https://mb-dashboard.stonecode.ai'
@@ -375,8 +376,11 @@ export default function PortalLayout() {
         </header>
 
         {/* Page content */}
-        <main className="p-4 sm:p-6">
-          <Outlet />
+        <main className="relative p-4 sm:p-6">
+          <QuantumField className="absolute inset-0 w-full h-full pointer-events-none opacity-40" />
+          <div className="relative z-10">
+            <Outlet />
+          </div>
         </main>
       </div>
 
