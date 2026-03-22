@@ -414,12 +414,7 @@ function FeatureCard({ f, darkMode }: { f: Feature; darkMode: boolean }) {
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuth()
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-    }
-    return true
-  })
+  const [darkMode, setDarkMode] = useState(true)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [, setCursorVariant] = useState('default')

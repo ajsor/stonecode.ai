@@ -49,7 +49,10 @@ export default function PortalLayout() {
   const navigate = useNavigate()
   const { isAuthenticated, isLoading, user, profile, signOut } = useAuth()
   const { hasFeature } = useFeatureFlags()
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('portal-dark-mode')
+    return saved !== null ? saved === 'true' : true
+  })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
@@ -58,6 +61,7 @@ export default function PortalLayout() {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode)
+    localStorage.setItem('portal-dark-mode', String(darkMode))
   }, [darkMode])
 
   // Redirect if not authenticated
