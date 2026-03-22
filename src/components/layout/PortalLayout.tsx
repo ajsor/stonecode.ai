@@ -50,6 +50,7 @@ export default function PortalLayout() {
   const { hasFeature } = useFeatureFlags()
   const [darkMode, setDarkMode] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   const isAdmin = profile?.is_admin || hasFeature('admin_panel')
   const isDashboard = location.pathname === '/portal/dashboard'
@@ -333,7 +334,23 @@ export default function PortalLayout() {
               {isDashboard && <DashboardToolbar />}
             </div>
 
-            {/* Right: dark mode toggle */}
+            {/* Right: help + dark mode toggle */}
+            <div className="flex items-center gap-1">
+            {isDashboard && (
+              <button
+                onClick={() => setHelpOpen(true)}
+                className={`p-2 rounded-lg transition-colors ${
+                  darkMode
+                    ? 'text-slate-400 hover:bg-white/5 hover:text-white'
+                    : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                }`}
+                aria-label="Dashboard help"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={() => setDarkMode(!darkMode)}
               className={`p-2 rounded-lg transition-colors ${
@@ -353,6 +370,7 @@ export default function PortalLayout() {
                 </svg>
               )}
             </button>
+            </div>
           </div>
         </header>
 
@@ -361,6 +379,102 @@ export default function PortalLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Dashboard Help Modal */}
+      <AnimatePresence>
+        {helpOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setHelpOpen(false)}
+            />
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl pointer-events-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Dashboard Help</h2>
+                  </div>
+                  <button
+                    onClick={() => setHelpOpen(false)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="p-6 space-y-5">
+                  {[
+                    {
+                      icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
+                      title: 'Add & remove widgets',
+                      desc: 'Click the Customize button to enable or disable any of the 12 available widgets.',
+                    },
+                    {
+                      icon: 'M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4',
+                      title: 'Drag to rearrange',
+                      desc: 'Grab the drag handle (⠿) in any widget header to move it wherever you like.',
+                    },
+                    {
+                      icon: 'M4 8V4m0 0h4M4 4l5 5M20 8V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5M20 16v4m0 0h-4m4 0l-5-5',
+                      title: 'Resize widgets',
+                      desc: 'Drag the bottom-right corner of any widget to resize it to your preferred height.',
+                    },
+                    {
+                      icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+                      title: 'Configure each widget',
+                      desc: 'Click the gear icon in a widget\'s header to set location, timezone, playlists, and more.',
+                    },
+                    {
+                      icon: 'M5 15l7-7 7 7',
+                      title: 'Collapse widgets',
+                      desc: 'Click the chevron in a widget header to collapse it and save screen space.',
+                    },
+                  ].map(({ icon, title, desc }) => (
+                    <div key={title} className="flex gap-4">
+                      <div className="w-8 h-8 shrink-0 rounded-lg bg-slate-100 dark:bg-white/5 flex items-center justify-center mt-0.5">
+                        <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-slate-900 dark:text-white">{title}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="px-6 pb-6">
+                  <button
+                    onClick={() => setHelpOpen(false)}
+                    className="w-full py-2.5 rounded-xl font-medium bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-sm"
+                  >
+                    Got it
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -224,20 +224,20 @@ export const DEFAULT_LAYOUT: WidgetLayoutItem[] = [
   { i: 'calendar', x: 2, y: 278, w: 2, h: 53, minW: 2, minH: 33 },
 ]
 
-// Default Configs
+// Default Configs — all widgets off by default for new users
 export const DEFAULT_CONFIGS: WidgetConfigs = {
   weather: { enabled: false, location: '98682,US', units: 'imperial' },
   spotify: { enabled: false, playlists: [] },
   calendar: { enabled: false, maxEvents: 7 },
-  clock: { enabled: true, showSeconds: true, timezones: ['local'] },
-  pomodoro: { enabled: true, focusMinutes: 25, breakMinutes: 5, longBreakMinutes: 15 },
-  countdown: { enabled: true, eventName: '', targetDate: '' },
-  calculator: { enabled: true },
-  breathing: { enabled: true, pattern: 'relaxing' },
-  notes: { enabled: true },
-  bookmarks: { enabled: true },
-  todos: { enabled: true },
-  habits: { enabled: true },
+  clock: { enabled: false, showSeconds: true, timezones: ['local'] },
+  pomodoro: { enabled: false, focusMinutes: 25, breakMinutes: 5, longBreakMinutes: 15 },
+  countdown: { enabled: false, eventName: '', targetDate: '' },
+  calculator: { enabled: false },
+  breathing: { enabled: false, pattern: 'relaxing' },
+  notes: { enabled: false },
+  bookmarks: { enabled: false },
+  todos: { enabled: false },
+  habits: { enabled: false },
   news: { enabled: false, categories: ['technology'], keywords: [] },
 }
 
