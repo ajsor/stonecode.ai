@@ -150,7 +150,7 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 
 ### Core
 - [x] Responsive design
-- [x] Dark/light mode (JS-toggled via `.dark` class on `<html>`, class-based with `@custom-variant dark` in Tailwind v4)
+- [x] Dark/light mode (JS-toggled via `.dark` class on `<html>`, class-based with `@custom-variant dark` in Tailwind v4; both homepage and portal default to dark; portal persists preference in `localStorage`)
 - [x] Custom favicon
 - [x] SEO meta tags
 - [x] Open Graph tags for social sharing
@@ -180,8 +180,9 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] Layout version migration (resets to defaults on version change)
 - [ ] Deploy google-oauth-exchange Edge Function
 - [x] Configure OpenWeatherMap API key (in GitHub Actions deploy.yml build env)
-- [ ] Widgets disabled by default for new users (currently all widgets on by default)
-- [ ] Add ? help icon to dashboard header explaining widget functionality
+- [x] Widgets disabled by default for new users
+- [x] Add ? help icon to dashboard header explaining widget functionality
+- [x] Quantum vortex nebula background in portal main content area (`src/components/QuantumField.tsx`)
 - [ ] Configure Google API keys (Calendar widget)
 - [ ] Test full widget persistence and OAuth flow
 
@@ -321,6 +322,12 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-03-21
+- All widgets disabled by default for new users; existing users unaffected
+- Added ? help icon to portal header (dashboard only) — opens modal explaining add/drag/resize/configure/collapse
+- Added quantum vortex nebula background to portal main content area (`src/components/QuantumField.tsx`, shared component sizing to container via ResizeObserver, 40% opacity)
+- Homepage and portal both default to dark mode; portal persists user preference in `localStorage` key `portal-dark-mode`
+
 ### 2026-03-19
 - Fixed weather widget: root cause was GitHub Actions build step was missing `VITE_OPENWEATHER_API_KEY` env var — key was never baked into the JS bundle; added to `deploy.yml` build step; widget now works in production
 - Fixed Change Password button on Security Settings (was a stub with no handler): implemented inline expand/collapse form using `supabase.auth.updateUser({ password })`; works for magic-link users setting a password for the first time
@@ -443,4 +450,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-03-19 (session 2)*
+*Last updated: 2026-03-21*
