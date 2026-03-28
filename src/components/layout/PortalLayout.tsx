@@ -56,7 +56,7 @@ export default function PortalLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
-  const isAdmin = profile?.is_admin || hasFeature('admin_panel')
+  const isAdmin = profile?.is_admin === true
   const isDashboard = location.pathname === '/portal/dashboard'
 
   useEffect(() => {
