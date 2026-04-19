@@ -101,12 +101,17 @@ export default function PortalLayout() {
   const isDashboard = location.pathname === '/portal/dashboard'
   const availableTools = TOOLS.filter((t) => hasFeature(t.flag))
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated, or if user lacks portal access
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return
+    if (!isAuthenticated) {
       navigate('/login')
+      return
     }
-  }, [isAuthenticated, isLoading, navigate])
+    if (profile && profile.portal_access === false) {
+      navigate('/no-portal-access', { replace: true })
+    }
+  }, [isAuthenticated, isLoading, profile, navigate])
 
   const handleSignOut = async () => {
     await signOut()
@@ -132,6 +137,15 @@ export default function PortalLayout() {
 
   if (!isAuthenticated) {
     return null
+  }
+
+  // Don't render portal chrome while we wait for profile, or while redirecting app-only users away
+  if (!profile || profile.portal_access === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (

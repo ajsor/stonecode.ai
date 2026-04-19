@@ -11,6 +11,7 @@ export interface Database {
           full_name: string | null
           avatar_url: string | null
           is_admin: boolean
+          portal_access: boolean
           created_at: string
           updated_at: string
         }
@@ -20,6 +21,7 @@ export interface Database {
           full_name?: string | null
           avatar_url?: string | null
           is_admin?: boolean
+          portal_access?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -29,6 +31,7 @@ export interface Database {
           full_name?: string | null
           avatar_url?: string | null
           is_admin?: boolean
+          portal_access?: boolean
           created_at?: string
           updated_at?: string
         }

@@ -5,6 +5,7 @@ import { lazy, Suspense, type ReactNode, type LazyExoticComponent, type Componen
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 const AcceptInvitePage = lazy(() => import('./pages/auth/AcceptInvitePage'))
+const NoPortalAccessPage = lazy(() => import('./pages/auth/NoPortalAccessPage'))
 const PortalLayout = lazy(() => import('./components/layout/PortalLayout'))
 const Dashboard = lazy(() => import('./pages/portal/Dashboard'))
 const ProfilePage = lazy(() => import('./pages/portal/ProfilePage'))
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
   {
     path: '/accept-invite',
     element: withSuspense(AcceptInvitePage),
+  },
+  {
+    path: '/no-portal-access',
+    element: withSuspense(NoPortalAccessPage),
   },
   {
     path: '/portal',

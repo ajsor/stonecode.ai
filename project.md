@@ -322,6 +322,13 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-19
+- **Phase 1 — Identity model for app-scoped invitations:** Added `profiles.portal_access` boolean column (migration 011) distinguishing portal members from app-only members. All existing profiles backfilled to `true` (backward compatible).
+- New `/no-portal-access` page shows invitation-only message with deep-link cards for any apps the user IS flagged for (mb_dashboard, relaite, aether, adam) — enables app-scoped users to land somewhere useful when they hit the portal
+- `PortalLayout` guard now redirects `portal_access=false` users to `/no-portal-access` before rendering portal UI
+- `create-invitation` edge function redeployed (was out of sync with local code after prior refactor to Resend-based HTML email)
+- Supabase secret `RESEND_API_KEY` set on production project; end-to-end invite email send not yet verified by user
+
 ### 2026-04-18
 - Extracted cross-app code into `@stonecode/portal-sdk` (github:ajsor/stonecode-portal-sdk) — bootstrap hash-token sessions, build portal launch URLs, create Supabase client with per-app storage keys, shared theme tokens
 - Refactored `PortalLayout.tsx` — 4 duplicated tool buttons + 4 openX functions collapsed to a single TOOLS config array + one `openTool()` using `buildPortalLaunchUrl` from the SDK
