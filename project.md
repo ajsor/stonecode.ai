@@ -322,6 +322,12 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-19 (2) — App-scoped invitation primitives
+- Migration 012 adds `app` + `message` columns to `invitations`. Existing rows default to `app='portal'` so the admin Invitations UI continues to work unchanged.
+- New edge function `app-create-invitation` — any signed-in user with the target app's feature flag can invite someone into that app. If the invitee email already has a stonecode.ai profile, the flag is granted directly (no signup). Otherwise an invitation row is created and a Resend email is sent with per-app sender branding (`"MB Dashboard" <invites@stonecode.ai>`, etc., all from the verified `invites@stonecode.ai` mailbox).
+- New edge function `app-accept-invitation` — invitee calls this after signing in. Grants the app's feature flag to the caller (merging by email) and marks the invite accepted. Does NOT grant `portal_access` unless `app='portal'`.
+- Supports apps: `mb_dashboard`, `relaite`, `aether`, `adam`.
+
 ### 2026-04-19
 - **Phase 1 — Identity model for app-scoped invitations:** Added `profiles.portal_access` boolean column (migration 011) distinguishing portal members from app-only members. All existing profiles backfilled to `true` (backward compatible).
 - New `/no-portal-access` page shows invitation-only message with deep-link cards for any apps the user IS flagged for (mb_dashboard, relaite, aether, adam) — enables app-scoped users to land somewhere useful when they hit the portal
