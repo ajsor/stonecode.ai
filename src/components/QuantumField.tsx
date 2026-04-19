@@ -1,14 +1,19 @@
 import { useEffect, useRef } from 'react'
+import { prefersReducedMotion } from '../hooks/useDarkMode'
 
 interface QuantumFieldProps {
   className?: string
+  /** When true, a full-viewport fixed canvas. When false, sizes to parent. */
+  fullscreen?: boolean
 }
 
-// Quantum-style vortex tunnel — sizes to its container
-export function QuantumField({ className }: QuantumFieldProps) {
+// Quantum-style vortex tunnel — sizes to its container (or viewport)
+export function QuantumField({ className, fullscreen }: QuantumFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    if (prefersReducedMotion()) return
+
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -52,6 +57,11 @@ export function QuantumField({ className }: QuantumFieldProps) {
     let time = 0
 
     const resize = () => {
+      if (fullscreen) {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        return
+      }
       const parent = canvas.parentElement
       if (parent) {
         canvas.width = parent.clientWidth
@@ -61,7 +71,8 @@ export function QuantumField({ className }: QuantumFieldProps) {
     resize()
 
     const ro = new ResizeObserver(resize)
-    if (canvas.parentElement) ro.observe(canvas.parentElement)
+    if (!fullscreen && canvas.parentElement) ro.observe(canvas.parentElement)
+    if (fullscreen) window.addEventListener('resize', resize)
 
     const draw = (ts: number) => {
       if (ts - lastTime < TARGET_MS) {
@@ -154,8 +165,9 @@ export function QuantumField({ className }: QuantumFieldProps) {
     return () => {
       cancelAnimationFrame(animId)
       ro.disconnect()
+      if (fullscreen) window.removeEventListener('resize', resize)
     }
-  }, [])
+  }, [fullscreen])
 
   return (
     <canvas

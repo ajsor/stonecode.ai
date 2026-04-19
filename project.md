@@ -322,6 +322,19 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-18
+- Extracted cross-app code into `@stonecode/portal-sdk` (github:ajsor/stonecode-portal-sdk) — bootstrap hash-token sessions, build portal launch URLs, create Supabase client with per-app storage keys, shared theme tokens
+- Refactored `PortalLayout.tsx` — 4 duplicated tool buttons + 4 openX functions collapsed to a single TOOLS config array + one `openTool()` using `buildPortalLaunchUrl` from the SDK
+- Extracted `StarField` and `QuantumField` from `LandingPage.tsx` into reusable components (`src/components/`); both honor `prefers-reduced-motion`; QuantumField gained a `fullscreen` prop
+- `useDarkMode()` hook centralizes dark mode with `localStorage` key `stonecode-dark-mode`; consumed by LandingPage and PortalLayout (was duplicated)
+- Scoped portal QuantumField background to Dashboard route only (was running on every portal page)
+- Debounced widget layout persistence (500ms) — rapid drag/resize events coalesce into one DB write; config toggles still write immediately via `flushPersist()`
+- Fixed double-profile-insert in `AcceptInvitePage` — removed the explicit insert that races the `handle_new_user` trigger
+- Rewrote `create-invitation` edge function to send a branded HTML invite via Resend (requires `RESEND_API_KEY`); admin Invitations page now calls the edge function instead of inserting rows directly
+- Added rollback tag `rollback-20260418-170835` on all 3 repos (stonecode.ai, aether, relaite) before the refactor
+- Added FAQ documentation for all 3 projects (`FAQ.md`)
+- Aether + RELAiTE: both now consume the SDK — deep-link auth uses `bootstrapSessionFromHash()`, Supabase clients built via `createPortalSupabaseClient()` with unique `storageKey` (prevents token collision across satellites)
+
 ### 2026-03-21
 - All widgets disabled by default for new users; existing users unaffected
 - Added ? help icon to portal header (dashboard only) — opens modal explaining add/drag/resize/configure/collapse
@@ -450,4 +463,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-03-21*
+*Last updated: 2026-04-18*

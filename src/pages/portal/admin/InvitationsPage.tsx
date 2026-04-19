@@ -40,24 +40,22 @@ export default function InvitationsPage() {
     setMessage(null)
 
     try {
-      // Generate a secure token
-      const token = crypto.randomUUID() + '-' + crypto.randomUUID()
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 7) // 7 days
-
-      const { error } = await supabase.from('invitations').insert({
-        email: newInviteEmail,
-        token,
-        invited_by: user.id,
-        expires_at: expiresAt.toISOString(),
+      // Delegate to the create-invitation edge function so it can send the email via Resend.
+      const { data, error } = await supabase.functions.invoke('create-invitation', {
+        body: { email: newInviteEmail },
       })
 
-      if (error) {
-        setMessage({ type: 'error', text: error.message })
+      if (error || !data?.success) {
+        const errMsg = data?.error || error?.message || 'Failed to create invitation'
+        setMessage({ type: 'error', text: errMsg })
       } else {
-        const inviteUrl = `${window.location.origin}/accept-invite?token=${token}`
-        setCreatedInvitation({ email: newInviteEmail, url: inviteUrl })
+        setCreatedInvitation({ email: newInviteEmail, url: data.invitation.invite_url })
         setNewInviteEmail('')
+        if (data.email_sent) {
+          setMessage({ type: 'success', text: 'Invitation sent.' })
+        } else if (data.email_error) {
+          setMessage({ type: 'error', text: `Invite created but email failed: ${data.email_error}` })
+        }
         await loadInvitations()
       }
     } catch (err) {

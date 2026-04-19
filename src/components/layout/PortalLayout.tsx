@@ -1,16 +1,59 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { buildPortalLaunchUrl, type SatelliteApp } from '@stonecode/portal-sdk'
 import { useAuth } from '../../hooks/useAuth'
 import { useFeatureFlags } from '../../hooks/useFeatureFlags'
+import { useDarkMode } from '../../hooks/useDarkMode'
 import { DashboardToolbar } from '../dashboard/DashboardToolbar'
 import { QuantumField } from '../QuantumField'
 import { supabase } from '../../lib/supabase'
 
-const MB_DASHBOARD_URL = 'https://mb-dashboard.stonecode.ai'
-const RELAITE_URL = 'https://relaite.stonecode.ai'
-const AETHER_URL = 'https://aether.stonecode.ai'
-const ADAM_URL = 'https://adam.stonecode.ai'
+type Tool = {
+  flag: string
+  app: SatelliteApp
+  label: string
+  icon: ReactNode
+}
+
+const TOOLS: Tool[] = [
+  {
+    flag: 'mb_dashboard',
+    app: 'mb-dashboard',
+    label: 'MB Dashboard',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    flag: 'relaite',
+    app: 'relaite',
+    label: 'RELAiTE',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    ),
+  },
+  {
+    flag: 'aether',
+    app: 'aether',
+    label: 'Aether',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>
+    ),
+  },
+  {
+    flag: 'adam',
+    app: 'adam',
+    label: 'ADAM',
+    icon: <img src="https://adam.stonecode.ai/acolyte-logo.png" alt="ADAM" className="w-5 h-5 object-contain" />,
+  },
+]
 
 const navItems = [
   {
@@ -50,20 +93,13 @@ export default function PortalLayout() {
   const navigate = useNavigate()
   const { isAuthenticated, isLoading, user, profile, signOut } = useAuth()
   const { hasFeature } = useFeatureFlags()
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('portal-dark-mode')
-    return saved !== null ? saved === 'true' : true
-  })
+  const [darkMode, setDarkMode] = useDarkMode()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
   const isAdmin = profile?.is_admin === true
   const isDashboard = location.pathname === '/portal/dashboard'
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode)
-    localStorage.setItem('portal-dark-mode', String(darkMode))
-  }, [darkMode])
+  const availableTools = TOOLS.filter((t) => hasFeature(t.flag))
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -77,32 +113,10 @@ export default function PortalLayout() {
     navigate('/')
   }
 
-  const openMbDashboard = async () => {
+  const openTool = async (app: SatelliteApp) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
-    const url = `${MB_DASHBOARD_URL}/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
-  const openRelaite = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-    const url = `${RELAITE_URL}/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
-  const openAether = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-    const url = `${AETHER_URL}/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
-  const openAdam = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
-    const url = `${ADAM_URL}/#access_token=${session.access_token}&refresh_token=${session.refresh_token}&type=portal`
-    window.open(url, '_blank', 'noopener,noreferrer')
+    window.open(buildPortalLaunchUrl(app, session), '_blank', 'noopener,noreferrer')
   }
 
   if (isLoading) {
@@ -195,82 +209,28 @@ export default function PortalLayout() {
           })}
 
           {/* Tools section */}
-          {(hasFeature('mb_dashboard') || hasFeature('relaite') || hasFeature('aether') || hasFeature('adam')) && (
+          {availableTools.length > 0 && (
             <div className={`px-4 py-3 mt-6 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
               <span className="text-xs font-semibold uppercase tracking-wider">Tools</span>
             </div>
           )}
-          {hasFeature('mb_dashboard') && (
+          {availableTools.map((tool) => (
             <button
-              onClick={() => { setSidebarOpen(false); openMbDashboard() }}
+              key={tool.app}
+              onClick={() => { setSidebarOpen(false); openTool(tool.app) }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                 darkMode
                   ? 'text-slate-400 hover:bg-white/5 hover:text-white'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span className="font-medium">MB Dashboard</span>
+              {tool.icon}
+              <span className="font-medium">{tool.label}</span>
               <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </button>
-          )}
-          {hasFeature('relaite') && (
-            <button
-              onClick={() => { setSidebarOpen(false); openRelaite() }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                darkMode
-                  ? 'text-slate-400 hover:bg-white/5 hover:text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              <span className="font-medium">RELAiTE</span>
-              <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
-          )}
-          {hasFeature('aether') && (
-            <button
-              onClick={() => { setSidebarOpen(false); openAether() }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                darkMode
-                  ? 'text-slate-400 hover:bg-white/5 hover:text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-              <span className="font-medium">Aether</span>
-              <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
-          )}
-
-          {hasFeature('adam') && (
-            <button
-              onClick={() => { setSidebarOpen(false); openAdam() }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                darkMode
-                  ? 'text-slate-400 hover:bg-white/5 hover:text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`}
-            >
-              <img src="https://adam.stonecode.ai/acolyte-logo.png" alt="ADAM" className="w-5 h-5 object-contain" />
-              <span className="font-medium">ADAM</span>
-              <svg className="w-3.5 h-3.5 ml-auto opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
-          )}
+          ))}
 
           {/* Admin section */}
           {isAdmin && (
@@ -406,7 +366,9 @@ export default function PortalLayout() {
 
         {/* Page content */}
         <main className="relative p-4 sm:p-6">
-          <QuantumField className="absolute inset-0 w-full h-full pointer-events-none opacity-40" />
+          {isDashboard && (
+            <QuantumField className="absolute inset-0 w-full h-full pointer-events-none opacity-40" />
+          )}
           <div className="relative z-10">
             <Outlet />
           </div>

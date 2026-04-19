@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState, useCallback, useMemo } from 'react'
+import { createContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { getWidgetPreferences, saveWidgetPreferences, isSupabaseConfigured } from '../lib/supabase'
@@ -46,6 +46,8 @@ function mergeConfigs(saved: Record<string, unknown>): WidgetConfigs {
   return merged as unknown as WidgetConfigs
 }
 
+const PERSIST_DEBOUNCE_MS = 500
+
 export function WidgetProvider({ children }: WidgetProviderProps) {
   const { user } = useAuth()
   const [layout, setLayout] = useState<WidgetLayoutItem[]>(DEFAULT_LAYOUT)
@@ -53,6 +55,8 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingRef = useRef<{ layout: WidgetLayoutItem[]; configs: WidgetConfigs } | null>(null)
 
   // Fetch preferences on mount/user change
   useEffect(() => {
@@ -95,8 +99,9 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
     fetchPreferences()
   }, [user?.id])
 
-  // Save preferences to database
-  const persistPreferences = useCallback(async (
+  // Write to DB. Debounced by schedulePersist — rapid drag/resize events
+  // coalesce into one write after PERSIST_DEBOUNCE_MS of quiet.
+  const writePreferences = useCallback(async (
     newLayout: WidgetLayoutItem[],
     newConfigs: WidgetConfigs
   ) => {
@@ -124,13 +129,48 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
     }
   }, [user?.id])
 
-  // Update layout (called on drag/resize)
+  const schedulePersist = useCallback((
+    newLayout: WidgetLayoutItem[],
+    newConfigs: WidgetConfigs
+  ) => {
+    pendingRef.current = { layout: newLayout, configs: newConfigs }
+    if (persistTimerRef.current) clearTimeout(persistTimerRef.current)
+    persistTimerRef.current = setTimeout(() => {
+      const pending = pendingRef.current
+      pendingRef.current = null
+      persistTimerRef.current = null
+      if (pending) void writePreferences(pending.layout, pending.configs)
+    }, PERSIST_DEBOUNCE_MS)
+  }, [writePreferences])
+
+  // Flush any pending write immediately (used for urgent saves + unmount).
+  const flushPersist = useCallback(async () => {
+    if (persistTimerRef.current) {
+      clearTimeout(persistTimerRef.current)
+      persistTimerRef.current = null
+    }
+    const pending = pendingRef.current
+    pendingRef.current = null
+    if (pending) await writePreferences(pending.layout, pending.configs)
+  }, [writePreferences])
+
+  useEffect(() => {
+    return () => {
+      if (persistTimerRef.current) {
+        clearTimeout(persistTimerRef.current)
+        const pending = pendingRef.current
+        if (pending) void writePreferences(pending.layout, pending.configs)
+      }
+    }
+  }, [writePreferences])
+
+  // Update layout (called on drag/resize — high-frequency, debounced)
   const updateLayout = useCallback(async (newLayout: WidgetLayoutItem[]) => {
     setLayout(newLayout)
-    await persistPreferences(newLayout, configs)
-  }, [configs, persistPreferences])
+    schedulePersist(newLayout, configs)
+  }, [configs, schedulePersist])
 
-  // Update a specific widget's config
+  // Update a specific widget's config (discrete clicks — flush immediately)
   const updateConfig = useCallback(async <K extends keyof WidgetConfigs>(
     widget: K,
     config: Partial<WidgetConfigs[K]>
@@ -140,20 +180,20 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
       [widget]: { ...configs[widget], ...config },
     }
     setConfigs(newConfigs)
-    await persistPreferences(layout, newConfigs)
-  }, [configs, layout, persistPreferences])
+    pendingRef.current = { layout, configs: newConfigs }
+    await flushPersist()
+  }, [configs, layout, flushPersist])
 
-  // Toggle widget enabled state
   const toggleWidget = useCallback(async (widget: keyof WidgetConfigs, enabled: boolean) => {
     await updateConfig(widget, { enabled } as Partial<WidgetConfigs[typeof widget]>)
   }, [updateConfig])
 
-  // Reset to defaults
   const resetToDefaults = useCallback(async () => {
     setLayout(DEFAULT_LAYOUT)
     setConfigs(DEFAULT_CONFIGS)
-    await persistPreferences(DEFAULT_LAYOUT, DEFAULT_CONFIGS)
-  }, [persistPreferences])
+    pendingRef.current = { layout: DEFAULT_LAYOUT, configs: DEFAULT_CONFIGS }
+    await flushPersist()
+  }, [flushPersist])
 
   const value = useMemo<WidgetContextType>(() => ({
     layout,

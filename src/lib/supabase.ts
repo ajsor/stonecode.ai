@@ -1,4 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { createPortalSupabaseClient } from '@stonecode/portal-sdk'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
@@ -10,19 +11,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Create Supabase client without strict database typing for flexibility
-// In production, generate proper types with `supabase gen types typescript`
-export const supabase: SupabaseClient = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key',
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  }
-)
+export const supabase: SupabaseClient = createPortalSupabaseClient({
+  url: supabaseUrl || 'https://placeholder.supabase.co',
+  anonKey: supabaseAnonKey || 'placeholder-key',
+  storageKey: 'stonecode-auth',
+})
 
 // Helper to check if Supabase is configured
 export const isSupabaseConfigured = () => {

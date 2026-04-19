@@ -98,21 +98,13 @@ export default function AcceptInvitePage() {
         return
       }
 
-      // Mark invitation as accepted
+      // Mark invitation as accepted. Profile row is created automatically by
+      // the handle_new_user trigger on auth.users INSERT — no explicit insert
+      // needed here (previous code duplicated and raced the trigger).
       await supabase
         .from('invitations')
         .update({ accepted_at: new Date().toISOString() })
         .eq('token', token)
-
-      // Create profile
-      await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: invitationEmail,
-          full_name: fullName,
-          is_admin: false,
-        })
 
       setStep('success')
 
