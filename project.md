@@ -322,6 +322,10 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-21 (2) — Fix Revoke Access failing silently
+- Redeployed `admin-revoke-user` edge function with `--no-verify-jwt`. Platform-level JWT gatekeeper was rejecting admin tokens with `UNAUTHORIZED_UNSUPPORTED_TOKEN_ALGORITHM` after Supabase rotated auth tokens to ES256 (legacy verify path was HS256-only). The function still verifies the caller is an admin internally via `supabase.auth.getUser()` + `profiles.is_admin`, so removing the platform-level check is safe. Verified end-to-end: test user now gets removed from both `auth.users` and `profiles`.
+- `UsersPage.tsx`: surface `err.message` and the HTTP status when a revoke call fails, so future gatekeeper issues don't masquerade as "Failed to revoke access". Previously the error body `{code, message}` from the platform didn't have an `error` key, so the UI fell back to the generic message.
+
 ### 2026-04-21 — Allow deleting expired invitations
 - `UsersPage.tsx`: the red trash button on the Invitations tab now renders for any non-accepted invitation, not just pending-and-unexpired ones. Expired invites were previously stuck in the list with no delete affordance. Tooltip distinguishes "Delete expired invitation" vs "Revoke invitation". Accepted invites remain read-only.
 

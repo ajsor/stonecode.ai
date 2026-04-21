@@ -171,8 +171,8 @@ export default function UsersPage() {
       setExpandedUserId(null)
       setMessage({ type: 'success', text: `Access revoked for ${email}` })
     } else {
-      const err = await res.json().catch(() => ({ error: 'Unknown error' }))
-      setMessage({ type: 'error', text: err.error || 'Failed to revoke access' })
+      const err = await res.json().catch(() => ({}))
+      setMessage({ type: 'error', text: err.error || err.message || `Failed to revoke access (${res.status})` })
     }
     setRevokingUserId(null)
   }
