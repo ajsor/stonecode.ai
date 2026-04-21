@@ -322,6 +322,9 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-20 — Bump GitHub Actions to v5 (Node 24 runtime)
+- `.github/workflows/deploy.yml`: `actions/checkout@v4` → `@v5`, `actions/setup-node@v4` → `@v5`. Silences the Node.js 20 deprecation warning GitHub emits on every run. Node 20 is being removed from runners on 2026-09-16; v5 runs on Node 24. Build `node-version: '20'` unchanged (that's the build target, unrelated to the action runtime warning). Same bump applied in parallel to mb-payroll-dashboard, aether, relaite, and adam.
+
 ### 2026-04-19 (2) — App-scoped invitation primitives
 - Migration 012 adds `app` + `message` columns to `invitations`. Existing rows default to `app='portal'` so the admin Invitations UI continues to work unchanged.
 - New edge function `app-create-invitation` — any signed-in user with the target app's feature flag can invite someone into that app. If the invitee email already has a stonecode.ai profile, the flag is granted directly (no signup). Otherwise an invitation row is created and a Resend email is sent with per-app sender branding (`"MB Dashboard" <invites@stonecode.ai>`, etc., all from the verified `invites@stonecode.ai` mailbox).
