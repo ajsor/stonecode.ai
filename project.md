@@ -322,6 +322,9 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-21 — Allow deleting expired invitations
+- `UsersPage.tsx`: the red trash button on the Invitations tab now renders for any non-accepted invitation, not just pending-and-unexpired ones. Expired invites were previously stuck in the list with no delete affordance. Tooltip distinguishes "Delete expired invitation" vs "Revoke invitation". Accepted invites remain read-only.
+
 ### 2026-04-20 — Bump GitHub Actions to v5 (Node 24 runtime)
 - `.github/workflows/deploy.yml`: `actions/checkout@v4` → `@v5`, `actions/setup-node@v4` → `@v5`. Silences the Node.js 20 deprecation warning GitHub emits on every run. Node 20 is being removed from runners on 2026-09-16; v5 runs on Node 24. Build `node-version: '20'` unchanged (that's the build target, unrelated to the action runtime warning). Same bump applied in parallel to mb-payroll-dashboard, aether, relaite, and adam.
 - Also replaced `cloudflare/wrangler-action@v3` with a direct `npx wrangler pages deploy` step (same pattern aether/relaite/mb-payroll-dashboard already use). `cloudflare/wrangler-action` still runs on Node 20 and has no v4 release yet, so the action was triggering a separate deprecation warning on every deploy. Uses `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` env vars; auth surface unchanged. Adam got the same swap (using its legacy `CLOUDFLARE_API_KEY` + `CLOUDFLARE_EMAIL` auth).

@@ -563,9 +563,10 @@ export default function UsersPage() {
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
                             {status.label}
                           </span>
-                          {!invitation.accepted_at && new Date(invitation.expires_at) > new Date() && (
+                          {!invitation.accepted_at && (
                             <button
                               onClick={() => handleRevokeInvitation(invitation.id)}
+                              title={new Date(invitation.expires_at) < new Date() ? 'Delete expired invitation' : 'Revoke invitation'}
                               className="p-2 rounded-lg text-slate-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
