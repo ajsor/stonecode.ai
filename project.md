@@ -324,6 +324,7 @@ All tables use Row Level Security (RLS).
 
 ### 2026-04-20 — Bump GitHub Actions to v5 (Node 24 runtime)
 - `.github/workflows/deploy.yml`: `actions/checkout@v4` → `@v5`, `actions/setup-node@v4` → `@v5`. Silences the Node.js 20 deprecation warning GitHub emits on every run. Node 20 is being removed from runners on 2026-09-16; v5 runs on Node 24. Build `node-version: '20'` unchanged (that's the build target, unrelated to the action runtime warning). Same bump applied in parallel to mb-payroll-dashboard, aether, relaite, and adam.
+- Also replaced `cloudflare/wrangler-action@v3` with a direct `npx wrangler pages deploy` step (same pattern aether/relaite/mb-payroll-dashboard already use). `cloudflare/wrangler-action` still runs on Node 20 and has no v4 release yet, so the action was triggering a separate deprecation warning on every deploy. Uses `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` env vars; auth surface unchanged. Adam got the same swap (using its legacy `CLOUDFLARE_API_KEY` + `CLOUDFLARE_EMAIL` auth).
 
 ### 2026-04-19 (2) — App-scoped invitation primitives
 - Migration 012 adds `app` + `message` columns to `invitations`. Existing rows default to `app='portal'` so the admin Invitations UI continues to work unchanged.
