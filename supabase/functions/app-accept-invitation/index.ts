@@ -1,8 +1,11 @@
 // Supabase Edge Function: app-accept-invitation
 // Accepts an app-scoped invitation token and grants the corresponding feature
 // flag to the calling (authenticated) user. Does NOT grant portal_access
-// unless app='portal'. Intended to be called by the satellite app's
-// /accept-invite page after the invitee signs in or signs up.
+// unless app='portal'. For app='adam', also provisions the invitee's
+// user_profiles row from invitation.metadata so they show up in the Acolyte
+// tenant with the inviter-specified role on first sign-in. Intended to be
+// called by the satellite app's /accept-invite page after the invitee signs
+// in or signs up.
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -34,7 +37,7 @@ serve(async (req) => {
 
     const { data: invite, error: inviteErr } = await admin
       .from('invitations')
-      .select('id, email, app, expires_at, accepted_at, invited_by')
+      .select('id, email, app, expires_at, accepted_at, invited_by, metadata')
       .eq('token', token)
       .maybeSingle()
     if (inviteErr) return json({ error: inviteErr.message }, 500)
@@ -70,6 +73,22 @@ serve(async (req) => {
           { onConflict: 'user_id,feature_id' },
         )
       if (upsertErr) return json({ error: upsertErr.message }, 500)
+    }
+
+    // ADAM-specific: provision user_profiles so the invitee is recognized
+    // inside ADAM's multi-tenant model. metadata is set by app-create-invitation.
+    if (invite.app === 'adam') {
+      const meta = invite.metadata as { company_id?: string; role?: string } | null
+      if (meta?.company_id && meta?.role) {
+        const { error: profileErr } = await admin
+          .from('user_profiles')
+          .upsert({
+            id: user.id,
+            company_id: meta.company_id,
+            role: meta.role,
+          }, { onConflict: 'id' })
+        if (profileErr) return json({ error: profileErr.message }, 500)
+      }
     }
 
     await admin

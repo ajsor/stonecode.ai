@@ -322,6 +322,14 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-21 (3) — Phase B: migrate ADAM invites to shared app-create-invitation
+- `supabase/migrations/013_invitation_metadata.sql` (new): add `metadata JSONB` to `invitations`. Consumed by `app-accept-invitation`; for `app='adam'` the metadata carries `{company_id, role}` so the invitee is provisioned into ADAM's multi-tenant `user_profiles` on first sign-in.
+- `supabase/functions/app-create-invitation/index.ts`: accept optional `metadata` in the request body and persist it on the invitation row. For `app='adam'` in the direct-grant path (existing stonecode.ai account), also upsert `user_profiles` from metadata. Added Acolyte-branded invite + granted email templates (charcoal `#32373c` + orange `#ff6900`, Company/Role table) branched via `app === 'adam'`. Other apps continue to use the existing gradient template.
+- `supabase/functions/app-accept-invitation/index.ts`: select `metadata` from invitations; for `app='adam'` upsert `user_profiles` from `metadata.{company_id, role}` after granting the `adam` flag.
+- Both functions redeployed with `--no-verify-jwt` (same gatekeeper bypass applied in the 2026-04-21 (2) fix).
+- Migration applied via Supabase Management API (`POST /v1/projects/{ref}/database/query`); direct DB password not available.
+- Companion ADAM changes in the `adam` repo: worker `handleInviteUser` now proxies to `app-create-invitation`; new `/accept-invite` page in the portal; `RESEND_API_KEY` no longer needed on the ADAM worker.
+
 ### 2026-04-21 (2) — Fix Revoke Access failing silently
 - Redeployed `admin-revoke-user` edge function with `--no-verify-jwt`. Platform-level JWT gatekeeper was rejecting admin tokens with `UNAUTHORIZED_UNSUPPORTED_TOKEN_ALGORITHM` after Supabase rotated auth tokens to ES256 (legacy verify path was HS256-only). The function still verifies the caller is an admin internally via `supabase.auth.getUser()` + `profiles.is_admin`, so removing the platform-level check is safe. Verified end-to-end: test user now gets removed from both `auth.users` and `profiles`.
 - `UsersPage.tsx`: surface `err.message` and the HTTP status when a revoke call fails, so future gatekeeper issues don't masquerade as "Failed to revoke access". Previously the error body `{code, message}` from the platform didn't have an `error` key, so the UI fell back to the generic message.

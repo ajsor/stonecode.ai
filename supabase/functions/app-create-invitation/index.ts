@@ -8,6 +8,11 @@
 //     directly and send a "you've been added" email (no signup step).
 //   - Otherwise, create an `invitations` row with app=<app>, send an invite
 //     email with a link to <app's accept URL>?token=<token>.
+//
+// Optional `metadata` in the request body is persisted on the invitation row.
+// For app='adam', metadata is expected to be { company_id, role } and is used
+// to provision the invitee's ADAM user_profiles row on both direct-grant and
+// accept paths.
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -42,6 +47,11 @@ const APP_CONFIG: Record<AppSlug, { label: string; acceptUrl: string; from: stri
   },
 }
 
+const ADAM_COMPANY_NAMES: Record<string, string> = {
+  '00000000-0000-0000-0000-000000000001': 'Acolyte Health',
+  '00000000-0000-0000-0000-000000000002': 'Lockton',
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
@@ -62,6 +72,7 @@ serve(async (req) => {
     const app = body?.app as AppSlug
     const email = (body?.email as string | undefined)?.trim().toLowerCase()
     const message = body?.message as string | undefined
+    const metadata = body?.metadata as Record<string, unknown> | undefined
 
     if (!app || !(app in APP_CONFIG)) return json({ error: 'Unknown app' }, 400)
     if (!email) return json({ error: 'Email is required' }, 400)
@@ -104,7 +115,6 @@ serve(async (req) => {
       .maybeSingle()
 
     if (existingProfile) {
-      // Upsert user_feature_flags to enabled=true
       const { error: upsertErr } = await admin
         .from('user_feature_flags')
         .upsert(
@@ -113,7 +123,17 @@ serve(async (req) => {
         )
       if (upsertErr) return json({ error: upsertErr.message }, 500)
 
-      await sendGrantedEmail({ email, inviterName, config, message })
+      // For ADAM, also upsert the user_profiles row so the invitee appears in
+      // the Acolyte tenant with the specified role on first sign-in.
+      if (app === 'adam' && metadata?.company_id && metadata?.role) {
+        await admin.from('user_profiles').upsert({
+          id: existingProfile.id,
+          company_id: metadata.company_id,
+          role: metadata.role,
+        }, { onConflict: 'id' })
+      }
+
+      await sendGrantedEmail({ email, inviterName, config, message, app, metadata })
 
       await admin.from('audit_log').insert({
         user_id: user.id,
@@ -154,13 +174,14 @@ serve(async (req) => {
         expires_at: expiresAt.toISOString(),
         app,
         message: message ?? null,
+        metadata: metadata ?? null,
       })
       .select()
       .single()
     if (insertErr) return json({ error: insertErr.message }, 500)
 
     const inviteUrl = `${config.acceptUrl}?token=${token}`
-    const emailResult = await sendInviteEmail({ email, inviterName, inviteUrl, config, message })
+    const emailResult = await sendInviteEmail({ email, inviterName, inviteUrl, config, message, app, metadata })
 
     await admin.from('audit_log').insert({
       user_id: user.id,
@@ -200,16 +221,19 @@ async function sendInviteEmail(args: {
   inviteUrl: string
   config: { label: string; from: string }
   message?: string
+  app: AppSlug
+  metadata?: Record<string, unknown>
 }): Promise<{ sent: boolean; error: string | null }> {
   const resendKey = Deno.env.get('RESEND_API_KEY')
   if (!resendKey) return { sent: false, error: 'RESEND_API_KEY not configured' }
 
-  const { email, inviterName, inviteUrl, config, message } = args
-  const personalNote = message
-    ? `<p style="color:#334155;font-size:15px;line-height:1.6;margin:0 0 24px;border-left:3px solid #fb923c;padding:0 0 0 16px;">${escapeHtml(message)}</p>`
-    : ''
+  const { email, inviterName, inviteUrl, config, message, app, metadata } = args
 
   try {
+    const html = app === 'adam'
+      ? buildAdamInviteHtml({ inviterName, inviteUrl, message, metadata })
+      : buildInviteHtml({ inviterName, inviteUrl, personalNote: buildPersonalNote(message), label: config.label })
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
@@ -217,7 +241,7 @@ async function sendInviteEmail(args: {
         from: config.from,
         to: [email],
         subject: `${inviterName} invited you to ${config.label}`,
-        html: buildInviteHtml({ inviterName, inviteUrl, personalNote, label: config.label }),
+        html,
         text: `${inviterName} invited you to ${config.label}.\n\n${message ? message + '\n\n' : ''}Accept: ${inviteUrl}\n\nThis link expires in 7 days.`,
       }),
     })
@@ -233,16 +257,19 @@ async function sendGrantedEmail(args: {
   inviterName: string
   config: { label: string; from: string; acceptUrl: string }
   message?: string
+  app: AppSlug
+  metadata?: Record<string, unknown>
 }): Promise<void> {
   const resendKey = Deno.env.get('RESEND_API_KEY')
   if (!resendKey) return
-  const { email, inviterName, config, message } = args
+  const { email, inviterName, config, message, app, metadata } = args
   const appRoot = config.acceptUrl.replace(/\/accept-invite$/, '')
-  const personalNote = message
-    ? `<p style="color:#334155;font-size:15px;line-height:1.6;margin:0 0 24px;border-left:3px solid #fb923c;padding:0 0 0 16px;">${escapeHtml(message)}</p>`
-    : ''
 
   try {
+    const html = app === 'adam'
+      ? buildAdamGrantedHtml({ inviterName, appRoot, message, metadata })
+      : buildGrantedHtml({ inviterName, appRoot, personalNote: buildPersonalNote(message), label: config.label })
+
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
@@ -250,13 +277,19 @@ async function sendGrantedEmail(args: {
         from: config.from,
         to: [email],
         subject: `${inviterName} added you to ${config.label}`,
-        html: buildGrantedHtml({ inviterName, appRoot, personalNote, label: config.label }),
+        html,
         text: `${inviterName} added you to ${config.label}.\n\n${message ? message + '\n\n' : ''}Sign in at ${appRoot} with your existing stonecode.ai account.`,
       }),
     })
   } catch (err) {
     console.error('sendGrantedEmail failed:', err)
   }
+}
+
+function buildPersonalNote(message?: string): string {
+  return message
+    ? `<p style="color:#334155;font-size:15px;line-height:1.6;margin:0 0 24px;border-left:3px solid #fb923c;padding:0 0 0 16px;">${escapeHtml(message)}</p>`
+    : ''
 }
 
 function buildInviteHtml(args: { inviterName: string; inviteUrl: string; personalNote: string; label: string }): string {
@@ -291,5 +324,85 @@ ${personalNote}
 <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0 16px;"><tr><td style="border-radius:12px;background:linear-gradient(135deg,#f97316,#f59e0b);">
 <a href="${appRoot}" style="display:inline-block;padding:14px 28px;color:#fff;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;">Open ${escapeHtml(label)}</a></td></tr></table>
 <p style="color:#64748b;font-size:13px;line-height:1.6;margin:20px 0 0;"><a href="${appRoot}" style="color:#ea580c;word-break:break-all;">${appRoot}</a></p>
+</td></tr></table></td></tr></table></body></html>`
+}
+
+function buildAdamInviteHtml(args: {
+  inviterName: string
+  inviteUrl: string
+  message?: string
+  metadata?: Record<string, unknown>
+}): string {
+  const { inviterName, inviteUrl, message, metadata } = args
+  const companyId = metadata?.company_id as string | undefined
+  const role = metadata?.role as string | undefined
+  const companyName = companyId ? (ADAM_COMPANY_NAMES[companyId] ?? 'Acolyte Health') : 'Acolyte Health'
+  const roleLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Internal'
+  const personalNote = message
+    ? `<p style="color:#32373c;font-size:13px;line-height:1.6;margin:0 0 20px;border-left:3px solid #ff6900;padding:0 0 0 12px;">${escapeHtml(message)}</p>`
+    : ''
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f0f0f0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#32373c;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f0f0f0;padding:40px 16px;"><tr><td align="center">
+<table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #e5e7eb;">
+<tr><td style="background:#32373c;padding:28px 32px;">
+<div style="font-size:11px;font-weight:600;letter-spacing:2px;color:#ff6900;text-transform:uppercase;margin-bottom:6px;">Acolyte Digital Asset Manager</div>
+<div style="font-size:24px;font-weight:600;color:#ffffff;letter-spacing:-0.01em;">ADAM</div>
+</td></tr>
+<tr><td style="padding:36px 32px 28px;">
+<h2 style="color:#32373c;font-size:20px;font-weight:600;margin:0 0 16px;">You're invited</h2>
+<p style="color:#32373c;font-size:15px;line-height:1.65;margin:0 0 20px;"><strong>${escapeHtml(inviterName)}</strong> has invited you to ADAM, the AI-powered digital asset manager for Acolyte Health.</p>
+${personalNote}
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px;border:1px solid #e5e7eb;width:100%;">
+<tr><td style="padding:10px 14px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;width:90px;">Company</td><td style="padding:10px 14px;font-size:13px;color:#32373c;font-weight:500;">${escapeHtml(companyName)}</td></tr>
+<tr><td style="padding:10px 14px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;border-top:1px solid #e5e7eb;">Role</td><td style="padding:10px 14px;font-size:13px;color:#32373c;font-weight:500;border-top:1px solid #e5e7eb;">${escapeHtml(roleLabel)}</td></tr>
+</table>
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px;"><tr><td style="background:#ff6900;">
+<a href="${inviteUrl}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:14px;font-weight:500;text-decoration:none;">Accept invitation</a></td></tr></table>
+<p style="color:#6b7280;font-size:12px;line-height:1.6;margin:0 0 4px;">Or copy this link into your browser:</p>
+<p style="color:#32373c;font-size:12px;line-height:1.6;margin:0 0 20px;word-break:break-all;"><a href="${inviteUrl}" style="color:#ff6900;text-decoration:none;">${inviteUrl}</a></p>
+<p style="color:#6b7280;font-size:12px;line-height:1.6;margin:0;">You'll create a password and set your display name when you accept. This link expires in 7 days.</p>
+</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#fafafa;">
+<p style="color:#6b7280;font-size:11px;margin:0;">ADAM &middot; Acolyte Health &middot; <a href="https://adam.stonecode.ai" style="color:#6b7280;text-decoration:none;">adam.stonecode.ai</a></p>
+</td></tr></table></td></tr></table></body></html>`
+}
+
+function buildAdamGrantedHtml(args: {
+  inviterName: string
+  appRoot: string
+  message?: string
+  metadata?: Record<string, unknown>
+}): string {
+  const { inviterName, appRoot, message, metadata } = args
+  const companyId = metadata?.company_id as string | undefined
+  const role = metadata?.role as string | undefined
+  const companyName = companyId ? (ADAM_COMPANY_NAMES[companyId] ?? 'Acolyte Health') : 'Acolyte Health'
+  const roleLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Internal'
+  const personalNote = message
+    ? `<p style="color:#32373c;font-size:13px;line-height:1.6;margin:0 0 20px;border-left:3px solid #ff6900;padding:0 0 0 12px;">${escapeHtml(message)}</p>`
+    : ''
+
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f0f0f0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#32373c;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f0f0f0;padding:40px 16px;"><tr><td align="center">
+<table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border:1px solid #e5e7eb;">
+<tr><td style="background:#32373c;padding:28px 32px;">
+<div style="font-size:11px;font-weight:600;letter-spacing:2px;color:#ff6900;text-transform:uppercase;margin-bottom:6px;">Acolyte Digital Asset Manager</div>
+<div style="font-size:24px;font-weight:600;color:#ffffff;letter-spacing:-0.01em;">ADAM</div>
+</td></tr>
+<tr><td style="padding:36px 32px 28px;">
+<h2 style="color:#32373c;font-size:20px;font-weight:600;margin:0 0 16px;">You're in</h2>
+<p style="color:#32373c;font-size:15px;line-height:1.65;margin:0 0 20px;"><strong>${escapeHtml(inviterName)}</strong> added you to ADAM. Sign in with your existing stonecode.ai account.</p>
+${personalNote}
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px;border:1px solid #e5e7eb;width:100%;">
+<tr><td style="padding:10px 14px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;width:90px;">Company</td><td style="padding:10px 14px;font-size:13px;color:#32373c;font-weight:500;">${escapeHtml(companyName)}</td></tr>
+<tr><td style="padding:10px 14px;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;border-top:1px solid #e5e7eb;">Role</td><td style="padding:10px 14px;font-size:13px;color:#32373c;font-weight:500;border-top:1px solid #e5e7eb;">${escapeHtml(roleLabel)}</td></tr>
+</table>
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 20px;"><tr><td style="background:#ff6900;">
+<a href="${appRoot}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:14px;font-weight:500;text-decoration:none;">Open ADAM</a></td></tr></table>
+<p style="color:#32373c;font-size:12px;line-height:1.6;margin:0 0 20px;word-break:break-all;"><a href="${appRoot}" style="color:#ff6900;text-decoration:none;">${appRoot}</a></p>
+</td></tr>
+<tr><td style="padding:20px 32px;border-top:1px solid #e5e7eb;background:#fafafa;">
+<p style="color:#6b7280;font-size:11px;margin:0;">ADAM &middot; Acolyte Health &middot; <a href="https://adam.stonecode.ai" style="color:#6b7280;text-decoration:none;">adam.stonecode.ai</a></p>
 </td></tr></table></td></tr></table></body></html>`
 }
