@@ -45,6 +45,9 @@ export interface Database {
           expires_at: string
           accepted_at: string | null
           created_at: string
+          app: string
+          message: string | null
+          metadata: Record<string, unknown> | null
         }
         Insert: {
           id?: string
@@ -54,6 +57,9 @@ export interface Database {
           expires_at: string
           accepted_at?: string | null
           created_at?: string
+          app?: string
+          message?: string | null
+          metadata?: Record<string, unknown> | null
         }
         Update: {
           id?: string
@@ -63,6 +69,9 @@ export interface Database {
           expires_at?: string
           accepted_at?: string | null
           created_at?: string
+          app?: string
+          message?: string | null
+          metadata?: Record<string, unknown> | null
         }
       }
       feature_flags: {
