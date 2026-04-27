@@ -58,6 +58,29 @@ serve(async (req) => {
         .from('profiles')
         .update({ portal_access: true })
         .eq('id', user.id)
+
+      // Pre-assigned feature flags (set at create time so the invitee lands
+      // with access on first login). Unknown flag names are skipped silently
+      // — the create function validates them before storing, but the lookup
+      // is forgiving in case a flag was renamed/deleted between create + accept.
+      const meta = invite.metadata as { feature_flags?: string[] } | null
+      const requestedFlags = Array.isArray(meta?.feature_flags) ? meta!.feature_flags : []
+      if (requestedFlags.length > 0) {
+        const { data: flagRows } = await admin
+          .from('feature_flags')
+          .select('id, name')
+          .in('name', requestedFlags)
+        if (flagRows && flagRows.length > 0) {
+          const upsertRows = flagRows.map((f) => ({
+            user_id: user.id,
+            feature_id: f.id,
+            enabled: true,
+          }))
+          await admin
+            .from('user_feature_flags')
+            .upsert(upsertRows, { onConflict: 'user_id,feature_id' })
+        }
+      }
     } else {
       const { data: flagRow } = await admin
         .from('feature_flags')

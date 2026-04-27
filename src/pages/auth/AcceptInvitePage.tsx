@@ -98,13 +98,22 @@ export default function AcceptInvitePage() {
         return
       }
 
-      // Mark invitation as accepted. Profile row is created automatically by
-      // the handle_new_user trigger on auth.users INSERT — no explicit insert
-      // needed here (previous code duplicated and raced the trigger).
-      await supabase
-        .from('invitations')
-        .update({ accepted_at: new Date().toISOString() })
-        .eq('token', token)
+      // Profile row is created automatically by the handle_new_user trigger
+      // on auth.users INSERT. Marking the invitation accepted has to go
+      // through the edge function because RLS restricts UPDATE on invitations
+      // to admins — a self-service client UPDATE silently fails and leaves
+      // the row stuck in "Pending".
+      const { data: acceptData, error: acceptErr } = await supabase.functions.invoke(
+        'app-accept-invitation',
+        { body: { token } },
+      )
+
+      if (acceptErr || !acceptData?.success) {
+        const msg = acceptData?.error || acceptErr?.message || 'Failed to finalize invitation'
+        setError(msg)
+        setIsLoading(false)
+        return
+      }
 
       setStep('success')
 

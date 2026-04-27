@@ -322,6 +322,18 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-04-26 (2) — Pre-assign feature flags at invitation time
+- `supabase/functions/create-invitation/index.ts`: accept optional `feature_flags: string[]` (flag names) in the request body, validate them against the `feature_flags` table, and persist on the new invitation row as `metadata.feature_flags`.
+- `supabase/functions/app-accept-invitation/index.ts`: when accepting a `app='portal'` invite, read `metadata.feature_flags`, look up matching flag IDs, and upsert into `user_feature_flags(user_id, feature_id, enabled=true)`. Unknown names skipped silently in case a flag was renamed/deleted between create + accept.
+- `src/pages/portal/admin/UsersPage.tsx`: switch the Invite User modal from a direct `invitations.insert()` to `supabase.functions.invoke('create-invitation', ...)` — the previous direct insert silently bypassed the Resend email send. Add a checkbox multi-select for feature flags inside the modal (admin_panel hidden — too sensitive to grant via invite), pass the selected names to the edge function, and show granted flags as small orange pills under each row in the Invitations tab.
+- `src/pages/portal/admin/InvitationsPage.tsx`: deleted. The file was orphaned (not referenced from `router.tsx` — UsersPage owns the Invitations tab via its tabbed layout).
+- Both edge functions redeployed with `--no-verify-jwt` (same admin-internal auth pattern as the rest of the invitation pipeline).
+- Eliminates the manual "log in as admin → grant flags" step after each new invite, and incidentally fixes invite emails not being sent from the Users tab.
+
+### 2026-04-26 — Fix portal invitations stuck in "Pending" after acceptance
+- `src/pages/auth/AcceptInvitePage.tsx`: route the post-signup invite finalization through `supabase.functions.invoke('app-accept-invitation', ...)` instead of a direct client UPDATE on `invitations`. Migration 005 restricts `UPDATE invitations` to admins, so the previous client-side `update({ accepted_at }).eq('token', token)` was silently failing for the (newly-signed-up, non-admin) accepting user — leaving the row stuck at `accepted_at IS NULL` and showing as "Pending" on the admin Invitations tab even after the user became an active portal user. The edge function uses the service role and already handles `app === 'portal'` (sets `profiles.portal_access = true` and stamps `accepted_at`).
+- Backfill SQL run in Supabase SQL editor for the one user who hit this (ckekke@gmail.com): `UPDATE invitations SET accepted_at = NOW() WHERE email = 'ckekke@gmail.com' AND accepted_at IS NULL;`
+
 ### 2026-04-21 (3) — Phase B: migrate ADAM invites to shared app-create-invitation
 - `supabase/migrations/013_invitation_metadata.sql` (new): add `metadata JSONB` to `invitations`. Consumed by `app-accept-invitation`; for `app='adam'` the metadata carries `{company_id, role}` so the invitee is provisioned into ADAM's multi-tenant `user_profiles` on first sign-in.
 - `supabase/functions/app-create-invitation/index.ts`: accept optional `metadata` in the request body and persist it on the invitation row. For `app='adam'` in the direct-grant path (existing stonecode.ai account), also upsert `user_profiles` from metadata. Added Acolyte-branded invite + granted email templates (charcoal `#32373c` + orange `#ff6900`, Company/Role table) branched via `app === 'adam'`. Other apps continue to use the existing gradient template.

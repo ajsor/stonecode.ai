@@ -50,13 +50,38 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { email, message } = await req.json()
+    const { email, message, feature_flags } = await req.json()
 
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'Email is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
+    }
+
+    // Validate requested feature flags exist. Names are kept (not IDs) so the
+    // metadata stays human-readable; the accept function will resolve to IDs.
+    let validFlagNames: string[] = []
+    if (Array.isArray(feature_flags) && feature_flags.length > 0) {
+      const requested = feature_flags.filter((n) => typeof n === 'string')
+      const { data: flagRows, error: flagErr } = await supabaseClient
+        .from('feature_flags')
+        .select('name')
+        .in('name', requested)
+      if (flagErr) {
+        return new Response(
+          JSON.stringify({ error: `Failed to validate feature flags: ${flagErr.message}` }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      validFlagNames = (flagRows ?? []).map((r) => r.name as string)
+      const unknown = requested.filter((n) => !validFlagNames.includes(n))
+      if (unknown.length > 0) {
+        return new Response(
+          JSON.stringify({ error: `Unknown feature flag(s): ${unknown.join(', ')}` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     // Check if email already has pending invitation
@@ -94,7 +119,12 @@ serve(async (req) => {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 7) // 7 days
 
-    // Create invitation
+    // Create invitation. metadata.feature_flags carries any flags the admin
+    // pre-selected; app-accept-invitation grants them on accept so the
+    // invitee lands with access on first login.
+    const metadata =
+      validFlagNames.length > 0 ? { feature_flags: validFlagNames } : null
+
     const { data: invitation, error: insertError } = await supabaseClient
       .from('invitations')
       .insert({
@@ -102,6 +132,7 @@ serve(async (req) => {
         token: token_value,
         invited_by: user.id,
         expires_at: expiresAt.toISOString(),
+        metadata,
       })
       .select()
       .single()

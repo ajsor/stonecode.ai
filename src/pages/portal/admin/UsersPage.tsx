@@ -65,6 +65,7 @@ export default function UsersPage() {
   const [invitationsLoading, setInvitationsLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [newInviteEmail, setNewInviteEmail] = useState('')
+  const [selectedFlags, setSelectedFlags] = useState<string[]>([])
   const [isCreating, setIsCreating] = useState(false)
   const [createdInvitation, setCreatedInvitation] = useState<{ email: string; url: string } | null>(null)
 
@@ -179,27 +180,36 @@ export default function UsersPage() {
 
   // --- Invitations logic ---
 
+  const toggleSelectedFlag = (name: string) => {
+    setSelectedFlags(prev =>
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name],
+    )
+  }
+
   const handleCreateInvitation = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!currentUser?.id) return
     setIsCreating(true)
     setMessage(null)
     try {
-      const token = crypto.randomUUID() + '-' + crypto.randomUUID()
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 7)
-      const { error } = await supabase.from('invitations').insert({
-        email: newInviteEmail,
-        token,
-        invited_by: currentUser.id,
-        expires_at: expiresAt.toISOString(),
+      // Delegate to the create-invitation edge function so it sends the email
+      // via Resend and persists pre-selected feature flags in metadata. The
+      // previous direct .insert() never sent an email and ignored flag selection.
+      const { data, error } = await supabase.functions.invoke('create-invitation', {
+        body: { email: newInviteEmail, feature_flags: selectedFlags },
       })
-      if (error) {
-        setMessage({ type: 'error', text: error.message })
+      if (error || !data?.success) {
+        const errMsg = data?.error || error?.message || 'Failed to create invitation'
+        setMessage({ type: 'error', text: errMsg })
       } else {
-        const inviteUrl = `${window.location.origin}/accept-invite?token=${token}`
-        setCreatedInvitation({ email: newInviteEmail, url: inviteUrl })
+        setCreatedInvitation({ email: newInviteEmail, url: data.invitation.invite_url })
         setNewInviteEmail('')
+        setSelectedFlags([])
+        if (data.email_sent) {
+          setMessage({ type: 'success', text: 'Invitation sent.' })
+        } else if (data.email_error) {
+          setMessage({ type: 'error', text: `Invite created but email failed: ${data.email_error}` })
+        }
         await loadInvitations()
       }
     } catch {
@@ -557,6 +567,23 @@ export default function UsersPage() {
                               {' · '}
                               {new Date(invitation.created_at).toLocaleDateString()}
                             </p>
+                            {(() => {
+                              const meta = invitation.metadata as { feature_flags?: string[] } | null
+                              const flags = Array.isArray(meta?.feature_flags) ? meta!.feature_flags : []
+                              if (flags.length === 0) return null
+                              return (
+                                <div className="mt-1.5 flex flex-wrap gap-1">
+                                  {flags.map((f) => (
+                                    <span
+                                      key={f}
+                                      className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-200/60 dark:border-orange-500/20"
+                                    >
+                                      {f}
+                                    </span>
+                                  ))}
+                                </div>
+                              )
+                            })()}
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -774,7 +801,7 @@ export default function UsersPage() {
                 <>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">Invite User</h2>
                   <form onSubmit={handleCreateInvitation}>
-                    <div className="mb-6">
+                    <div className="mb-5">
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">Email Address</label>
                       <input
                         type="email"
@@ -785,6 +812,48 @@ export default function UsersPage() {
                         className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-500 focus:border-orange-500 outline-none transition-colors"
                       />
                     </div>
+
+                    {features.length > 0 && (
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                          Grant access to
+                        </label>
+                        <p className="text-xs text-slate-500 mb-3">
+                          Selected features are enabled automatically when the user accepts. Leave empty for portal-only access.
+                        </p>
+                        <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                          {features
+                            .filter(f => f.name !== 'admin_panel')
+                            .map((flag) => {
+                              const checked = selectedFlags.includes(flag.name)
+                              return (
+                                <label
+                                  key={flag.name}
+                                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                                    checked
+                                      ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-300 dark:border-orange-500/40'
+                                      : 'bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => toggleSelectedFlag(flag.name)}
+                                    className="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-white/20 text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">{flag.name}</p>
+                                    {flag.description && (
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{flag.description}</p>
+                                    )}
+                                  </div>
+                                </label>
+                              )
+                            })}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-3">
                       <button
                         type="button"
