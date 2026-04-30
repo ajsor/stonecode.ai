@@ -65,7 +65,7 @@ export default function NoPortalAccessPage() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-xl"
       >
-        <div className="bg-slate-900 border border-white/10 rounded-2xl p-8">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -359,7 +359,7 @@ export default function AcceptInvitePage() {
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
         <motion.div
-          className={`w-full max-w-md p-8 rounded-2xl backdrop-blur-xl border ${
+          className={`w-full max-w-md p-4 rounded-2xl backdrop-blur-xl border ${
             darkMode
               ? 'bg-white/5 border-white/10'
               : 'bg-white/60 border-white/20'

@@ -87,7 +87,7 @@ export default function LoginPage() {
       <div className={`min-h-screen flex items-center justify-center px-4 ${
         darkMode ? 'bg-slate-950' : 'bg-slate-100'
       }`}>
-        <div className={`max-w-md w-full p-8 rounded-2xl backdrop-blur-xl border ${
+        <div className={`max-w-md w-full p-4 rounded-2xl backdrop-blur-xl border ${
           darkMode
             ? 'bg-white/5 border-white/10'
             : 'bg-white/60 border-white/20'
@@ -154,7 +154,7 @@ export default function LoginPage() {
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
         <motion.div
-          className={`w-full max-w-md p-8 rounded-2xl backdrop-blur-xl border ${
+          className={`w-full max-w-md p-4 rounded-2xl backdrop-blur-xl border ${
             darkMode
               ? 'bg-white/5 border-white/10'
               : 'bg-white/60 border-white/20'

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { updateProfile } from '../../lib/supabase'
+import { Button } from '../../components/ui/Button'
 
 export default function ProfilePage() {
   const { profile, user, refreshProfile } = useAuth()
@@ -61,7 +62,7 @@ export default function ProfilePage() {
         )}
 
         {/* Profile Information */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6">
+        <div className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Personal Information</h2>
             {!isEditing && (
@@ -112,27 +113,19 @@ export default function ProfilePage() {
 
             {isEditing && (
               <div className="flex gap-3 pt-4">
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all disabled:opacity-50"
-                >
+                <Button variant="primary" onClick={handleSave} loading={isSaving}>
                   {isSaving ? 'Saving...' : 'Save Changes'}
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={isSaving}
-                  className="px-6 py-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors"
-                >
+                </Button>
+                <Button variant="secondary" onClick={handleCancel} disabled={isSaving}>
                   Cancel
-                </button>
+                </Button>
               </div>
             )}
           </div>
         </div>
 
         {/* Account Details */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6">
+        <div className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Account Details</h2>
 
           <div className="space-y-4">
@@ -160,7 +153,7 @@ export default function ProfilePage() {
         {/* Security Section Link */}
         <Link
           to="/portal/profile/security"
-          className="flex items-center justify-between p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group"
+          className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group"
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
@@ -181,7 +174,7 @@ export default function ProfilePage() {
         {/* Color Settings Link */}
         <Link
           to="/portal/profile/color-settings"
-          className="flex items-center justify-between p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group mt-6"
+          className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group mt-6"
         >
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center">

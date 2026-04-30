@@ -197,7 +197,7 @@ export function BreathingWidget() {
         {/* Controls */}
         <button
           onClick={isActive ? stop : start}
-          className={`px-6 py-2 rounded-xl font-medium transition-colors ${
+          className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
             isActive
               ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20'
               : 'bg-teal-500 text-white hover:bg-teal-600'

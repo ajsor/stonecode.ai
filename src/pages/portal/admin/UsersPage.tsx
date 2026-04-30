@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QRCodeSVG } from 'qrcode.react'
 import { getAllUsers, getInvitations, getAllFeatureFlags, supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../hooks/useAuth'
+import { Button } from '../../../components/ui/Button'
 import type { AdminUser, Invitation, FeatureFlag } from '../../../types'
 
 interface UserFlagOverride {
@@ -299,20 +300,17 @@ export default function UsersPage() {
             </p>
           </div>
           {activeTab === 'invitations' && (
-            <button
+            <Button
+              variant="primary"
               onClick={() => { setShowCreateModal(true); setCreatedInvitation(null) }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all text-sm"
             >
               Invite User
-            </button>
+            </Button>
           )}
           {activeTab === 'features' && (
-            <button
-              onClick={() => setShowCreateFeatureForm(v => !v)}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all text-sm"
-            >
+            <Button variant="primary" onClick={() => setShowCreateFeatureForm(v => !v)}>
               {showCreateFeatureForm ? 'Cancel' : 'New Feature'}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -491,20 +489,18 @@ export default function UsersPage() {
 
                               {!isSelf && (
                                 <div className="pt-2 border-t border-slate-100 dark:border-white/5">
-                                  <button
+                                  <Button
+                                    variant="danger"
                                     onClick={() => handleRevoke(user.id, user.email)}
-                                    disabled={revokingUserId === user.id}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/20 transition-colors text-sm font-medium disabled:opacity-50"
-                                  >
-                                    {revokingUserId === user.id ? (
-                                      <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                                    ) : (
+                                    loading={revokingUserId === user.id}
+                                    leftIcon={
                                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                       </svg>
-                                    )}
+                                    }
+                                  >
                                     {revokingUserId === user.id ? 'Revoking...' : 'Revoke Access'}
-                                  </button>
+                                  </Button>
                                 </div>
                               )}
                             </div>
@@ -617,7 +613,7 @@ export default function UsersPage() {
             <AnimatePresence>
               {showCreateFeatureForm && (
                 <motion.div
-                  className="p-6 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6"
+                  className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 backdrop-blur-xl mb-6"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -649,13 +645,14 @@ export default function UsersPage() {
                           className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 outline-none transition-colors"
                         />
                       </div>
-                      <button
+                      <Button
                         type="submit"
-                        disabled={isCreatingFeature}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all disabled:opacity-50"
+                        variant="primary"
+                        loading={isCreatingFeature}
+                        className="w-full"
                       >
                         {isCreatingFeature ? 'Creating...' : 'Create Feature Flag'}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </motion.div>
@@ -751,7 +748,7 @@ export default function UsersPage() {
             onClick={() => setShowCreateModal(false)}
           >
             <motion.div
-              className="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10"
+              className="w-full max-w-md p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -790,12 +787,13 @@ export default function UsersPage() {
                       </button>
                     </div>
                   </div>
-                  <button
+                  <Button
+                    variant="secondary"
                     onClick={() => setShowCreateModal(false)}
-                    className="w-full py-3 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors font-medium"
+                    className="w-full"
                   >
                     Done
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
@@ -855,20 +853,22 @@ export default function UsersPage() {
                     )}
 
                     <div className="flex gap-3">
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
                         onClick={() => setShowCreateModal(false)}
-                        className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors font-medium"
+                        className="flex-1"
                       >
                         Cancel
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="submit"
-                        disabled={isCreating}
-                        className="flex-1 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium hover:from-orange-400 hover:to-amber-400 transition-all disabled:opacity-50"
+                        variant="primary"
+                        loading={isCreating}
+                        className="flex-1"
                       >
                         {isCreating ? 'Sending...' : 'Send Invite'}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </>

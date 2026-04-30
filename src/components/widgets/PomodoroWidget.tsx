@@ -155,7 +155,7 @@ export function PomodoroWidget() {
           <div className="flex gap-3">
             <button
               onClick={toggleTimer}
-              className={`px-6 py-2 rounded-xl font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 isRunning
                   ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/20'
                   : 'bg-orange-500 text-white hover:bg-orange-600'

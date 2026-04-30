@@ -206,7 +206,7 @@ export default function PortalLayout() {
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-colors ${
                   isActive
                     ? darkMode
                       ? 'bg-orange-500/20 text-orange-400'
@@ -232,7 +232,7 @@ export default function PortalLayout() {
             <button
               key={tool.app}
               onClick={() => { setSidebarOpen(false); openTool(tool.app) }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-colors ${
                 darkMode
                   ? 'text-slate-400 hover:bg-white/5 hover:text-white'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -259,7 +259,7 @@ export default function PortalLayout() {
                     key={item.path}
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-colors ${
                       isActive
                         ? darkMode
                           ? 'bg-orange-500/20 text-orange-400'
@@ -316,7 +316,7 @@ export default function PortalLayout() {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Header */}
-        <header className={`sticky top-0 z-30 px-4 sm:px-6 py-3 backdrop-blur-xl ${
+        <header className={`sticky top-0 z-30 px-4 sm:px-6 py-2 backdrop-blur-xl ${
           darkMode ? 'bg-slate-950/80 border-b border-white/5' : 'bg-white/95 border-b border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
@@ -409,7 +409,7 @@ export default function PortalLayout() {
             >
               <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-2xl pointer-events-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-white/10">
+                <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-white/10">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center">
                       <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,7 +429,7 @@ export default function PortalLayout() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-5">
+                <div className="p-4 space-y-5">
                   {[
                     {
                       icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
@@ -471,10 +471,10 @@ export default function PortalLayout() {
                   ))}
                 </div>
 
-                <div className="px-6 pb-6">
+                <div className="px-4 pb-4">
                   <button
                     onClick={() => setHelpOpen(false)}
-                    className="w-full py-2.5 rounded-xl font-medium bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-sm"
+                    className="w-full py-2 rounded-xl font-medium bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors text-sm"
                   >
                     Got it
                   </button>
