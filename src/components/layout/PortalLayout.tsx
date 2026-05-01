@@ -191,8 +191,36 @@ export default function PortalLayout() {
                 <polyline points="8 6 2 12 8 18" />
               </svg>
             </div>
-            <span className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-              stonecode.ai
+            <span
+              className="text-lg flex items-baseline"
+              style={{
+                fontFamily: "'Space Grotesk', system-ui, sans-serif",
+                letterSpacing: '-0.03em',
+              }}
+            >
+              <span
+                className="font-bold bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: 'url(/stone-texture.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  WebkitBackgroundClip: 'text',
+                  filter: darkMode
+                    ? 'brightness(1.4) contrast(1.1)'
+                    : 'brightness(0.9) contrast(1.2)',
+                }}
+              >
+                stone
+              </span>
+              <span
+                className="font-light"
+                style={{ color: darkMode ? '#ffffff' : '#000000' }}
+              >
+                code
+              </span>
+              <span className={`font-light ${darkMode ? 'text-orange-400' : 'text-orange-600'}`}>
+                .ai
+              </span>
             </span>
           </Link>
         </div>
