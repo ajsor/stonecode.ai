@@ -275,6 +275,20 @@ export function LandingAgent({ darkMode }: Props) {
                   Andrew's conversational guide
                 </div>
               </div>
+              <button
+                onClick={() => setOpen(false)}
+                className={`shrink-0 p-1.5 rounded-lg transition-colors ${
+                  darkMode
+                    ? 'text-slate-400 hover:text-white hover:bg-white/10'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+                aria-label="Close Agent Stone"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
             </div>
 
             {/* Messages */}
