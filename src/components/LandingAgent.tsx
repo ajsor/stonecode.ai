@@ -24,6 +24,31 @@ function getOrCreateSessionId(): string {
   return id
 }
 
+// Web Speech API — feature-detected at runtime; missing in Firefox
+interface SpeechAlternative { transcript: string }
+interface SpeechResult extends ArrayLike<SpeechAlternative> { isFinal: boolean }
+interface SpeechResultEvent { resultIndex: number; results: ArrayLike<SpeechResult> }
+interface SpeechErrorEvent { error?: string }
+
+interface SpeechRecognitionInstance {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onresult: ((e: SpeechResultEvent) => void) | null
+  onerror: ((e: SpeechErrorEvent) => void) | null
+  onend: (() => void) | null
+  start: () => void
+  stop: () => void
+}
+
+type SpeechCtor = new () => SpeechRecognitionInstance
+
+function getSpeechRecognitionCtor(): SpeechCtor | null {
+  if (typeof window === 'undefined') return null
+  const w = window as unknown as { SpeechRecognition?: SpeechCtor; webkitSpeechRecognition?: SpeechCtor }
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
+}
+
 interface Props {
   darkMode: boolean
 }
@@ -35,8 +60,15 @@ export function LandingAgent({ darkMode }: Props) {
   const [sending, setSending] = useState(false)
   const [ended, setEnded] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [listening, setListening] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+  // Snapshot of input at the moment recognition started, so interim results
+  // append to (rather than overwrite) text the user already typed.
+  const baseInputRef = useRef('')
+
+  const speechSupported = typeof window !== 'undefined' && getSpeechRecognitionCtor() !== null
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -48,7 +80,73 @@ export function LandingAgent({ darkMode }: Props) {
     if (open) setTimeout(() => inputRef.current?.focus(), 200)
   }, [open])
 
+  // Stop listening if the panel closes
+  useEffect(() => {
+    if (!open && recognitionRef.current) {
+      try { recognitionRef.current.stop() } catch { /* ignore */ }
+    }
+  }, [open])
+
+  const toggleListening = () => {
+    if (sending || ended) return
+    if (listening) {
+      try { recognitionRef.current?.stop() } catch { /* ignore */ }
+      return
+    }
+    const Ctor = getSpeechRecognitionCtor()
+    if (!Ctor) {
+      setError('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.')
+      return
+    }
+    setError(null)
+    const recog = new Ctor()
+    recog.continuous = true
+    recog.interimResults = true
+    recog.lang = navigator.language || 'en-US'
+    baseInputRef.current = input.length > 0 ? input.trimEnd() + ' ' : ''
+
+    recog.onresult = (event) => {
+      let finalText = ''
+      let interimText = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const alt = event.results[i][0]
+        if (event.results[i].isFinal) finalText += alt.transcript
+        else interimText += alt.transcript
+      }
+      // Persist final segments into the base so subsequent interim results
+      // don't blow them away
+      if (finalText) baseInputRef.current = (baseInputRef.current + finalText).replace(/\s+/g, ' ')
+      const next = (baseInputRef.current + interimText).slice(0, 800)
+      setInput(next)
+    }
+    recog.onerror = (e) => {
+      const code = e.error ?? 'unknown'
+      if (code === 'not-allowed' || code === 'service-not-allowed') {
+        setError('Microphone access blocked. Allow it in your browser settings to use voice.')
+      } else if (code === 'no-speech') {
+        // Quietly stop — user hit mic but didn't speak
+      } else if (code !== 'aborted') {
+        setError(`Voice input error: ${code}`)
+      }
+    }
+    recog.onend = () => {
+      setListening(false)
+      recognitionRef.current = null
+    }
+
+    recognitionRef.current = recog
+    try {
+      recog.start()
+      setListening(true)
+    } catch {
+      setError('Could not start voice input. Try again.')
+    }
+  }
+
   const send = async () => {
+    if (listening) {
+      try { recognitionRef.current?.stop() } catch { /* ignore */ }
+    }
     const text = input.trim()
     if (!text || sending || ended) return
     setError(null)
@@ -241,7 +339,7 @@ export function LandingAgent({ darkMode }: Props) {
                     onChange={(e) => setInput(e.target.value.slice(0, 800))}
                     onKeyDown={handleKey}
                     rows={1}
-                    placeholder="Ask anything about Andrew's work…"
+                    placeholder={listening ? 'Listening…' : "Ask anything about Andrew's work…"}
                     className={`flex-1 resize-none rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
                       darkMode
                         ? 'bg-white/5 border border-white/10 text-slate-100 placeholder-slate-500 focus:ring-orange-500/40 focus:border-orange-500/40'
@@ -250,6 +348,34 @@ export function LandingAgent({ darkMode }: Props) {
                     style={{ maxHeight: 120 }}
                     disabled={sending}
                   />
+                  {speechSupported && (
+                    <button
+                      onClick={toggleListening}
+                      disabled={sending}
+                      className={`relative p-2.5 rounded-xl border transition-colors disabled:opacity-40 ${
+                        listening
+                          ? 'bg-red-500 border-red-500 text-white'
+                          : darkMode
+                          ? 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
+                      aria-label={listening ? 'Stop listening' : 'Start voice input'}
+                      aria-pressed={listening}
+                    >
+                      {listening && (
+                        <motion.span
+                          className="absolute inset-0 rounded-xl pointer-events-none"
+                          animate={{ boxShadow: ['0 0 0 0 rgba(239,68,68,0.6)', '0 0 0 8px rgba(239,68,68,0)'] }}
+                          transition={{ duration: 1.2, repeat: Infinity, ease: 'easeOut' }}
+                        />
+                      )}
+                      <svg className="w-4 h-4 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="2" width="6" height="12" rx="3" />
+                        <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+                        <line x1="12" y1="19" x2="12" y2="22" />
+                      </svg>
+                    </button>
+                  )}
                   <button
                     onClick={send}
                     disabled={sending || !input.trim()}
@@ -265,7 +391,7 @@ export function LandingAgent({ darkMode }: Props) {
                 </div>
               )}
               <div className={`mt-2 text-[10px] text-center ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                Demo · Powered by Claude · Conversations are stored
+                Demo · Powered by Claude · {speechSupported ? 'Voice + text' : 'Text only'} · Conversations are stored
               </div>
             </div>
           </motion.div>

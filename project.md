@@ -327,6 +327,9 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-05-04 (2) — Voice input on Agent Stone
+- `src/components/LandingAgent.tsx`: add a microphone button next to the textarea using the browser's Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`). Continuous + interim results stream into the textarea live so the visitor can edit before sending. Active state shows a pulsing red ring; placeholder swaps to "Listening…". Feature-detected — Firefox (no Web Speech support) silently hides the mic button. No backend changes; transcription runs entirely in the browser. Especially useful for phone visitors. Permission errors and `no-speech` aborts are handled gracefully.
+
 ### 2026-05-04 — Agent Stone (landing-page conversational agent) + Inquiries admin
 - **Migration 014** (`014_inquiries.sql`): new tables `landing_conversations` (session-scoped, anonymous), `landing_messages` (JSONB content preserves Anthropic tool blocks), `landing_leads` (status: new/reviewed/contacted/closed). All RLS-locked to admins.
 - **Edge function `landing-agent`** (`supabase/functions/landing-agent/index.ts`): public, no auth. Tool-loop against Anthropic with three tools (`capture_lead`, `flag_concern`, `end_conversation`). Founder-voice system prompt explicitly forbids naming specific products, doing free AI work, or going off-topic; agent self-flags concerns to a categorized array on the conversation row for guardrail iteration.
