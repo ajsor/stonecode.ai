@@ -239,6 +239,95 @@ export interface Database {
           updated_at?: string
         }
       }
+      landing_conversations: {
+        Row: {
+          id: string
+          session_id: string
+          started_at: string
+          last_message_at: string
+          message_count: number
+          total_tokens: number
+          ip_address: string | null
+          user_agent: string | null
+          flag_categories: string[]
+          flag_notes: string | null
+          reviewed: boolean
+          admin_notes: string | null
+          ended_reason: string | null
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          started_at?: string
+          last_message_at?: string
+          message_count?: number
+          total_tokens?: number
+          ip_address?: string | null
+          user_agent?: string | null
+          flag_categories?: string[]
+          flag_notes?: string | null
+          reviewed?: boolean
+          admin_notes?: string | null
+          ended_reason?: string | null
+        }
+        Update: {
+          reviewed?: boolean
+          admin_notes?: string | null
+          flag_notes?: string | null
+        }
+      }
+      landing_messages: {
+        Row: {
+          id: number
+          conversation_id: string
+          role: 'user' | 'assistant' | 'tool' | 'system'
+          content: unknown
+          tokens_in: number | null
+          tokens_out: number | null
+          created_at: string
+        }
+        Insert: {
+          conversation_id: string
+          role: 'user' | 'assistant' | 'tool' | 'system'
+          content: unknown
+          tokens_in?: number | null
+          tokens_out?: number | null
+          created_at?: string
+        }
+        Update: never
+      }
+      landing_leads: {
+        Row: {
+          id: string
+          conversation_id: string | null
+          name: string | null
+          email: string | null
+          phone: string | null
+          interest: string | null
+          synopsis: string
+          contact_preference: string | null
+          status: 'new' | 'reviewed' | 'contacted' | 'closed'
+          admin_notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id?: string | null
+          name?: string | null
+          email?: string | null
+          phone?: string | null
+          interest?: string | null
+          synopsis: string
+          contact_preference?: string | null
+          status?: 'new' | 'reviewed' | 'contacted' | 'closed'
+          admin_notes?: string | null
+        }
+        Update: {
+          status?: 'new' | 'reviewed' | 'contacted' | 'closed'
+          admin_notes?: string | null
+        }
+      }
       google_oauth_tokens: {
         Row: {
           id: string
@@ -288,6 +377,9 @@ export type AuditLog = Database['public']['Tables']['audit_log']['Row']
 export type MfaFactor = Database['public']['Tables']['mfa_factors']['Row']
 export type WidgetPreferencesRow = Database['public']['Tables']['widget_preferences']['Row']
 export type GoogleOAuthTokenRow = Database['public']['Tables']['google_oauth_tokens']['Row']
+export type LandingConversation = Database['public']['Tables']['landing_conversations']['Row']
+export type LandingMessage = Database['public']['Tables']['landing_messages']['Row']
+export type LandingLead = Database['public']['Tables']['landing_leads']['Row']
 
 // Admin view type (includes last_sign_in_at from auth.users via get_admin_users RPC)
 export interface AdminUser {

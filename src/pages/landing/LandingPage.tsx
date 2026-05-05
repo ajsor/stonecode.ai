@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { useDarkMode } from '../../hooks/useDarkMode'
 import { QuantumField } from '../../components/QuantumField'
 import { StarField } from '../../components/StarField'
+import { LandingAgent } from '../../components/LandingAgent'
 
 // Feature card data
 const FEATURES = [
@@ -289,6 +290,9 @@ export default function LandingPage() {
         className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-orange-600 via-amber-400 to-orange-500 origin-left z-50"
         style={{ scaleX: scrollYProgress }}
       />
+
+      {/* Agent Stone — top-left conversational agent */}
+      <LandingAgent darkMode={darkMode} />
 
       {/* Header */}
       <motion.div

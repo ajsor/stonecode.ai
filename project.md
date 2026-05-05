@@ -259,6 +259,7 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 | `/portal/profile/security` | MFA, passkeys, password | Authenticated |
 | `/portal/profile/color-settings` | Light mode color palette explorer | Authenticated |
 | `/portal/admin/users` | Users, Invitations, and Features (tabbed) | Admin only |
+| `/portal/admin/inquiries` | Agent Stone conversations, leads, and flagged sessions (tabbed) | Admin only |
 | `/portal/admin/invitations` | Redirects to `/portal/admin/users` | Admin only |
 | `/portal/admin/features` | Redirects to `/portal/admin/users` | Admin only |
 
@@ -306,6 +307,9 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - **webauthn_challenges** - Temporary challenge storage
 - **widget_preferences** - Per-user widget layout and configs
 - **google_oauth_tokens** - Google OAuth tokens with expiry
+- **landing_conversations** - Anonymous chat sessions with Agent Stone on landing page
+- **landing_messages** - Per-turn transcript for landing_conversations (JSONB content preserves tool blocks)
+- **landing_leads** - Qualified leads captured by Agent Stone via the capture_lead tool
 - **quick_notes** - Quick notes widget data
 - **bookmarks** - Bookmarks widget data
 - **todos** - Todo list items
@@ -319,8 +323,21 @@ All tables use Row Level Security (RLS).
 
 ### Edge Functions (Supabase)
 - **admin-revoke-user** - Deletes a user from auth using service role (admin-only)
+- **landing-agent** - Public-facing conversational agent ("Agent Stone") on the landing page. Anonymous; identifies sessions by client-generated UUID. Streams Claude (`claude-sonnet-4-6`) with three tools: `capture_lead`, `flag_concern`, `end_conversation`. Rate-limited per session (25 user msgs, 8000 output tokens) and per IP (5 sessions/24h). Captured leads emailed to `1stonecode.ai@gmail.com` via Resend. Required Supabase secrets: `ANTHROPIC_API_KEY`, `RESEND_API_KEY`.
 
 ## Changelog
+
+### 2026-05-04 — Agent Stone (landing-page conversational agent) + Inquiries admin
+- **Migration 014** (`014_inquiries.sql`): new tables `landing_conversations` (session-scoped, anonymous), `landing_messages` (JSONB content preserves Anthropic tool blocks), `landing_leads` (status: new/reviewed/contacted/closed). All RLS-locked to admins.
+- **Edge function `landing-agent`** (`supabase/functions/landing-agent/index.ts`): public, no auth. Tool-loop against Anthropic with three tools (`capture_lead`, `flag_concern`, `end_conversation`). Founder-voice system prompt explicitly forbids naming specific products, doing free AI work, or going off-topic; agent self-flags concerns to a categorized array on the conversation row for guardrail iteration.
+- **`<LandingAgent>`** (`src/components/LandingAgent.tsx`): top-left trigger pill with a pulsing orange glow ring, no auto-open. Click opens a 360px panel with chat history + textarea (Enter to send, 800-char cap). Session ID persists in `localStorage` so refresh resumes the conversation.
+- **Inquiries admin page** (`/portal/admin/inquiries`): three tabs — Conversations / Leads / Flagged. Transcript viewer renders user/assistant/tool blocks distinctly (tool_use blocks shown as JSON for debug). Admin can mark conversations reviewed and add notes (intended for capturing guardrail learnings). Lead detail has status pills + admin notes.
+- **Manual setup required**:
+  1. Run `014_inquiries.sql` in Supabase SQL editor.
+  2. Set Supabase secret `ANTHROPIC_API_KEY` (already set for Aether/RELAiTE — same key works).
+  3. Verify Supabase secret `RESEND_API_KEY` (already set).
+  4. Deploy edge function: `supabase functions deploy landing-agent --no-verify-jwt` (public/anonymous endpoint).
+  5. (Optional) Verify `agent@stonecode.ai` sender on Resend, or change `FROM_EMAIL` in the function to use `invites@stonecode.ai`.
 
 ### 2026-04-26 (2) — Pre-assign feature flags at invitation time
 - `supabase/functions/create-invitation/index.ts`: accept optional `feature_flags: string[]` (flag names) in the request body, validate them against the `feature_flags` table, and persist on the new invitation row as `metadata.feature_flags`.
@@ -507,4 +524,4 @@ All tables use Row Level Security (RLS).
 
 ---
 
-*Last updated: 2026-04-18*
+*Last updated: 2026-05-04*
