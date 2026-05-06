@@ -70,14 +70,16 @@ export const updateProfile = async (
 }
 
 // Invitation helpers
+// Looks up a single pending, non-expired invitation by token via the
+// `get_invitation_by_token` RPC. The underlying table no longer has a public
+// SELECT policy (migration 015) — direct SELECTs return empty for anon/auth
+// users, so this RPC is the only way to validate a token client-side.
 export const validateInvitation = async (token: string) => {
-  return supabase
-    .from('invitations')
-    .select('*')
-    .eq('token', token)
-    .is('accepted_at', null)
-    .gt('expires_at', new Date().toISOString())
-    .single()
+  const { data, error } = await supabase.rpc('get_invitation_by_token', { p_token: token })
+  if (error) return { data: null, error }
+  const row = Array.isArray(data) && data.length > 0 ? data[0] : null
+  if (!row) return { data: null, error: { message: 'Invitation not found, expired, or already accepted' } }
+  return { data: row, error: null }
 }
 
 export const getInvitations = async () => {

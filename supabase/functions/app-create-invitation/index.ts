@@ -17,9 +17,23 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const ALLOWED_ORIGINS = new Set([
+  'https://stonecode.ai',
+  'https://mb-dashboard.stonecode.ai',
+  'https://relaite.stonecode.ai',
+  'https://aether.stonecode.ai',
+  'https://adam.stonecode.ai',
+])
+
+function corsHeadersFor(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? ''
+  const allow = ALLOWED_ORIGINS.has(origin) ? origin : 'https://stonecode.ai'
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    Vary: 'Origin',
+  }
 }
 
 type AppSlug = 'mb_dashboard' | 'relaite' | 'aether' | 'adam'
@@ -53,6 +67,12 @@ const ADAM_COMPANY_NAMES: Record<string, string> = {
 }
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req)
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
@@ -72,10 +92,57 @@ serve(async (req) => {
     const app = body?.app as AppSlug
     const email = (body?.email as string | undefined)?.trim().toLowerCase()
     const message = body?.message as string | undefined
-    const metadata = body?.metadata as Record<string, unknown> | undefined
+    const rawMetadata = body?.metadata as Record<string, unknown> | undefined
 
     if (!app || !(app in APP_CONFIG)) return json({ error: 'Unknown app' }, 400)
     if (!email) return json({ error: 'Email is required' }, 400)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Invalid email' }, 400)
+    if (email.length > 254) return json({ error: 'Email too long' }, 400)
+    if (message && message.length > 2000) return json({ error: 'Message too long' }, 400)
+
+    // Per-app metadata validation. Anything not in the allowlist is dropped
+    // so a caller can't smuggle arbitrary fields onto the invitation row.
+    const ADAM_VALID_COMPANY_IDS = new Set([
+      '00000000-0000-0000-0000-000000000001', // Acolyte Health
+      '00000000-0000-0000-0000-000000000002', // Lockton
+    ])
+    const ADAM_VALID_ROLES = new Set(['internal', 'admin'])
+    let metadata: Record<string, unknown> | undefined
+    if (app === 'adam') {
+      const companyId = rawMetadata?.company_id as string | undefined
+      const role = rawMetadata?.role as string | undefined
+      if (!companyId || !ADAM_VALID_COMPANY_IDS.has(companyId)) {
+        return json({ error: 'Invalid or missing ADAM company_id' }, 400)
+      }
+      if (!role || !ADAM_VALID_ROLES.has(role)) {
+        return json({ error: 'Invalid or missing ADAM role' }, 400)
+      }
+      // Tenant isolation: a non-superadmin caller can only invite into their
+      // own company. Superadmin (stonecode.ai is_admin=true) can cross tenants.
+      const { data: callerProfile } = await admin
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (!callerProfile?.is_admin) {
+        const { data: callerAdamProfile } = await admin
+          .from('user_profiles')
+          .select('company_id, role')
+          .eq('id', user.id)
+          .maybeSingle()
+        if (!callerAdamProfile || callerAdamProfile.company_id !== companyId) {
+          return json({ error: 'You can only invite users to your own company' }, 403)
+        }
+      }
+      metadata = { company_id: companyId, role }
+    } else {
+      // For non-ADAM apps, allow only the optional pre-assigned feature_flags
+      // array, validated against the live feature_flags table below.
+      const flags = rawMetadata?.feature_flags
+      metadata = Array.isArray(flags) && flags.every((f) => typeof f === 'string')
+        ? { feature_flags: flags as string[] }
+        : undefined
+    }
 
     // 1. Verify caller has the app's feature flag enabled
     const { data: flagRow } = await admin
@@ -201,13 +268,6 @@ serve(async (req) => {
     return json({ error: msg }, 500)
   }
 })
-
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
-}
 
 function escapeHtml(s: string): string {
   return s

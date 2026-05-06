@@ -1,8 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://stonecode.ai',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  Vary: 'Origin',
 }
 
 interface TokenRequest {
@@ -28,6 +31,30 @@ serve(async (req) => {
   }
 
   try {
+    // Require an authenticated Supabase user. Without this check, anyone with
+    // the function URL could exchange a leaked refresh_token for fresh access
+    // tokens — a permanent footgun. We only need to know the call originates
+    // from a logged-in user; the token rows are user-scoped client-side.
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const bearer = authHeader.replace(/^Bearer\s+/i, '')
+    if (!bearer) {
+      return new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
+    const { data: { user }, error: authError } = await admin.auth.getUser(bearer)
+    if (authError || !user) {
+      return new Response(JSON.stringify({ message: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID')
     const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')
 

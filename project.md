@@ -327,6 +327,26 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-05-06 — Multi-project security review (Phases 1–4)
+Comprehensive review of stonecode.ai + 4 sibling repos. Closed four confirmed live data leaks (anon-key reproducible) and tightened auth/CORS/input-validation surfaces. ADAM tenant-isolation rewrite is queued as Phase 5 (separate session).
+
+**Migration 015 (`015_security_lockdown.sql`):**
+- Drop public SELECT on `invitations`; replace with `SECURITY DEFINER` RPC `get_invitation_by_token(p_token)`. Anyone could enumerate every pending invitation token+email before this. `validateInvitation()` in `src/lib/supabase.ts` now calls the RPC.
+- Tighten 7 ADAM table policies (`assets`, `asset_metadata`, `companies`, `generation_jobs`, `retrieval_jobs`, `style_profiles`, `user_profiles`) — `service_role_all` policies were granted to `public` instead of `service_role`, leaving every row world-read/write. Worker uses service role and is unaffected.
+- Drop `aether_debug_log.debug_insert_any` policy (open-write DoS / log-poisoning vector).
+- Drop overly broad `relaite_invitations` SELECT policy ("authenticated reads invitation by token" — actually let any authenticated user enumerate all invites). Inviter still reads own.
+- Harden 4 SECURITY DEFINER functions (`auth_is_admin`, `get_admin_users`, `handle_new_user`, `set_landing_leads_updated_at`) to `SET search_path = ''` with fully-qualified refs.
+
+**Edge function fixes:**
+- `google-oauth-exchange`: now requires Supabase JWT auth; CORS scoped to `https://stonecode.ai`. Previously anyone could swap a leaked refresh token from the open internet.
+- `news`: requires auth; scoped CORS. Previously open NewsAPI quota drain vector.
+- `app-create-invitation`: validate email format/length, allowlist ADAM `company_id` and `role`, enforce that the inviter belongs to the same company (unless stonecode.ai admin), allowlist non-ADAM `feature_flags`. Per-request CORS origin echoing for the 5 known satellite origins.
+- `app-accept-invitation`: per-request CORS origin echoing.
+- `webauthn-authentication-options`: switched to discoverable-credential auth (`allowCredentials: undefined` always) — the previous response-shape branch on `email->profile->passkeys` leaked account existence.
+
+**Other:**
+- `public/_headers`: added `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`. Updated `Permissions-Policy` to allow microphone for first-party (Agent Stone voice input).
+
 ### 2026-05-04 (2) — Voice input on Agent Stone
 - `src/components/LandingAgent.tsx`: add a microphone button next to the textarea using the browser's Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`). Continuous + interim results stream into the textarea live so the visitor can edit before sending. Active state shows a pulsing red ring; placeholder swaps to "Listening…". Feature-detected — Firefox (no Web Speech support) silently hides the mic button. No backend changes; transcription runs entirely in the browser. Especially useful for phone visitors. Permission errors and `no-speech` aborts are handled gracefully.
 

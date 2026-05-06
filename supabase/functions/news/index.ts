@@ -1,11 +1,16 @@
 // Supabase Edge Function: news
-// Proxies NewsAPI.org requests server-side to avoid CORS and keep API key secure
+// Proxies NewsAPI.org requests server-side to avoid CORS and keep API key secure.
+// Auth-gated to authenticated portal users to prevent quota drain by anyone
+// who finds the function URL.
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://stonecode.ai',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  Vary: 'Origin',
 }
 
 const NEWS_API_BASE = 'https://newsapi.org/v2'
@@ -20,6 +25,26 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const bearer = authHeader.replace(/^Bearer\s+/i, '')
+    if (!bearer) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    const admin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
+    const { data: { user }, error: authError } = await admin.auth.getUser(bearer)
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const apiKey = Deno.env.get('NEWS_API_KEY')
     if (!apiKey) {
       return new Response(

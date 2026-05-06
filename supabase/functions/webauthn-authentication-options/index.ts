@@ -8,8 +8,10 @@ import {
 } from 'https://esm.sh/@simplewebauthn/server@9.0.0'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://stonecode.ai',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  Vary: 'Origin',
 }
 
 serve(async (req) => {
@@ -25,31 +27,14 @@ serve(async (req) => {
 
     const { email } = await req.json()
 
-    let allowCredentials = undefined
-
-    // If email provided, get specific user's passkeys
-    if (email) {
-      const { data: profile } = await supabaseClient
-        .from('profiles')
-        .select('id')
-        .eq('email', email)
-        .single()
-
-      if (profile) {
-        const { data: passkeys } = await supabaseClient
-          .from('passkeys')
-          .select('credential_id, transports')
-          .eq('user_id', profile.id)
-
-        if (passkeys && passkeys.length > 0) {
-          allowCredentials = passkeys.map(p => ({
-            id: p.credential_id,
-            type: 'public-key' as const,
-            transports: p.transports,
-          }))
-        }
-      }
-    }
+    // Use discoverable-credential auth: never branch the response shape on
+    // whether the email maps to an existing profile. The previous branch
+    // (return `allowCredentials` only when email->profile->passkeys all hit)
+    // leaked account existence to anyone who could call this endpoint.
+    // Browsers handle `allowCredentials: undefined` by letting the user pick
+    // any registered passkey on the device — a slightly different UX, but
+    // closes the enumeration vector cleanly.
+    const allowCredentials = undefined
 
     const rpID = Deno.env.get('WEBAUTHN_RP_ID') ?? 'stonecode.ai'
 
