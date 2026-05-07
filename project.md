@@ -327,6 +327,14 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-05-06 (2) — Security review Phase 5: ADAM tenant isolation rewrite
+Tracked separately in `C:\Users\ajs_o\Projects\adam\project.md` — see that changelog for the full breakdown. Summary:
+- ADAM worker no longer hardcodes Acolyte. `auth.ts` returns `companyId` from `user_profiles`; ~25 routes scoped by `auth.companyId`; client-supplied `userId`/`company_id` body fields ignored everywhere.
+- `/api/files/:key` gated by HMAC-signed URLs (or bearer fallback). Asset-returning responses decorate `cdn_url`/`thumbnail_url` with 1h-expiry signed variants. New secret: `ADAM_FILE_SIGNING_SECRET` (set on Cloudflare via `wrangler secret put`).
+- New R2 keys namespaced by company (`<companyId>/<type>s/<id>.<ext>`).
+- CORS allowlisted to `adam.stonecode.ai`.
+- ADAM admin routes now verify target user's company matches caller before role updates / deletes; `handleDeleteUser` forbids self-delete.
+
 ### 2026-05-06 — Multi-project security review (Phases 1–4)
 Comprehensive review of stonecode.ai + 4 sibling repos. Closed four confirmed live data leaks (anon-key reproducible) and tightened auth/CORS/input-validation surfaces. ADAM tenant-isolation rewrite is queued as Phase 5 (separate session).
 
