@@ -203,7 +203,6 @@ Deployment is handled by `.github/workflows/deploy.yml`:
 - [x] Tagline glow & grow effect (10% scale, pause, shrink) on load and hover
 - [x] Theme toggle with glow effect and "Light mode" / "Dark mode" label on hover
 - [x] Animated shimmer effects on glassmorphism cards
-- [x] Pulsing status indicator on "Coming Soon" badge
 
 ## TODO
 
@@ -326,6 +325,14 @@ All tables use Row Level Security (RLS).
 - **landing-agent** - Public-facing conversational agent ("Agent Stone") on the landing page. Anonymous; identifies sessions by client-generated UUID. Streams Claude (`claude-sonnet-4-6`) with three tools: `capture_lead`, `flag_concern`, `end_conversation`. Rate-limited per session (25 user msgs, 8000 output tokens) and per IP (5 sessions/24h). Captured leads emailed to `1stonecode.ai@gmail.com` via Resend. Required Supabase secrets: `ANTHROPIC_API_KEY`, `RESEND_API_KEY`.
 
 ## Changelog
+
+### 2026-05-11 — Landing page SEO/AI optimization + remove "Coming Soon"
+- `index.html`: expanded `<title>` and `description` to keyword-rich copy; added `keywords`, `author`, `robots` (`max-snippet:-1, max-image-preview:large`), `canonical`, `theme-color`, and `apple-touch-icon`. Open Graph gained `og:site_name`, `og:locale`, `og:image` (+ width/height/alt). Twitter switched to `summary_large_image` with image + alt. Added JSON-LD `@graph` covering Organization, Person (Andrew Stone), WebSite, and ProfessionalService for rich-result eligibility and AI agent grounding.
+- `public/robots.txt` (new): allows all crawlers on `/`, blocks `/portal/`, `/login`, `/accept-invite`, `/no-portal-access`. Explicit per-bot rules for GPTBot, ClaudeBot/Claude-Web/anthropic-ai, PerplexityBot, Google-Extended, CCBot — all allowed (override their conservative defaults). Sitemap pointer included.
+- `public/sitemap.xml` (new): single entry for the homepage (everything else is auth-gated).
+- `public/llms.txt` (new): emerging convention for AI agents — concise plaintext summary of the studio's offering and contact path (Agent Stone).
+- `src/pages/landing/LandingPage.tsx`: removed the "Coming Soon" pill and its shimmer wrapper. Feature card body copy is now always in the DOM via `sr-only` (was conditionally mounted on hover, so crawlers never saw it); visual hover-reveal preserved with `aria-hidden` to avoid screen-reader duplication.
+- **Open item:** `og:image` references `/og-image.png` which doesn't exist yet. Create a 1200×630 PNG and drop it in `public/` to get rich social cards. Until then social embeds will fall back to a generic preview.
 
 ### 2026-05-06 (2) — Security review Phase 5: ADAM tenant isolation rewrite
 Tracked separately in `C:\Users\ajs_o\Projects\adam\project.md` — see that changelog for the full breakdown. Summary:
@@ -555,4 +562,4 @@ Comprehensive review of stonecode.ai + 4 sibling repos. Closed four confirmed li
 
 ---
 
-*Last updated: 2026-05-04*
+*Last updated: 2026-05-11*

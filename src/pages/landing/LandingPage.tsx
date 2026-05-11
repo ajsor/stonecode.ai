@@ -108,7 +108,10 @@ function FeatureCard({ f, darkMode }: { f: Feature; darkMode: boolean }) {
         </div>
       </div>
 
-      {/* Body text — slides open on hover */}
+      {/* SEO/AI-crawler copy — always in the DOM, visually hidden */}
+      <span className="sr-only">{f.body}</span>
+
+      {/* Body text — slides open on hover (visual only; hidden from AT to avoid duplication) */}
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
@@ -117,6 +120,7 @@ function FeatureCard({ f, darkMode }: { f: Feature; darkMode: boolean }) {
             animate={{ height: 'auto', opacity: 1, transition: { duration: 0.25, ease: 'easeOut' } }}
             exit={{ height: 0, opacity: 0, transition: { duration: 1.0, ease: 'easeOut' } }}
             className="overflow-hidden"
+            aria-hidden="true"
           >
             <p
               className={`text-sm leading-relaxed pt-3 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}
@@ -526,67 +530,13 @@ export default function LandingPage() {
             Where ambition meets precision.
           </motion.p>
           <motion.p
-            className={`text-xs md:text-sm text-center max-w-md mb-6 ${
+            className={`text-xs md:text-sm text-center max-w-md ${
               darkMode ? 'text-slate-600' : 'text-slate-500'
             }`}
             variants={itemVariants}
           >
             AI-augmented software development for businesses ready to build something great.
           </motion.p>
-
-          {/* "Coming Soon" pill — Quantum Pipes glass style */}
-          <motion.div
-            className="relative px-5 py-2.5 rounded-full backdrop-blur-xl mb-0 overflow-hidden"
-            style={{
-              background: darkMode
-                ? 'rgba(255, 255, 255, 0.03)'
-                : 'rgba(255, 255, 255, 0.7)',
-              border: darkMode
-                ? '1px solid rgba(255, 255, 255, 0.08)'
-                : '1px solid rgba(0, 0, 0, 0.08)',
-              boxShadow: darkMode
-                ? '0 4px 24px rgba(0, 0, 0, 0.3)'
-                : '0 4px 16px rgba(0, 0, 0, 0.08)',
-            }}
-            variants={itemVariants}
-            whileHover={{
-              scale: 1.03,
-              boxShadow: darkMode
-                ? '0 8px 32px rgba(234, 88, 12, 0.15)'
-                : '0 8px 32px rgba(234, 88, 12, 0.1)',
-            }}
-          >
-            {/* Shimmer sweep */}
-            <motion.div
-              className="absolute inset-0 rounded-full"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)',
-              }}
-              animate={{ x: ['-100%', '100%'] }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                repeatDelay: 4,
-                ease: 'easeInOut',
-              }}
-            />
-            <div className="flex items-center gap-3 relative z-10">
-              <motion.div
-                className="w-2 h-2 rounded-full bg-green-400"
-                animate={{ scale: [1, 1.3, 1], opacity: [1, 0.6, 1] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-              <span
-                className={`text-sm font-medium ${
-                  darkMode ? 'text-slate-300' : 'text-slate-600'
-                }`}
-                style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
-              >
-                Coming Soon
-              </span>
-            </div>
-          </motion.div>
         </motion.div>
         </div>{/* end hero */}
 

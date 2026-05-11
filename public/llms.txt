@@ -1,0 +1,25 @@
+# stonecode.ai
+
+> The studio of Andrew Stone. AI-augmented software development for businesses ready to ship.
+
+stonecode.ai is a software development studio that integrates with client teams to build production-ready systems with AI woven in. The studio works on custom software engineering, AI integration and automation, and technology strategy.
+
+## What stonecode.ai does
+
+- **Collaborate** — Embeds with the client's team to align on goals and build alongside them, turning domain expertise into software that's unmistakably theirs.
+- **Deliver** — Ships production-ready software on schedule, built to perform under real-world demands and scale.
+- **Guide** — Helps clients cut through technology noise: right tools, right architecture, clear roadmap.
+- **Assist** — Integrates AI that amplifies what teams can do — automation that removes friction and unlocks capabilities that weren't possible before.
+
+## Contact
+
+- Conversational agent on the homepage ("Agent Stone") — qualified inquiries route directly to Andrew.
+- Website: https://stonecode.ai/
+
+## About Andrew Stone
+
+Founder of stonecode.ai. Builds AI-augmented software with clients who want to ship real systems rather than slide decks.
+
+## Not indexed
+
+The /portal/ area is an invitation-only authenticated workspace and is not part of the public site.

@@ -1,0 +1,51 @@
+User-agent: *
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+Disallow: /no-portal-access
+
+# AI training & retrieval crawlers — explicitly allowed (override defaults)
+User-agent: GPTBot
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+User-agent: CCBot
+Allow: /
+Disallow: /portal/
+Disallow: /login
+Disallow: /accept-invite
+
+Sitemap: https://stonecode.ai/sitemap.xml
