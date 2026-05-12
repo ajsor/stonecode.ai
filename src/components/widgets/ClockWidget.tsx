@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react'
 import { WidgetContainer } from './WidgetContainer'
 import { useWidgets } from '../../hooks/useWidgets'
-
-const TIMEZONES = [
-  { id: 'local', label: 'Local', zone: Intl.DateTimeFormat().resolvedOptions().timeZone },
-  { id: 'utc', label: 'UTC', zone: 'UTC' },
-  { id: 'new_york', label: 'New York', zone: 'America/New_York' },
-  { id: 'london', label: 'London', zone: 'Europe/London' },
-  { id: 'tokyo', label: 'Tokyo', zone: 'Asia/Tokyo' },
-  { id: 'sydney', label: 'Sydney', zone: 'Australia/Sydney' },
-]
+import { TIMEZONES } from './widgetConstants'
 
 export function ClockWidget() {
   const { configs } = useWidgets()
@@ -89,5 +81,3 @@ export function ClockWidget() {
     </WidgetContainer>
   )
 }
-
-export { TIMEZONES }

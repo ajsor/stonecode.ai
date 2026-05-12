@@ -1,21 +1,35 @@
-import { useMemo, useCallback, useRef, useEffect, useState, createContext } from 'react'
+import { useMemo, useCallback, useRef, useEffect, useState, createContext, lazy, Suspense } from 'react'
 import type { ComponentType } from 'react'
 import GridLayoutBase from 'react-grid-layout'
 import { useWidgets } from '../../hooks/useWidgets'
-import { WeatherWidget } from './WeatherWidget'
-import { SpotifyWidget } from './SpotifyWidget'
-import { CalendarWidget } from './CalendarWidget'
-import { ClockWidget } from './ClockWidget'
-import { PomodoroWidget } from './PomodoroWidget'
-import { CountdownWidget } from './CountdownWidget'
-import { CalculatorWidget } from './CalculatorWidget'
-import { BreathingWidget } from './BreathingWidget'
-import { NotesWidget } from './NotesWidget'
-import { BookmarksWidget } from './BookmarksWidget'
-import { TodosWidget } from './TodosWidget'
-import { HabitsWidget } from './HabitsWidget'
 import { WidgetErrorBoundary } from './WidgetErrorBoundary'
 import type { WidgetLayoutItem, WidgetType } from '../../types/widgets'
+
+// Lazy-load each widget so only the ones the user has enabled (per their
+// widget_configs) ship code. New users / disabled widgets pay zero bytes.
+// Named export → default-shape adapter for React.lazy.
+const WeatherWidget = lazy(() => import('./WeatherWidget').then(m => ({ default: m.WeatherWidget })))
+const SpotifyWidget = lazy(() => import('./SpotifyWidget').then(m => ({ default: m.SpotifyWidget })))
+const CalendarWidget = lazy(() => import('./CalendarWidget').then(m => ({ default: m.CalendarWidget })))
+const ClockWidget = lazy(() => import('./ClockWidget').then(m => ({ default: m.ClockWidget })))
+const PomodoroWidget = lazy(() => import('./PomodoroWidget').then(m => ({ default: m.PomodoroWidget })))
+const CountdownWidget = lazy(() => import('./CountdownWidget').then(m => ({ default: m.CountdownWidget })))
+const CalculatorWidget = lazy(() => import('./CalculatorWidget').then(m => ({ default: m.CalculatorWidget })))
+const BreathingWidget = lazy(() => import('./BreathingWidget').then(m => ({ default: m.BreathingWidget })))
+const NotesWidget = lazy(() => import('./NotesWidget').then(m => ({ default: m.NotesWidget })))
+const BookmarksWidget = lazy(() => import('./BookmarksWidget').then(m => ({ default: m.BookmarksWidget })))
+const TodosWidget = lazy(() => import('./TodosWidget').then(m => ({ default: m.TodosWidget })))
+const HabitsWidget = lazy(() => import('./HabitsWidget').then(m => ({ default: m.HabitsWidget })))
+
+// Lightweight placeholder while a widget chunk loads. Sized to match the
+// minimum widget body so the grid doesn't reflow when the real widget mounts.
+function WidgetChunkSkeleton() {
+  return (
+    <div className="w-full h-full min-h-[120px] flex items-center justify-center">
+      <div className="w-5 h-5 border-2 border-orange-500/40 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
 
 import 'react-grid-layout/css/styles.css'
 
@@ -226,7 +240,7 @@ export function WidgetGrid({ className }: WidgetGridProps) {
         }}
       >
         <WidgetErrorBoundary widgetName={WIDGET_NAMES[type]}>
-          {widget}
+          <Suspense fallback={<WidgetChunkSkeleton />}>{widget}</Suspense>
         </WidgetErrorBoundary>
       </WidgetCollapseContext.Provider>
     )

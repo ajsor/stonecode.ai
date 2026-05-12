@@ -1,16 +1,7 @@
+// Public widget surface. Individual widget components are lazy-loaded
+// inside WidgetGrid and intentionally NOT re-exported here — exporting
+// them would re-introduce static graph edges that defeat the lazy split.
 export { WidgetGrid } from './WidgetGrid'
 export { WidgetContainer } from './WidgetContainer'
 export { WidgetSettings } from './WidgetSettings'
 export { WidgetErrorBoundary } from './WidgetErrorBoundary'
-export { WeatherWidget } from './WeatherWidget'
-export { SpotifyWidget } from './SpotifyWidget'
-export { CalendarWidget } from './CalendarWidget'
-export { ClockWidget } from './ClockWidget'
-export { PomodoroWidget } from './PomodoroWidget'
-export { CountdownWidget } from './CountdownWidget'
-export { CalculatorWidget } from './CalculatorWidget'
-export { BreathingWidget } from './BreathingWidget'
-export { NotesWidget } from './NotesWidget'
-export { BookmarksWidget } from './BookmarksWidget'
-export { TodosWidget } from './TodosWidget'
-export { HabitsWidget } from './HabitsWidget'

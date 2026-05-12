@@ -2,24 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { WidgetContainer } from './WidgetContainer'
 import { useWidgets } from '../../hooks/useWidgets'
+import { PATTERNS } from './widgetConstants'
 
 type BreathPhase = 'inhale' | 'hold' | 'exhale' | 'rest'
-
-interface BreathPattern {
-  id: string
-  name: string
-  inhale: number
-  hold: number
-  exhale: number
-  rest: number
-}
-
-const PATTERNS: BreathPattern[] = [
-  { id: 'relaxing', name: 'Relaxing (4-7-8)', inhale: 4, hold: 7, exhale: 8, rest: 0 },
-  { id: 'box', name: 'Box Breathing', inhale: 4, hold: 4, exhale: 4, rest: 4 },
-  { id: 'calm', name: 'Calm (4-4-6)', inhale: 4, hold: 4, exhale: 6, rest: 0 },
-  { id: 'energizing', name: 'Energizing (6-0-6)', inhale: 6, hold: 0, exhale: 6, rest: 0 },
-]
 
 const PHASE_LABELS: Record<BreathPhase, string> = {
   inhale: 'Breathe In',
@@ -209,5 +194,3 @@ export function BreathingWidget() {
     </WidgetContainer>
   )
 }
-
-export { PATTERNS }

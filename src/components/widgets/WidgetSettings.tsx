@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useWidgets } from '../../hooks/useWidgets'
 import type { WidgetType, SpotifyPlaylist } from '../../types/widgets'
 import { NEWS_CATEGORIES } from '../../lib/newsApi'
-import { TIMEZONES } from './ClockWidget'
-import { PATTERNS } from './BreathingWidget'
+import { TIMEZONES, PATTERNS } from './widgetConstants'
 
 type SettingsTab = WidgetType | 'news'
 
