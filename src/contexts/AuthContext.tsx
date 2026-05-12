@@ -79,14 +79,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     })
 
-    // Listen for auth changes
+    // Listen for auth changes. CRITICAL: this callback must not await any
+    // supabase-js work. supabase-js holds an internal auth lock while it
+    // notifies subscribers — anything awaited here blocks every other query
+    // in the app for the duration. The previous `await fetchProfile(...)`
+    // here serialized the widget_preferences fetch behind our 3s profile
+    // timeout, so widgets took 3-4s to paint even though their own query
+    // resolves in ~300ms. Fire the profile fetch in the background instead.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
 
         if (event === 'SIGNED_IN' && session?.user) {
-          await fetchProfile(session.user.id)
+          void fetchProfile(session.user.id)
         } else if (event === 'SIGNED_OUT') {
           setProfile(null)
         }
