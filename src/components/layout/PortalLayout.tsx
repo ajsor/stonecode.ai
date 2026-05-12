@@ -159,6 +159,7 @@ export default function PortalLayout() {
   }
 
   return (
+    <WidgetProvider>
     <div className={`min-h-screen transition-colors duration-300 ${
       darkMode ? 'bg-slate-950' : 'bg-slate-50'
     }`}>
@@ -422,9 +423,7 @@ export default function PortalLayout() {
             <QuantumField className="absolute inset-0 w-full h-full pointer-events-none opacity-40" />
           )}
           <div className="relative z-10">
-            <WidgetProvider>
-              <Outlet />
-            </WidgetProvider>
+            <Outlet />
           </div>
         </main>
       </div>
@@ -525,5 +524,6 @@ export default function PortalLayout() {
         )}
       </AnimatePresence>
     </div>
+    </WidgetProvider>
   )
 }
