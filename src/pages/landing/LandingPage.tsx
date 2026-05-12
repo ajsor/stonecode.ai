@@ -95,15 +95,15 @@ function FeatureCard({ f, darkMode }: { f: Feature; darkMode: boolean }) {
         </div>
         <div className="min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <span
-              className={`text-sm font-semibold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}
+            <h2
+              className={`m-0 text-sm font-semibold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}
               style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
             >
               {f.word}
-            </span>
-            <span className="text-xs" style={{ color: f.iconColor.stroke }}>
+            </h2>
+            <h3 className="m-0 text-xs font-normal" style={{ color: f.iconColor.stroke }}>
               {f.subhead}
-            </span>
+            </h3>
           </div>
         </div>
       </div>
@@ -140,6 +140,7 @@ export default function LandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isTouchDevice, setIsTouchDevice] = useState(false)
   const [, setCursorVariant] = useState('default')
+  const [agentOpen, setAgentOpen] = useState(false)
   const { scrollYProgress } = useScroll()
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
 
@@ -295,8 +296,8 @@ export default function LandingPage() {
         style={{ scaleX: scrollYProgress }}
       />
 
-      {/* Agent Stone — top-left conversational agent */}
-      <LandingAgent darkMode={darkMode} />
+      {/* Agent Stone — top-left conversational agent (controlled so a CTA can open it) */}
+      <LandingAgent darkMode={darkMode} open={agentOpen} onOpenChange={setAgentOpen} />
 
       {/* Header */}
       <motion.div
@@ -530,13 +531,45 @@ export default function LandingPage() {
             Where ambition meets precision.
           </motion.p>
           <motion.p
-            className={`text-xs md:text-sm text-center max-w-md ${
+            className={`text-xs md:text-sm text-center max-w-md mb-6 ${
               darkMode ? 'text-slate-600' : 'text-slate-500'
             }`}
             variants={itemVariants}
           >
             AI-augmented software development for businesses ready to build something great.
           </motion.p>
+
+          {/* Primary CTA — opens Agent Stone */}
+          <motion.button
+            type="button"
+            onClick={() => setAgentOpen(true)}
+            variants={itemVariants}
+            whileHover={{ scale: 1.04, boxShadow: '0 12px 36px rgba(234, 88, 12, 0.45)' }}
+            whileTap={{ scale: 0.97 }}
+            className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white overflow-hidden"
+            style={{
+              fontFamily: "'Space Grotesk', system-ui, sans-serif",
+              background: 'linear-gradient(135deg, #fb923c 0%, #ea580c 100%)',
+              boxShadow: '0 8px 24px rgba(234, 88, 12, 0.35)',
+            }}
+            aria-label="Open chat with Andrew"
+          >
+            <motion.span
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)' }}
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 3.5, ease: 'easeInOut' }}
+            />
+            <span className="relative z-10">Start a conversation</span>
+            <svg
+              className="relative z-10 w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </motion.button>
         </motion.div>
         </div>{/* end hero */}
 
@@ -551,6 +584,87 @@ export default function LandingPage() {
             {FEATURES.map((f) => (
               <FeatureCard key={f.word} f={f} darkMode={darkMode} />
             ))}
+          </div>
+        </motion.section>
+
+        {/* How we work — substantive copy for SEO/AI crawlers (and humans who scroll) */}
+        <motion.section
+          aria-labelledby="how-we-work-heading"
+          className="w-full px-4 sm:px-6 pt-16 pb-16"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        >
+          <div className="max-w-3xl mx-auto">
+            <p
+              className={`text-xs font-medium tracking-[0.2em] uppercase mb-4 ${
+                darkMode ? 'text-orange-400/80' : 'text-orange-600'
+              }`}
+              style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+            >
+              How we work
+            </p>
+            <h2
+              id="how-we-work-heading"
+              className={`text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-6 ${
+                darkMode ? 'text-white' : 'text-slate-900'
+              }`}
+              style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", letterSpacing: '-0.02em' }}
+            >
+              A studio built for teams that want to ship — not slideware.
+            </h2>
+            <div className={`space-y-5 text-base sm:text-lg leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              <p>
+                stonecode.ai is the studio of <strong className={darkMode ? 'text-slate-200' : 'text-slate-900'}>Andrew Stone</strong>.
+                We partner with operators, founders, and product teams to design and build
+                AI-augmented software that runs in production — not demos that fall apart the
+                moment they leave a slide deck. Every engagement starts with the people doing
+                the actual work, and ends with software they actually use.
+              </p>
+              <p>
+                We embed with your team rather than disappearing behind a statement of work.
+                That means working in your repos, your tooling, and your decisions — pairing
+                with internal engineers, training them as we go, and leaving behind systems
+                your team can own once we're gone. AI is woven in where it earns its keep:
+                automating the painful, accelerating the slow, and surfacing what was
+                previously invisible.
+              </p>
+              <p>
+                Typical work spans custom application development, retrieval-augmented
+                generation (RAG) and agentic workflows on Claude and the OpenAI stack,
+                Supabase- and Postgres-backed data platforms, multi-tenant SaaS, and
+                technology-strategy work for leaders deciding what to build, buy, or pause.
+                If you have a domain advantage and a clear outcome in mind, we can help you
+                turn it into software.
+              </p>
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setAgentOpen(true)}
+                className={`px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:scale-[1.03] ${
+                  darkMode
+                    ? 'bg-white text-slate-900 hover:bg-orange-100'
+                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                }`}
+                style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+              >
+                Talk to Andrew →
+              </button>
+              <a
+                href="mailto:1stonecode.ai@gmail.com"
+                className={`px-5 py-2.5 rounded-full text-sm font-medium border transition-all hover:scale-[1.03] ${
+                  darkMode
+                    ? 'border-white/15 text-slate-300 hover:bg-white/5 hover:text-white'
+                    : 'border-slate-300 text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+                style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+              >
+                Email us
+              </a>
+            </div>
           </div>
         </motion.section>
 

@@ -51,10 +51,18 @@ function getSpeechRecognitionCtor(): SpeechCtor | null {
 
 interface Props {
   darkMode: boolean
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function LandingAgent({ darkMode }: Props) {
-  const [open, setOpen] = useState(false)
+export function LandingAgent({ darkMode, open: controlledOpen, onOpenChange }: Props) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = (v: boolean | ((p: boolean) => boolean)) => {
+    const next = typeof v === 'function' ? v(open) : v
+    if (controlledOpen === undefined) setInternalOpen(next)
+    onOpenChange?.(next)
+  }
   const [messages, setMessages] = useState<Msg[]>([GREETING])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)

@@ -8,6 +8,7 @@ import { useDarkMode } from '../../hooks/useDarkMode'
 import { DashboardToolbar } from '../dashboard/DashboardToolbar'
 import { QuantumField } from '../QuantumField'
 import { supabase } from '../../lib/supabase'
+import { WidgetProvider } from '../../contexts/WidgetContext'
 
 type Tool = {
   flag: string
@@ -421,7 +422,9 @@ export default function PortalLayout() {
             <QuantumField className="absolute inset-0 w-full h-full pointer-events-none opacity-40" />
           )}
           <div className="relative z-10">
-            <Outlet />
+            <WidgetProvider>
+              <Outlet />
+            </WidgetProvider>
           </div>
         </main>
       </div>

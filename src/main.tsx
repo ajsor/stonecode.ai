@@ -5,15 +5,14 @@ import './index.css'
 import { router } from './router'
 import { AuthProvider } from './contexts/AuthContext'
 import { FeatureFlagProvider } from './contexts/FeatureFlagContext'
-import { WidgetProvider } from './contexts/WidgetContext'
 
+// WidgetProvider lives inside PortalLayout — keeps widget code out of the
+// entry chunk so the landing page doesn't pay for it.
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <FeatureFlagProvider>
-        <WidgetProvider>
-          <RouterProvider router={router} />
-        </WidgetProvider>
+        <RouterProvider router={router} />
       </FeatureFlagProvider>
     </AuthProvider>
   </StrictMode>,
