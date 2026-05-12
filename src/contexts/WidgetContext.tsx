@@ -47,6 +47,33 @@ function mergeConfigs(saved: Record<string, unknown>): WidgetConfigs {
 }
 
 const PERSIST_DEBOUNCE_MS = 500
+const CACHE_KEY_PREFIX = 'widget_prefs_cache_v1_'
+
+// Read/write a per-user localStorage cache so warm loads paint the grid
+// instantly without waiting on the Supabase round-trip. Server fetch still
+// runs in the background and reconciles.
+function readCache(userId: string): { layout: WidgetLayoutItem[]; configs: WidgetConfigs } | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY_PREFIX + userId)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (!parsed?.layout || !parsed?.configs) return null
+    return parsed
+  } catch {
+    return null
+  }
+}
+
+function writeCache(userId: string, layout: WidgetLayoutItem[], configs: WidgetConfigs) {
+  try {
+    localStorage.setItem(
+      CACHE_KEY_PREFIX + userId,
+      JSON.stringify({ layout, configs })
+    )
+  } catch {
+    // Ignore quota / private-mode errors
+  }
+}
 
 export function WidgetProvider({ children }: WidgetProviderProps) {
   const { user } = useAuth()
@@ -58,18 +85,30 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
   const persistTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingRef = useRef<{ layout: WidgetLayoutItem[]; configs: WidgetConfigs } | null>(null)
 
-  // Fetch preferences on mount/user change
+  // Fetch preferences on mount/user change. Hit localStorage cache first
+  // (instant paint), then revalidate from Supabase in the background.
   useEffect(() => {
-    const fetchPreferences = async () => {
-      if (!user?.id || !isSupabaseConfigured()) {
-        setIsLoading(false)
-        return
-      }
+    if (!user?.id || !isSupabaseConfigured()) {
+      setIsLoading(false)
+      return
+    }
 
+    const userId = user.id
+    const cached = readCache(userId)
+    if (cached) {
+      setLayout(cached.layout)
+      setConfigs(cached.configs)
+      setIsLoading(false)
+    }
+
+    const fetchPreferences = async () => {
       try {
-        setIsLoading(true)
+        if (!cached) setIsLoading(true)
         setError(null)
-        const { data, error: fetchError } = await getWidgetPreferences(user.id)
+        const { data, error: fetchError } = await getWidgetPreferences(userId)
+
+        let nextLayout = DEFAULT_LAYOUT
+        let nextConfigs = DEFAULT_CONFIGS
 
         if (fetchError) {
           // PGRST116 = no rows found, which is fine for new users
@@ -77,17 +116,18 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
             console.error('Error fetching widget preferences:', fetchError)
             setError('Failed to load widget preferences')
           }
-          // Use defaults for new users
-          setLayout(DEFAULT_LAYOUT)
-          setConfigs(DEFAULT_CONFIGS)
         } else if (data) {
           const savedLayout = data.layout as WidgetLayoutItem[] | undefined
           const savedConfigs = data.widget_configs as Record<string, unknown> | undefined
           // layout_version stored inside widget_configs as _layoutVersion
           const savedVersion = savedConfigs?._layoutVersion as number | undefined
-          setLayout(savedLayout ? mergeLayout(savedLayout, savedVersion) : DEFAULT_LAYOUT)
-          setConfigs(savedConfigs ? mergeConfigs(savedConfigs) : DEFAULT_CONFIGS)
+          nextLayout = savedLayout ? mergeLayout(savedLayout, savedVersion) : DEFAULT_LAYOUT
+          nextConfigs = savedConfigs ? mergeConfigs(savedConfigs) : DEFAULT_CONFIGS
         }
+
+        setLayout(nextLayout)
+        setConfigs(nextConfigs)
+        writeCache(userId, nextLayout, nextConfigs)
       } catch (err) {
         console.error('Widget preferences fetch failed:', err)
         setError('Failed to load widget preferences')
@@ -101,11 +141,14 @@ export function WidgetProvider({ children }: WidgetProviderProps) {
 
   // Write to DB. Debounced by schedulePersist — rapid drag/resize events
   // coalesce into one write after PERSIST_DEBOUNCE_MS of quiet.
+  // Also refreshes the localStorage cache so warm loads see the latest state.
   const writePreferences = useCallback(async (
     newLayout: WidgetLayoutItem[],
     newConfigs: WidgetConfigs
   ) => {
     if (!user?.id || !isSupabaseConfigured()) return
+
+    writeCache(user.id, newLayout, newConfigs)
 
     try {
       setIsSaving(true)

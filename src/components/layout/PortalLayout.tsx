@@ -99,6 +99,17 @@ const adminNavItems = [
 ]
 
 export default function PortalLayout() {
+  // WidgetProvider wraps the inner layout so its widget_preferences fetch
+  // fires the moment the session resolves (in parallel with the profile fetch
+  // in AuthContext), instead of waiting for the profile-gated early returns.
+  return (
+    <WidgetProvider>
+      <PortalLayoutInner />
+    </WidgetProvider>
+  )
+}
+
+function PortalLayoutInner() {
   const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated, isLoading, user, profile, signOut } = useAuth()
@@ -159,7 +170,6 @@ export default function PortalLayout() {
   }
 
   return (
-    <WidgetProvider>
     <div className={`min-h-screen transition-colors duration-300 ${
       darkMode ? 'bg-slate-950' : 'bg-slate-50'
     }`}>
@@ -524,6 +534,5 @@ export default function PortalLayout() {
         )}
       </AnimatePresence>
     </div>
-    </WidgetProvider>
   )
 }
