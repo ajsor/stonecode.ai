@@ -32,8 +32,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!isSupabaseConfigured()) return
 
     try {
+      // 3s timeout — previously 10s, which matched what users saw as a hung
+      // spinner on /portal/dashboard when supabase-js's auto token refresh
+      // stalled. The DB-level query itself runs in ~0.4s, so anything past
+      // a few seconds is the supabase-js auth refresh hanging, not the DB.
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 3000)
       )
       const fetchPromise = getProfile(userId)
       const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as Awaited<ReturnType<typeof getProfile>>
@@ -60,14 +64,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Get initial session. Flip isLoading=false the moment we know whether
+    // there's a session — do NOT await the profile fetch. Previously this
+    // blocked portal rendering on a query that could hang, leading to
+    // multi-second white screens. The profile loads in the background; the
+    // portal layout renders chrome immediately and consumers use optional
+    // chaining (profile?.full_name, profile?.is_admin) so a brief null is fine.
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
-      if (session?.user) {
-        await fetchProfile(session.user.id)
-      }
       setIsLoading(false)
+      if (session?.user) {
+        void fetchProfile(session.user.id)
+      }
     })
 
     // Listen for auth changes

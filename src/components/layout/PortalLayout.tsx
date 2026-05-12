@@ -160,8 +160,12 @@ function PortalLayoutInner() {
     return null
   }
 
-  // Don't render portal chrome while we wait for profile, or while redirecting app-only users away
-  if (!profile || profile.portal_access === false) {
+  // If the profile has loaded and shows no portal access, hold the redirect
+  // here so we don't flash portal chrome. We don't block on profile === null
+  // anymore — profile loads in the background; chrome (sidebar, header) renders
+  // immediately with optional-chained values, and the redirect useEffect
+  // navigates app-only users to /no-portal-access once profile arrives.
+  if (profile && profile.portal_access === false) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />

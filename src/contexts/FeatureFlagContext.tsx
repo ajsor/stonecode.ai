@@ -24,7 +24,7 @@ const DEFAULT_FLAGS: Record<string, boolean> = {
 }
 
 export function FeatureFlagProvider({ children }: FeatureFlagProviderProps) {
-  const { user, isLoading: authLoading } = useAuth()
+  const { user } = useAuth()
   const [flags, setFlags] = useState<Record<string, boolean>>(DEFAULT_FLAGS)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -47,11 +47,12 @@ export function FeatureFlagProvider({ children }: FeatureFlagProviderProps) {
     }
   }, [user?.id])
 
+  // Fire as soon as user.id is known (set in AuthContext immediately when
+  // getSession() resolves) — do not wait for authLoading to flip, which used
+  // to gate this behind the profile fetch and introduce a serial waterfall.
   useEffect(() => {
-    if (!authLoading) {
-      fetchFlags()
-    }
-  }, [authLoading, fetchFlags])
+    fetchFlags()
+  }, [fetchFlags])
 
   const hasFeature = useCallback((featureName: string) => {
     return flags[featureName] ?? false
