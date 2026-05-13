@@ -17,6 +17,9 @@ dist-ssr
 .claude/
 supabase/.temp/
 
+# Local scratch files
+logo-concepts.html
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
