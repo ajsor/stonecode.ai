@@ -28,6 +28,24 @@ function formatLastSeen(dateStr: string | null): string {
   return d.toLocaleDateString()
 }
 
+// Per-app display label + badge color for invitation rows. Keyed on the
+// invitations.app column populated by migration 012.
+const APP_LABELS: Record<string, string> = {
+  portal: 'Portal',
+  aether: 'Aether',
+  adam: 'ADAM',
+  relaite: 'RELAiTE',
+  mb_dashboard: 'MB Dashboard',
+}
+
+const APP_BADGE_COLORS: Record<string, string> = {
+  portal: 'bg-orange-50 dark:bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-200/60 dark:border-orange-500/20',
+  aether: 'bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-500/20',
+  adam: 'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-500/20',
+  relaite: 'bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-500/20',
+  mb_dashboard: 'bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-500/20',
+}
+
 function getInvitationStatus(invitation: Invitation) {
   if (invitation.accepted_at) {
     return { label: 'Accepted', color: 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/20' }
@@ -557,7 +575,19 @@ export default function UsersPage() {
                             </svg>
                           </div>
                           <div>
-                            <p className="text-slate-900 dark:text-white font-medium">{invitation.email}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-slate-900 dark:text-white font-medium">{invitation.email}</p>
+                              {(() => {
+                                const app = invitation.app || 'portal'
+                                const label = APP_LABELS[app] ?? app
+                                const color = APP_BADGE_COLORS[app] ?? APP_BADGE_COLORS.portal
+                                return (
+                                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium ${color}`}>
+                                    {label}
+                                  </span>
+                                )
+                              })()}
+                            </div>
                             <p className="text-slate-500 text-sm">
                               Invited by {invitation.inviter?.full_name || invitation.inviter?.email || 'Unknown'}
                               {' · '}
