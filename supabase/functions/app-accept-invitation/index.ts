@@ -16,6 +16,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://relaite.stonecode.ai',
   'https://aether.stonecode.ai',
   'https://adam.stonecode.ai',
+  'https://chorus.stonecode.ai',
 ])
 
 function corsHeadersFor(req: Request): Record<string, string> {

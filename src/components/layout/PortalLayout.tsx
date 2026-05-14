@@ -12,7 +12,7 @@ import { WidgetProvider } from '../../contexts/WidgetContext'
 
 type Tool = {
   flag: string
-  app: SatelliteApp
+  app: SatelliteApp | string
   label: string
   icon: ReactNode
 }
@@ -53,6 +53,16 @@ const TOOLS: Tool[] = [
     app: 'adam',
     label: 'ADAM',
     icon: <img src="https://adam.stonecode.ai/acolyte-logo.png" alt="ADAM" className="w-5 h-5 object-contain" />,
+  },
+  {
+    flag: 'chorus',
+    app: 'https://chorus.stonecode.ai',
+    label: 'Chorus',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+      </svg>
+    ),
   },
 ]
 
@@ -139,7 +149,7 @@ function PortalLayoutInner() {
     navigate('/')
   }
 
-  const openTool = async (app: SatelliteApp) => {
+  const openTool = async (app: SatelliteApp | string) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     window.open(buildPortalLaunchUrl(app, session), '_blank', 'noopener,noreferrer')

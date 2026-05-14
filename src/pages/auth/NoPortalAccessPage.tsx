@@ -8,7 +8,7 @@ import { supabase } from '../../lib/supabase'
 
 type AppLink = {
   flag: string
-  app: SatelliteApp
+  app: SatelliteApp | string
   label: string
   description: string
 }
@@ -18,6 +18,7 @@ const APPS: AppLink[] = [
   { flag: 'relaite', app: 'relaite', label: 'RELAiTE', description: 'Relationship intelligence.' },
   { flag: 'aether', app: 'aether', label: 'Aether', description: 'AI-powered dream journal.' },
   { flag: 'adam', app: 'adam', label: 'ADAM', description: 'Acolyte Digital Asset Manager.' },
+  { flag: 'chorus', app: 'https://chorus.stonecode.ai', label: 'Chorus', description: 'AI customer feedback synthesis.' },
 ]
 
 export default function NoPortalAccessPage() {
@@ -38,7 +39,7 @@ export default function NoPortalAccessPage() {
 
   const availableApps = APPS.filter((a) => hasFeature(a.flag))
 
-  const openApp = async (app: SatelliteApp) => {
+  const openApp = async (app: SatelliteApp | string) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
     window.location.href = buildPortalLaunchUrl(app, session)
