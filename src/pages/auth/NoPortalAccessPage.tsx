@@ -21,6 +21,7 @@ const APPS: AppLink[] = [
   { flag: 'chorus', app: 'https://chorus.stonecode.ai', label: 'Chorus', description: 'AI customer feedback synthesis.' },
   { flag: 'mosaic', app: 'https://mosaic.stonecode.ai', label: 'Mosaic', description: 'AI brand identity studio.' },
   { flag: 'recon', app: 'https://recon.stonecode.ai', label: 'Recon', description: 'AI meeting prep briefs.' },
+  { flag: 'lens', app: 'https://lens.stonecode.ai', label: 'Lens', description: 'AI document chat & extractor.' },
 ]
 
 export default function NoPortalAccessPage() {

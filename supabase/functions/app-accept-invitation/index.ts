@@ -19,6 +19,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://chorus.stonecode.ai',
   'https://mosaic.stonecode.ai',
   'https://recon.stonecode.ai',
+  'https://lens.stonecode.ai',
 ])
 
 function corsHeadersFor(req: Request): Record<string, string> {
