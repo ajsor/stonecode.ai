@@ -19,6 +19,7 @@ const APPS: AppLink[] = [
   { flag: 'aether', app: 'aether', label: 'Aether', description: 'AI-powered dream journal.' },
   { flag: 'adam', app: 'adam', label: 'ADAM', description: 'Acolyte Digital Asset Manager.' },
   { flag: 'chorus', app: 'https://chorus.stonecode.ai', label: 'Chorus', description: 'AI customer feedback synthesis.' },
+  { flag: 'mosaic', app: 'https://mosaic.stonecode.ai', label: 'Mosaic', description: 'AI brand identity studio.' },
 ]
 
 export default function NoPortalAccessPage() {
