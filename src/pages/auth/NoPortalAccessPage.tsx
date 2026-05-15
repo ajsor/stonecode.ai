@@ -20,6 +20,7 @@ const APPS: AppLink[] = [
   { flag: 'adam', app: 'adam', label: 'ADAM', description: 'Acolyte Digital Asset Manager.' },
   { flag: 'chorus', app: 'https://chorus.stonecode.ai', label: 'Chorus', description: 'AI customer feedback synthesis.' },
   { flag: 'mosaic', app: 'https://mosaic.stonecode.ai', label: 'Mosaic', description: 'AI brand identity studio.' },
+  { flag: 'recon', app: 'https://recon.stonecode.ai', label: 'Recon', description: 'AI meeting prep briefs.' },
 ]
 
 export default function NoPortalAccessPage() {

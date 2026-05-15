@@ -25,6 +25,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://adam.stonecode.ai',
   'https://chorus.stonecode.ai',
   'https://mosaic.stonecode.ai',
+  'https://recon.stonecode.ai',
 ])
 
 function corsHeadersFor(req: Request): Record<string, string> {
@@ -38,7 +39,7 @@ function corsHeadersFor(req: Request): Record<string, string> {
   }
 }
 
-type AppSlug = 'mb_dashboard' | 'relaite' | 'aether' | 'adam' | 'chorus' | 'mosaic'
+type AppSlug = 'mb_dashboard' | 'relaite' | 'aether' | 'adam' | 'chorus' | 'mosaic' | 'recon'
 
 const APP_CONFIG: Record<AppSlug, { label: string; acceptUrl: string; from: string }> = {
   mb_dashboard: {
@@ -70,6 +71,11 @@ const APP_CONFIG: Record<AppSlug, { label: string; acceptUrl: string; from: stri
     label: 'Mosaic',
     acceptUrl: 'https://mosaic.stonecode.ai/accept-invite',
     from: 'Mosaic <invites@stonecode.ai>',
+  },
+  recon: {
+    label: 'Recon',
+    acceptUrl: 'https://recon.stonecode.ai/accept-invite',
+    from: 'Recon <invites@stonecode.ai>',
   },
 }
 
