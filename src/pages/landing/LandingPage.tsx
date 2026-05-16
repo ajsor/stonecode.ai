@@ -11,8 +11,8 @@ import { LandingAgent } from '../../components/LandingAgent'
 const FEATURES = [
   {
     word: 'Collaborate',
-    subhead: 'Build together, not just for you.',
-    body: "We don't take a brief and disappear. We integrate with your team, align to your goals, and build alongside you — turning your domain expertise into software that's unmistakably yours.",
+    subhead: 'We build with you, side by side.',
+    body: "Collaboration starts on day one. We join your team, work in your repos, and align to your goals — turning your domain expertise into software that's unmistakably yours.",
     iconColor: { bg: 'rgba(16,185,129,0.15)', stroke: '#34d399' },
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -26,7 +26,7 @@ const FEATURES = [
   {
     word: 'Deliver',
     subhead: 'From whiteboard to production.',
-    body: "Vision without execution is just a slide deck. We ship production-ready software on schedule — built to perform under real-world demands and scale alongside your ambitions.",
+    body: "Ideas earn their value when they ship. We deliver production-ready software on schedule — built to perform under real-world demands and to grow alongside your ambitions.",
     iconColor: { bg: 'rgba(234,88,12,0.15)', stroke: '#fb923c' },
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -37,8 +37,8 @@ const FEATURES = [
   },
   {
     word: 'Guide',
-    subhead: 'Navigate the complexity.',
-    body: "Technology decisions made today define your trajectory for years. We help you cut through the noise — right tools, right architecture, and a clear roadmap for where you want to go.",
+    subhead: 'Navigate the complexity together.',
+    body: "The best collaborators think with you. We help you cut through the noise — right tools, right architecture, a clear roadmap — so every decision moves you forward with confidence.",
     iconColor: { bg: 'rgba(245,158,11,0.15)', stroke: '#fbbf24' },
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -50,7 +50,7 @@ const FEATURES = [
   {
     word: 'Assist',
     subhead: 'Amplify what your team can do.',
-    body: "AI isn't replacing your team — it's supercharging it. We integrate intelligent automation that eliminates friction, accelerates output, and opens capabilities that weren't possible before.",
+    body: "AI works best as a force multiplier for your team. We weave intelligent automation in where it earns its keep — eliminating friction, accelerating output, and opening capabilities that weren't possible before.",
     iconColor: { bg: 'rgba(14,165,233,0.15)', stroke: '#38bdf8' },
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -528,7 +528,7 @@ export default function LandingPage() {
             variants={itemVariants}
             style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
           >
-            Where ambition meets precision.
+            Let's build it together.
           </motion.p>
           <motion.p
             className={`text-xs md:text-sm text-center max-w-md mb-6 ${
@@ -536,7 +536,7 @@ export default function LandingPage() {
             }`}
             variants={itemVariants}
           >
-            AI-augmented software development for businesses ready to build something great.
+            We collaborate with your team to design and build AI-augmented software that brings real value.
           </motion.p>
 
           {/* Primary CTA — opens Agent Stone */}
@@ -612,23 +612,22 @@ export default function LandingPage() {
               }`}
               style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", letterSpacing: '-0.02em' }}
             >
-              A studio built for teams that want to ship — not slideware.
+              A studio that builds alongside your team.
             </h2>
             <div className={`space-y-5 text-base sm:text-lg leading-relaxed ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
               <p>
                 stonecode.ai is the studio of <strong className={darkMode ? 'text-slate-200' : 'text-slate-900'}>Andrew Stone</strong>.
-                We partner with operators, founders, and product teams to design and build
+                We collaborate with operators, founders, and product teams to design and build
                 AI-augmented software that runs in production — not demos that fall apart the
                 moment they leave a slide deck. Every engagement starts with the people doing
-                the actual work, and ends with software they actually use.
+                the actual work, and stays focused on building something they're proud of.
               </p>
               <p>
-                We embed with your team rather than disappearing behind a statement of work.
-                That means working in your repos, your tooling, and your decisions — pairing
-                with internal engineers, training them as we go, and leaving behind systems
-                your team can own once we're gone. AI is woven in where it earns its keep:
-                automating the painful, accelerating the slow, and surfacing what was
-                previously invisible.
+                We work as an extension of your team rather than from behind a statement of
+                work. That means building in your repos, your tooling, and your decisions —
+                pairing with internal engineers and sharing what we know as we go. AI is woven
+                in where it earns its keep: automating the painful, accelerating the slow, and
+                surfacing what was previously invisible.
               </p>
               <p>
                 Typical work spans custom application development, retrieval-augmented
