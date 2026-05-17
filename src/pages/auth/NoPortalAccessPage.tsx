@@ -22,6 +22,7 @@ const APPS: AppLink[] = [
   { flag: 'mosaic', app: 'https://mosaic.stonecode.ai', label: 'Mosaic', description: 'AI brand identity studio.' },
   { flag: 'recon', app: 'https://recon.stonecode.ai', label: 'Recon', description: 'AI meeting prep briefs.' },
   { flag: 'lens', app: 'https://lens.stonecode.ai', label: 'Lens', description: 'AI document chat & extractor.' },
+  { flag: 'sketchy', app: 'https://sketchy.stonecode.ai', label: 'Sketchy', description: 'Comedic screenplay generator.' },
 ]
 
 export default function NoPortalAccessPage() {
