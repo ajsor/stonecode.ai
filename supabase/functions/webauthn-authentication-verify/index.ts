@@ -8,7 +8,7 @@ import {
 } from 'https://esm.sh/@simplewebauthn/server@9.0.0'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://stonecode.ai',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 

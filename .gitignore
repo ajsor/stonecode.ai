@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 .env
+.env.*
+
+# Secrets / local-only
+secrets.md
+.dev.vars
+.dev.vars.local
+.wrangler/
 
 # Workspace tooling
 .claude/
