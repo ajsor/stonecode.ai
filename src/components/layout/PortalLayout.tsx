@@ -104,6 +104,17 @@ const TOOLS: Tool[] = [
       </svg>
     ),
   },
+  {
+    flag: 'forge',
+    app: 'https://forge.stonecode.ai',
+    label: 'Forge',
+    icon: (
+      // Anvil + spark — hammer raw research into ready-to-sell plans
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 10h12l-2 3H6l-2-3zM8 13h6v2H8zM6 15h10v3H6zM18 5l1.5 2L21 5l-1.5-2L18 5z" />
+      </svg>
+    ),
+  },
 ]
 
 const navItems = [

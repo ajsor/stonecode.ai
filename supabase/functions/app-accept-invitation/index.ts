@@ -21,6 +21,7 @@ const ALLOWED_ORIGINS = new Set([
   'https://recon.stonecode.ai',
   'https://lens.stonecode.ai',
   'https://sketchy.stonecode.ai',
+  'https://forge.stonecode.ai',
 ])
 
 function corsHeadersFor(req: Request): Record<string, string> {

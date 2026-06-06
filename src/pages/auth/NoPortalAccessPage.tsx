@@ -23,6 +23,7 @@ const APPS: AppLink[] = [
   { flag: 'recon', app: 'https://recon.stonecode.ai', label: 'Recon', description: 'AI meeting prep briefs.' },
   { flag: 'lens', app: 'https://lens.stonecode.ai', label: 'Lens', description: 'AI document chat & extractor.' },
   { flag: 'sketchy', app: 'https://sketchy.stonecode.ai', label: 'Sketchy', description: 'Comedic screenplay generator.' },
+  { flag: 'forge', app: 'https://forge.stonecode.ai', label: 'Forge', description: 'AI SMB optimization reports with priced SOWs.' },
 ]
 
 export default function NoPortalAccessPage() {
