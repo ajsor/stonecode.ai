@@ -1,16 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useFeatureFlags } from '../../hooks/useFeatureFlags'
 import { WidgetGrid, WidgetSettings } from '../../components/widgets'
 import { NewsTicker } from '../../components/dashboard/NewsTicker'
+import { getUnresolvedIssueCount } from '../../lib/appIssues'
 
 export default function Dashboard() {
   const { profile } = useAuth()
   const { flags } = useFeatureFlags()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [issueCount, setIssueCount] = useState<number | null>(null)
+  const isAdmin = profile?.is_admin === true
 
   const enabledFeatures = Object.entries(flags).filter(([, enabled]) => enabled)
+
+  useEffect(() => {
+    if (!isAdmin) return
+    getUnresolvedIssueCount().then(setIssueCount)
+  }, [isAdmin])
 
   return (
     <div className="max-w-6xl mx-auto pb-14">
@@ -113,36 +122,67 @@ export default function Dashboard() {
             )}
           </motion.div>
 
-          {/* Quick Links Card */}
-          <motion.div
-            className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none backdrop-blur-xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
+          {/* App Issues (admin only) — replaces Quick Links */}
+          {isAdmin ? (
+            <Link to="/portal/admin/app-issues" className="block">
+              <motion.div
+                className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none backdrop-blur-xl hover:border-red-300 dark:hover:border-red-500/40 transition-colors h-full"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0l-7.1 12.25A2 2 0 005 19z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-white">App Issues</h2>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <p className="text-2xl font-light text-slate-900 dark:text-white leading-none">
+                      {issueCount === null ? '—' : issueCount}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      {issueCount === 0 ? 'All clear' : 'Unresolved'}
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">View →</span>
+                </div>
+              </motion.div>
+            </Link>
+          ) : (
+            <motion.div
+              className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm dark:shadow-none backdrop-blur-xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </div>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Quick Links</h2>
               </div>
-              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Quick Links</h2>
-            </div>
-            <div className="flex gap-2">
-              <a
-                href="/portal/profile"
-                className="flex-1 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-center text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              >
-                Profile
-              </a>
-              <a
-                href="/portal/profile/security"
-                className="flex-1 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-center text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              >
-                Security
-              </a>
-            </div>
-          </motion.div>
+              <div className="flex gap-2">
+                <a
+                  href="/portal/profile"
+                  className="flex-1 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-center text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                >
+                  Profile
+                </a>
+                <a
+                  href="/portal/profile/security"
+                  className="flex-1 px-3 py-2 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-center text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                >
+                  Security
+                </a>
+              </div>
+            </motion.div>
+          )}
         </div>
       </motion.div>
 

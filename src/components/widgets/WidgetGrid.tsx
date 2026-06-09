@@ -2,6 +2,7 @@ import { useMemo, useCallback, useRef, useEffect, useState, createContext, lazy,
 import type { ComponentType } from 'react'
 import GridLayoutBase from 'react-grid-layout'
 import { useWidgets } from '../../hooks/useWidgets'
+import { useAuth } from '../../hooks/useAuth'
 import { WidgetErrorBoundary } from './WidgetErrorBoundary'
 import type { WidgetLayoutItem, WidgetType } from '../../types/widgets'
 
@@ -81,6 +82,8 @@ const WIDGET_NAMES: Record<WidgetType, string> = {
 
 export function WidgetGrid({ className }: WidgetGridProps) {
   const { layout, configs, updateLayout, isLoading } = useWidgets()
+  const { profile } = useAuth()
+  const isAdmin = profile?.is_admin === true
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
   const [collapsedWidgets, setCollapsedWidgets] = useState<Set<string>>(new Set())
@@ -254,7 +257,10 @@ export function WidgetGrid({ className }: WidgetGridProps) {
     )
   }
 
-  if (visibleLayout.length === 0) {
+  // Admins typically don't use the dashboard widget grid and don't want the
+  // "No widgets enabled" prompt cluttering their view. They have the App
+  // Issues card and admin nav for their needs.
+  if (visibleLayout.length === 0 && !isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <svg className="w-16 h-16 text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,6 +272,9 @@ export function WidgetGrid({ className }: WidgetGridProps) {
         </p>
       </div>
     )
+  }
+  if (visibleLayout.length === 0 && isAdmin) {
+    return null
   }
 
   return (

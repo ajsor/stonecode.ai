@@ -325,6 +325,17 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-06-08 — Admin: App Issues card + page, hide widget empty-state for admins
+
+Adds a centralized place for the admin to see warnings/errors from stonecode.ai and its satellite apps (aether, forge, sketchy, chorus, mosaic, recon, lens, adam), and to generate a Claude Code prompt to investigate any individual issue. Also cleans up the admin dashboard so it's not nagging about empty widgets.
+
+- **DB migration 023 (`app_issues.sql`):** new `app_issues` table on the shared Supabase project. Columns: `app`, `severity` (warning|error), `message`, `details`, `source`, `location`, `user_id`, `created_at`, `resolved`/`resolved_at`/`resolved_by`. Two indexes: unresolved-by-recency (partial) and `(app, severity, created_at desc)`. RLS: authenticated users can INSERT (apps log on behalf of the signed-in user); only admins (`profiles.is_admin = true`) can SELECT/UPDATE/DELETE. Explicit GRANT to `authenticated` per the 2026-10-30 Data API default change.
+- **`src/lib/appIssues.ts` (new):** `getAppIssues`, `getUnresolvedIssueCount`, `resolveAppIssue`, `deleteAppIssue`, and `buildFixPrompt(issue)` — the last builds a Markdown block (app, severity, when, source, location, message, details, plus a four-step "diagnose then fix" instruction) for the Copy Fix Prompt button.
+- **`Dashboard.tsx`:** when `profile.is_admin === true`, the third card swaps from Quick Links to an **App Issues** card showing the unresolved count and linking to `/portal/admin/app-issues`. Non-admins still see Quick Links — no behavior change for them.
+- **`WidgetGrid.tsx`:** the "No widgets enabled" empty-state is suppressed for admins (returns `null` instead). Non-admin behavior unchanged so genuine users still see the prompt to customize.
+- **`AppIssuesPage.tsx` (new, `/portal/admin/app-issues`):** lists issues with app filter, "show resolved" toggle, severity badges, expandable details. Per-row actions: **Copy fix prompt** (writes the Markdown to clipboard via `navigator.clipboard`), **Mark resolved**, **Delete**. Optimistic UI; copy state self-clears after 2s.
+- **`router.tsx` + `PortalLayout.tsx`:** new admin route `/portal/admin/app-issues`; sidebar nav entry under Admin.
+
 ### 2026-05-12 — Fix: `useWidgets must be used within a WidgetProvider` on `/portal/dashboard`
 - `PortalLayout.tsx`: hoisted `<WidgetProvider>` to wrap the entire returned JSX. The 2026-05-11 entry-chunk diet moved the provider out of `main.tsx` but only wrapped `<Outlet />`, leaving `<DashboardToolbar />` (rendered in the sticky header) outside the context — it called `useWidgets()` and threw, and the React Router error boundary took over the whole page. Provider stays inside `PortalLayout` so the landing entry chunk still doesn't pay for widget code; it just now also covers the header.
 
