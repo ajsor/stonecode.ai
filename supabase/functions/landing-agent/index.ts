@@ -22,6 +22,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { logAppIssue } from '../_shared/appIssues.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://stonecode.ai',
@@ -340,9 +341,10 @@ serve(async (req) => {
       usage: { input_tokens: totalInputTokens, output_tokens: totalOutputTokens },
     })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
+    const msg = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err)
     console.error('landing-agent error:', msg)
-    return json({ error: msg }, 500)
+    logAppIssue({ fn: 'landing-agent', detail: msg })
+    return json({ error: err instanceof Error ? err.message : String(err) }, 500)
   }
 })
 

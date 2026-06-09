@@ -3,6 +3,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { logAppIssue } from '../_shared/appIssues.ts'
 import {
   generateAuthenticationOptions,
 } from 'https://esm.sh/@simplewebauthn/server@9.0.0'
@@ -64,6 +65,8 @@ serve(async (req) => {
     )
 
   } catch (error) {
+    const detail = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error)
+    logAppIssue({ fn: 'webauthn-authentication-options', detail })
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

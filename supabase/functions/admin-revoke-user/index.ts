@@ -1,3 +1,5 @@
+import { logAppIssue } from '../_shared/appIssues.ts'
+
 const CORS = {
   'Access-Control-Allow-Origin': 'https://stonecode.ai',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -67,7 +69,9 @@ Deno.serve(async (req) => {
       headers: { ...CORS, 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    console.error('admin-revoke-user error:', err instanceof Error ? err.message : err)
+    const msg = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err)
+    console.error('admin-revoke-user error:', msg)
+    logAppIssue({ fn: 'admin-revoke-user', detail: msg })
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
     })

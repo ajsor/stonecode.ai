@@ -16,6 +16,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { logAppIssue } from '../_shared/appIssues.ts'
 
 const ALLOWED_ORIGINS = new Set([
   'https://stonecode.ai',
@@ -300,8 +301,9 @@ serve(async (req) => {
       invitation: { id: invitation.id, email, expires_at: invitation.expires_at, invite_url: inviteUrl },
     })
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err)
-    return json({ error: msg }, 500)
+    const msg = err instanceof Error ? `${err.message}\n${err.stack ?? ''}` : String(err)
+    logAppIssue({ fn: 'app-create-invitation', detail: msg })
+    return json({ error: err instanceof Error ? err.message : String(err) }, 500)
   }
 })
 

@@ -325,6 +325,14 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-06-09 — Wire all 11 stonecode.ai edge functions into `app_issues`
+
+All 11 stonecode.ai edge functions now log terminal failures into the shared `app_issues` table (migration 023) so they show up in the admin "App Issues" dashboard alongside satellite-app errors.
+
+- **`supabase/functions/_shared/appIssues.ts`** (new): native-fetch helper that POSTs to `app_issues` via service-role auth — no Supabase client required at the call site, so it works from any scope. App slug `stonecode` baked in.
+- **Wired functions:** `admin-revoke-user`, `app-accept-invitation`, `app-create-invitation`, `create-invitation`, `google-oauth-exchange`, `landing-agent`, `news` (logged as `warning` since NewsAPI 5xx is upstream), `webauthn-authentication-options`, `webauthn-authentication-verify`, `webauthn-registration-options`, `webauthn-registration-verify`. Each top-level catch now fires `logAppIssue({fn, detail})` before returning the 5xx.
+- **Satellites done in the same pass (separate commits in their own repos):** aether (already wired in earlier 06-08 commit), chorus, mosaic, recon, lens, sketchy, forge, relaite — same `_shared/appIssues.ts` pattern with the app slug baked in per-project. adam, mb-payroll-dashboard have no edge functions; levorem/lionheart/project-dashboard don't use the shared Supabase.
+
 ### 2026-06-08 — Admin: App Issues card + page, hide widget empty-state for admins
 
 Adds a centralized place for the admin to see warnings/errors from stonecode.ai and its satellite apps (aether, forge, sketchy, chorus, mosaic, recon, lens, adam), and to generate a Claude Code prompt to investigate any individual issue. Also cleans up the admin dashboard so it's not nagging about empty widgets.

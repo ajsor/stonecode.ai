@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { logAppIssue } from '../_shared/appIssues.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://stonecode.ai',
@@ -116,7 +117,9 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    const detail = error instanceof Error ? `${error.message}\n${error.stack ?? ''}` : String(error)
     console.error('OAuth exchange error:', error)
+    logAppIssue({ fn: 'google-oauth-exchange', detail })
     return new Response(
       JSON.stringify({ message: error.message || 'Internal server error' }),
       {
