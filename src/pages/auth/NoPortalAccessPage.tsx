@@ -24,6 +24,7 @@ const APPS: AppLink[] = [
   { flag: 'lens', app: 'https://lens.stonecode.ai', label: 'Lens', description: 'AI document chat & extractor.' },
   { flag: 'sketchy', app: 'https://sketchy.stonecode.ai', label: 'Sketchy', description: 'Comedic screenplay generator.' },
   { flag: 'forge', app: 'https://forge.stonecode.ai', label: 'Forge', description: 'AI SMB optimization reports with priced SOWs.' },
+  { flag: 'cameo', app: 'https://cameo.stonecode.ai', label: 'Cameo', description: 'AI website builder — turn social references into a portable demo site.' },
 ]
 
 export default function NoPortalAccessPage() {

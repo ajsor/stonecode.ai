@@ -43,7 +43,7 @@ function corsHeadersFor(req: Request): Record<string, string> {
   }
 }
 
-type AppSlug = 'mb_dashboard' | 'relaite' | 'aether' | 'adam' | 'chorus' | 'mosaic' | 'recon' | 'lens' | 'sketchy' | 'forge'
+type AppSlug = 'mb_dashboard' | 'relaite' | 'aether' | 'adam' | 'chorus' | 'mosaic' | 'recon' | 'lens' | 'sketchy' | 'forge' | 'cameo'
 
 const APP_CONFIG: Record<AppSlug, { label: string; acceptUrl: string; from: string }> = {
   mb_dashboard: {
@@ -95,6 +95,11 @@ const APP_CONFIG: Record<AppSlug, { label: string; acceptUrl: string; from: stri
     label: 'Forge',
     acceptUrl: 'https://forge.stonecode.ai/accept-invite',
     from: 'Forge <invites@stonecode.ai>',
+  },
+  cameo: {
+    label: 'Cameo',
+    acceptUrl: 'https://cameo.stonecode.ai/accept-invite',
+    from: 'Cameo <invites@stonecode.ai>',
   },
 }
 

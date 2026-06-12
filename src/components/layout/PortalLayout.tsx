@@ -115,6 +115,18 @@ const TOOLS: Tool[] = [
       </svg>
     ),
   },
+  {
+    flag: 'cameo',
+    app: 'https://cameo.stonecode.ai',
+    label: 'Cameo',
+    icon: (
+      // Oval portrait frame — cast a brand's likeness into a portable site
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="12" rx="7" ry="9" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10c0-1.5 1-2.5 2.5-2.5S14 8.5 14 10v2l1 1-1 1v1c0 1.5-1 2-2 2s-2-.5-2-2v-1c-1 .5-1-1-1-2zM9 18c0-1.5 1.5-2.5 3-2.5S15 16.5 15 18" />
+      </svg>
+    ),
+  },
 ]
 
 const navItems = [
