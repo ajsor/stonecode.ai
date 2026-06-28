@@ -325,6 +325,14 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-06-28 — Supabase hardening: revoke anon DML grants + tighten `app_issues` policy
+
+Live audit of the shared project found every public table inherited the historical Supabase default of `GRANT INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER TO anon`. RLS was the only thing stopping anonymous writes — a single mistaken policy would have opened any table to the public anon key. Also tightened the `app_issues` insert policy (was `WITH CHECK (true)`, letting any signed-in user forge entries against any user_id/app).
+
+- **`025_revoke_anon_writes.sql`**: REVOKE writes from anon on all existing public tables + `ALTER DEFAULT PRIVILEGES` so future tables can't reintroduce the grant. SELECT preserved (cameo public renderer, forge share links, landing pages, feature_flags still work).
+- **`026_app_issues_lockdown.sql`**: `app_issues_insert_authenticated` now restricts to `user_id IS NULL OR user_id = auth.uid()`. Edge-function loggers use service-role and are unaffected; no client-side INSERT exists today.
+- **Audit script** kept at `cameo/scripts/audit-supabase.mjs` (read-only, idempotent) for periodic re-runs. Open follow-ups: tighten anon SELECT scope on per-user tables (defense-in-depth), `feature_flags` SELECT leaks unreleased-app names, RLS-but-no-policies on `aether_debug_log`/`feature_requests`/`prompt_library`.
+
 ### 2026-06-09 — Wire all 11 stonecode.ai edge functions into `app_issues`
 
 All 11 stonecode.ai edge functions now log terminal failures into the shared `app_issues` table (migration 023) so they show up in the admin "App Issues" dashboard alongside satellite-app errors.
