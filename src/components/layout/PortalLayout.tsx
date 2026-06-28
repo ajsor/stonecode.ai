@@ -264,7 +264,7 @@ function PortalLayoutInner() {
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full w-64 z-50 transform transition-transform duration-300 lg:translate-x-0 ${
+      <aside className={`fixed top-0 left-0 h-full w-64 z-50 flex flex-col transform transition-transform duration-300 lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } ${darkMode ? 'bg-slate-900 border-r border-white/5' : 'bg-white border-r border-slate-200'}`}>
         {/* Logo */}
@@ -323,8 +323,8 @@ function PortalLayoutInner() {
           </Link>
         </div>
 
-        {/* Navigation */}
-        <nav className="px-4 space-y-1">
+        {/* Navigation — scrolls when content exceeds viewport height */}
+        <nav className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
             return (
@@ -405,7 +405,7 @@ function PortalLayoutInner() {
         </nav>
 
         {/* User identity (Profile + Sign Out moved to header) */}
-        <div className={`absolute bottom-0 left-0 right-0 p-4 border-t ${
+        <div className={`shrink-0 p-4 border-t ${
           darkMode ? 'border-white/5' : 'border-slate-200'
         }`}>
           <div className="flex items-center gap-3">
