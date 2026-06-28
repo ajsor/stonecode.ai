@@ -324,7 +324,7 @@ function PortalLayoutInner() {
         </div>
 
         {/* Navigation — scrolls when content exceeds viewport height */}
-        <nav className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-1">
+        <nav className="widget-scrollable flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
             return (
