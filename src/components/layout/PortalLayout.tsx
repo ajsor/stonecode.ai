@@ -8,6 +8,7 @@ import { useDarkMode } from '../../hooks/useDarkMode'
 import { DashboardToolbar } from '../dashboard/DashboardToolbar'
 import { QuantumField } from '../QuantumField'
 import { supabase } from '../../lib/supabase'
+import { logAppLaunch } from '../../lib/appLaunches'
 import { WidgetProvider } from '../../contexts/WidgetContext'
 
 type Tool = {
@@ -152,6 +153,15 @@ const adminNavItems = [
     ),
   },
   {
+    path: '/portal/admin/utilization',
+    label: 'App Utilization',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6h6v13M3 19h18M5 19V10h4M15 19v-7h4" />
+      </svg>
+    ),
+  },
+  {
     path: '/portal/admin/inquiries',
     label: 'Inquiries',
     icon: (
@@ -212,10 +222,14 @@ function PortalLayoutInner() {
     navigate('/')
   }
 
-  const openTool = async (app: SatelliteApp | string) => {
+  const openTool = async (tool: Tool) => {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
-    window.open(buildPortalLaunchUrl(app, session), '_blank', 'noopener,noreferrer')
+    // Fire-and-forget — telemetry never blocks the launch. Use the feature
+    // flag slug so app_launches.app joins against feature_flags.name in the
+    // adoption-funnel aggregate.
+    void logAppLaunch(tool.flag)
+    window.open(buildPortalLaunchUrl(tool.app, session), '_blank', 'noopener,noreferrer')
   }
 
   if (isLoading) {
@@ -357,7 +371,7 @@ function PortalLayoutInner() {
           {availableTools.map((tool) => (
             <button
               key={tool.app}
-              onClick={() => { setSidebarOpen(false); openTool(tool.app) }}
+              onClick={() => { setSidebarOpen(false); openTool(tool) }}
               className={`w-full flex items-center gap-3 px-4 py-2 rounded-xl transition-colors ${
                 darkMode
                   ? 'text-slate-400 hover:bg-white/5 hover:text-white'

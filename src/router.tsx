@@ -15,6 +15,7 @@ const AdminLayout = lazy(() => import('./components/layout/AdminLayout'))
 const UsersPage = lazy(() => import('./pages/portal/admin/UsersPage'))
 const InquiriesPage = lazy(() => import('./pages/portal/admin/InquiriesPage'))
 const AppIssuesPage = lazy(() => import('./pages/portal/admin/AppIssuesPage'))
+const AppUtilizationPage = lazy(() => import('./pages/portal/admin/AppUtilizationPage'))
 
 // Loading component
 function PageLoader(): ReactNode {
@@ -97,6 +98,10 @@ export const router = createBrowserRouter([
           {
             path: 'app-issues',
             element: withSuspense(AppIssuesPage),
+          },
+          {
+            path: 'utilization',
+            element: withSuspense(AppUtilizationPage),
           },
           {
             path: 'invitations',
