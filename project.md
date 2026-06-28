@@ -325,6 +325,16 @@ All tables use Row Level Security (RLS).
 
 ## Changelog
 
+### 2026-06-28 (2) — Supabase medium-severity audit followups
+
+Closed the three medium items from the morning's audit:
+
+- **`027_feature_flags_lockdown.sql`**: `feature_flags` SELECT was `USING (true)` for authenticated; any signed-in user could enumerate unreleased app names. New policy admits admins, default-on flags, and flags the user has been explicitly granted via `user_feature_flags`. Admin features page unaffected.
+- **`028_revoke_anon_select.sql`**: Revokes SELECT from anon on every public table, then re-grants only on the three tables that legitimately need anonymous reads (`cameo_projects`, `cameo_pages`, `forge_share_links`). `ALTER DEFAULT PRIVILEGES` revokes the SELECT default for future tables too — new migrations needing anon read must GRANT explicitly. Post-fix audit confirms anon grants are now `SELECT` only and only on those three tables.
+- **`029_document_service_role_only_tables.sql`**: `COMMENT ON TABLE` for `aether_debug_log`, `feature_requests`, `prompt_library` documenting that their RLS-enabled-zero-policies state is intentional service-role-only.
+
+The only open audit item is the `cameo-uploads` public storage bucket, which is intentional (portable demos must remain world-readable).
+
 ### 2026-06-28 — Supabase hardening: revoke anon DML grants + tighten `app_issues` policy
 
 Live audit of the shared project found every public table inherited the historical Supabase default of `GRANT INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER TO anon`. RLS was the only thing stopping anonymous writes — a single mistaken policy would have opened any table to the public anon key. Also tightened the `app_issues` insert policy (was `WITH CHECK (true)`, letting any signed-in user forge entries against any user_id/app).
