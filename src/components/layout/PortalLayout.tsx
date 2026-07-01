@@ -128,6 +128,17 @@ const TOOLS: Tool[] = [
       </svg>
     ),
   },
+  {
+    flag: 'joule',
+    app: 'https://joule.stonecode.ai',
+    label: 'Joule',
+    icon: (
+      // Lightning bolt — energy unit, EV hunt
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 3L4 14h7l-1 7 9-11h-7l1-7z" />
+      </svg>
+    ),
+  },
 ]
 
 const navItems = [
